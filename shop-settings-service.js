@@ -35,6 +35,11 @@ class ShopSettingsService {
     return this.settings;
   }
 
+  // Alias for getAllSettings (for compatibility with server.js)
+  getSettings() {
+    return this.getAllSettings();
+  }
+
   // Get specific setting
   getSetting(key) {
     return this.settings[key] || null;
@@ -132,6 +137,38 @@ class ShopSettingsService {
     return Object.entries(this.settings.services)
       .filter(([_, service]) => service.enabled)
       .map(([name, service]) => ({ name, ...service }));
+  }
+
+  // Update shop info
+  updateShopInfo(info) {
+    const updates = {};
+    if (info.name) updates.shopName = info.name;
+    if (info.phone) updates.shopPhone = info.phone;
+    if (info.address) updates.shopAddress = info.address;
+    if (info.email) updates.shopEmail = info.email;
+    if (info.laborRate) updates.laborRate = info.laborRate;
+    if (info.diagnosticFee) updates.diagnosticFee = info.diagnosticFee;
+    if (info.taxRate) updates.taxRate = info.taxRate;
+    
+    return this.updateMultipleSettings(updates);
+  }
+
+  // Update working hours
+  updateWorkingHours(day, hours) {
+    if (this.settings.workingHours[day]) {
+      this.settings.workingHours[day] = hours;
+      return { success: true, message: `${day} hours updated` };
+    }
+    return { success: false, message: `Invalid day: ${day}` };
+  }
+
+  // Enable/disable service
+  toggleService(serviceName, enabled) {
+    if (this.settings.services[serviceName]) {
+      this.settings.services[serviceName].enabled = enabled;
+      return { success: true, message: `${serviceName} ${enabled ? 'enabled' : 'disabled'}` };
+    }
+    return { success: false, message: `Service ${serviceName} not found` };
   }
 }
 
