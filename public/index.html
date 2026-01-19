@@ -16,19 +16,943 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js">
+// Navigation functions - using correct screen IDs
+function showHome() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+    }
+}
+
+function showCustomers() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('Customer Management - Coming soon!');
+    }
+}
+
+function showQuickQuote() {
+    hideAllScreens();
+    const quickQuoteScreen = document.getElementById('quickQuoteScreen');
+    if (quickQuoteScreen) {
+        quickQuoteScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showVehicles() {
+    hideAllScreens();
+    const vehicleScreen = document.getElementById('vehicleScreen');
+    if (vehicleScreen) {
+        vehicleScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showTechDashboard() {
+    hideAllScreens();
+    const techWorkflowScreen = document.getElementById('techWorkflowScreen');
+    if (techWorkflowScreen) {
+        techWorkflowScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showInventory() {
+    hideAllScreens();
+    const inventoryScreen = document.getElementById('inventoryScreen');
+    if (inventoryScreen) {
+        inventoryScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAppointments() {
+    hideAllScreens();
+    const appointmentScreen = document.getElementById('appointmentScreen');
+    if (appointmentScreen) {
+        appointmentScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAIPhoneDashboard() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('AI Phone Dashboard - Coming soon!');
+    }
+}
+
+function showTowing() {
+    hideAllScreens();
+    const towingManagementScreen = document.getElementById('towingManagementScreen');
+    if (towingManagementScreen) {
+        towingManagementScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showReports() {
+    hideAllScreens();
+    const reportScreen = document.getElementById('reportScreen');
+    if (reportScreen) {
+        reportScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showSettings() {
+    hideAllScreens();
+    const settingsScreen = document.getElementById('settingsScreen');
+    if (settingsScreen) {
+        settingsScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showBayBalancing() {
+    hideAllScreens();
+    const bayBalancingScreen = document.getElementById('bayBalancingScreen');
+    if (bayBalancingScreen) {
+        bayBalancingScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showUserMenu() {
+    alert('User menu - Coming soon!');
+}
+
+function hideAllScreens() {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+        if (screen) {
+            screen.classList.remove('active');
+        }
+    });
+}
+
+console.log('Navigation functions fixed with correct screen IDs');
+</script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js">
+// Navigation functions - using correct screen IDs
+function showHome() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+    }
+}
+
+function showCustomers() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('Customer Management - Coming soon!');
+    }
+}
+
+function showQuickQuote() {
+    hideAllScreens();
+    const quickQuoteScreen = document.getElementById('quickQuoteScreen');
+    if (quickQuoteScreen) {
+        quickQuoteScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showVehicles() {
+    hideAllScreens();
+    const vehicleScreen = document.getElementById('vehicleScreen');
+    if (vehicleScreen) {
+        vehicleScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showTechDashboard() {
+    hideAllScreens();
+    const techWorkflowScreen = document.getElementById('techWorkflowScreen');
+    if (techWorkflowScreen) {
+        techWorkflowScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showInventory() {
+    hideAllScreens();
+    const inventoryScreen = document.getElementById('inventoryScreen');
+    if (inventoryScreen) {
+        inventoryScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAppointments() {
+    hideAllScreens();
+    const appointmentScreen = document.getElementById('appointmentScreen');
+    if (appointmentScreen) {
+        appointmentScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAIPhoneDashboard() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('AI Phone Dashboard - Coming soon!');
+    }
+}
+
+function showTowing() {
+    hideAllScreens();
+    const towingManagementScreen = document.getElementById('towingManagementScreen');
+    if (towingManagementScreen) {
+        towingManagementScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showReports() {
+    hideAllScreens();
+    const reportScreen = document.getElementById('reportScreen');
+    if (reportScreen) {
+        reportScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showSettings() {
+    hideAllScreens();
+    const settingsScreen = document.getElementById('settingsScreen');
+    if (settingsScreen) {
+        settingsScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showBayBalancing() {
+    hideAllScreens();
+    const bayBalancingScreen = document.getElementById('bayBalancingScreen');
+    if (bayBalancingScreen) {
+        bayBalancingScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showUserMenu() {
+    alert('User menu - Coming soon!');
+}
+
+function hideAllScreens() {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+        if (screen) {
+            screen.classList.remove('active');
+        }
+    });
+}
+
+console.log('Navigation functions fixed with correct screen IDs');
+</script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js">
+// Navigation functions - using correct screen IDs
+function showHome() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+    }
+}
+
+function showCustomers() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('Customer Management - Coming soon!');
+    }
+}
+
+function showQuickQuote() {
+    hideAllScreens();
+    const quickQuoteScreen = document.getElementById('quickQuoteScreen');
+    if (quickQuoteScreen) {
+        quickQuoteScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showVehicles() {
+    hideAllScreens();
+    const vehicleScreen = document.getElementById('vehicleScreen');
+    if (vehicleScreen) {
+        vehicleScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showTechDashboard() {
+    hideAllScreens();
+    const techWorkflowScreen = document.getElementById('techWorkflowScreen');
+    if (techWorkflowScreen) {
+        techWorkflowScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showInventory() {
+    hideAllScreens();
+    const inventoryScreen = document.getElementById('inventoryScreen');
+    if (inventoryScreen) {
+        inventoryScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAppointments() {
+    hideAllScreens();
+    const appointmentScreen = document.getElementById('appointmentScreen');
+    if (appointmentScreen) {
+        appointmentScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAIPhoneDashboard() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('AI Phone Dashboard - Coming soon!');
+    }
+}
+
+function showTowing() {
+    hideAllScreens();
+    const towingManagementScreen = document.getElementById('towingManagementScreen');
+    if (towingManagementScreen) {
+        towingManagementScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showReports() {
+    hideAllScreens();
+    const reportScreen = document.getElementById('reportScreen');
+    if (reportScreen) {
+        reportScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showSettings() {
+    hideAllScreens();
+    const settingsScreen = document.getElementById('settingsScreen');
+    if (settingsScreen) {
+        settingsScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showBayBalancing() {
+    hideAllScreens();
+    const bayBalancingScreen = document.getElementById('bayBalancingScreen');
+    if (bayBalancingScreen) {
+        bayBalancingScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showUserMenu() {
+    alert('User menu - Coming soon!');
+}
+
+function hideAllScreens() {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+        if (screen) {
+            screen.classList.remove('active');
+        }
+    });
+}
+
+console.log('Navigation functions fixed with correct screen IDs');
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js">
+// Navigation functions - using correct screen IDs
+function showHome() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+    }
+}
+
+function showCustomers() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('Customer Management - Coming soon!');
+    }
+}
+
+function showQuickQuote() {
+    hideAllScreens();
+    const quickQuoteScreen = document.getElementById('quickQuoteScreen');
+    if (quickQuoteScreen) {
+        quickQuoteScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showVehicles() {
+    hideAllScreens();
+    const vehicleScreen = document.getElementById('vehicleScreen');
+    if (vehicleScreen) {
+        vehicleScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showTechDashboard() {
+    hideAllScreens();
+    const techWorkflowScreen = document.getElementById('techWorkflowScreen');
+    if (techWorkflowScreen) {
+        techWorkflowScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showInventory() {
+    hideAllScreens();
+    const inventoryScreen = document.getElementById('inventoryScreen');
+    if (inventoryScreen) {
+        inventoryScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAppointments() {
+    hideAllScreens();
+    const appointmentScreen = document.getElementById('appointmentScreen');
+    if (appointmentScreen) {
+        appointmentScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAIPhoneDashboard() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('AI Phone Dashboard - Coming soon!');
+    }
+}
+
+function showTowing() {
+    hideAllScreens();
+    const towingManagementScreen = document.getElementById('towingManagementScreen');
+    if (towingManagementScreen) {
+        towingManagementScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showReports() {
+    hideAllScreens();
+    const reportScreen = document.getElementById('reportScreen');
+    if (reportScreen) {
+        reportScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showSettings() {
+    hideAllScreens();
+    const settingsScreen = document.getElementById('settingsScreen');
+    if (settingsScreen) {
+        settingsScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showBayBalancing() {
+    hideAllScreens();
+    const bayBalancingScreen = document.getElementById('bayBalancingScreen');
+    if (bayBalancingScreen) {
+        bayBalancingScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showUserMenu() {
+    alert('User menu - Coming soon!');
+}
+
+function hideAllScreens() {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+        if (screen) {
+            screen.classList.remove('active');
+        }
+    });
+}
+
+console.log('Navigation functions fixed with correct screen IDs');
+</script>
     
     <!-- Chart.js for analytics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js">
+// Navigation functions - using correct screen IDs
+function showHome() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+    }
+}
+
+function showCustomers() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('Customer Management - Coming soon!');
+    }
+}
+
+function showQuickQuote() {
+    hideAllScreens();
+    const quickQuoteScreen = document.getElementById('quickQuoteScreen');
+    if (quickQuoteScreen) {
+        quickQuoteScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showVehicles() {
+    hideAllScreens();
+    const vehicleScreen = document.getElementById('vehicleScreen');
+    if (vehicleScreen) {
+        vehicleScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showTechDashboard() {
+    hideAllScreens();
+    const techWorkflowScreen = document.getElementById('techWorkflowScreen');
+    if (techWorkflowScreen) {
+        techWorkflowScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showInventory() {
+    hideAllScreens();
+    const inventoryScreen = document.getElementById('inventoryScreen');
+    if (inventoryScreen) {
+        inventoryScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAppointments() {
+    hideAllScreens();
+    const appointmentScreen = document.getElementById('appointmentScreen');
+    if (appointmentScreen) {
+        appointmentScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAIPhoneDashboard() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('AI Phone Dashboard - Coming soon!');
+    }
+}
+
+function showTowing() {
+    hideAllScreens();
+    const towingManagementScreen = document.getElementById('towingManagementScreen');
+    if (towingManagementScreen) {
+        towingManagementScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showReports() {
+    hideAllScreens();
+    const reportScreen = document.getElementById('reportScreen');
+    if (reportScreen) {
+        reportScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showSettings() {
+    hideAllScreens();
+    const settingsScreen = document.getElementById('settingsScreen');
+    if (settingsScreen) {
+        settingsScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showBayBalancing() {
+    hideAllScreens();
+    const bayBalancingScreen = document.getElementById('bayBalancingScreen');
+    if (bayBalancingScreen) {
+        bayBalancingScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showUserMenu() {
+    alert('User menu - Coming soon!');
+}
+
+function hideAllScreens() {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+        if (screen) {
+            screen.classList.remove('active');
+        }
+    });
+}
+
+console.log('Navigation functions fixed with correct screen IDs');
+</script>
     
     <!-- Vapi AI for phone system -->
-    <script src="https://cdn.jsdelivr.net/npm/vapi-ai@latest/dist/vapi.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vapi-ai@latest/dist/vapi.min.js">
+// Navigation functions - using correct screen IDs
+function showHome() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+    }
+}
+
+function showCustomers() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('Customer Management - Coming soon!');
+    }
+}
+
+function showQuickQuote() {
+    hideAllScreens();
+    const quickQuoteScreen = document.getElementById('quickQuoteScreen');
+    if (quickQuoteScreen) {
+        quickQuoteScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showVehicles() {
+    hideAllScreens();
+    const vehicleScreen = document.getElementById('vehicleScreen');
+    if (vehicleScreen) {
+        vehicleScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showTechDashboard() {
+    hideAllScreens();
+    const techWorkflowScreen = document.getElementById('techWorkflowScreen');
+    if (techWorkflowScreen) {
+        techWorkflowScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showInventory() {
+    hideAllScreens();
+    const inventoryScreen = document.getElementById('inventoryScreen');
+    if (inventoryScreen) {
+        inventoryScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAppointments() {
+    hideAllScreens();
+    const appointmentScreen = document.getElementById('appointmentScreen');
+    if (appointmentScreen) {
+        appointmentScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAIPhoneDashboard() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('AI Phone Dashboard - Coming soon!');
+    }
+}
+
+function showTowing() {
+    hideAllScreens();
+    const towingManagementScreen = document.getElementById('towingManagementScreen');
+    if (towingManagementScreen) {
+        towingManagementScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showReports() {
+    hideAllScreens();
+    const reportScreen = document.getElementById('reportScreen');
+    if (reportScreen) {
+        reportScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showSettings() {
+    hideAllScreens();
+    const settingsScreen = document.getElementById('settingsScreen');
+    if (settingsScreen) {
+        settingsScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showBayBalancing() {
+    hideAllScreens();
+    const bayBalancingScreen = document.getElementById('bayBalancingScreen');
+    if (bayBalancingScreen) {
+        bayBalancingScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showUserMenu() {
+    alert('User menu - Coming soon!');
+}
+
+function hideAllScreens() {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+        if (screen) {
+            screen.classList.remove('active');
+        }
+    });
+}
+
+console.log('Navigation functions fixed with correct screen IDs');
+</script>
     
     <!-- jsPDF for PDF generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+// Navigation functions - using correct screen IDs
+function showHome() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+    }
+}
+
+function showCustomers() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('Customer Management - Coming soon!');
+    }
+}
+
+function showQuickQuote() {
+    hideAllScreens();
+    const quickQuoteScreen = document.getElementById('quickQuoteScreen');
+    if (quickQuoteScreen) {
+        quickQuoteScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showVehicles() {
+    hideAllScreens();
+    const vehicleScreen = document.getElementById('vehicleScreen');
+    if (vehicleScreen) {
+        vehicleScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showTechDashboard() {
+    hideAllScreens();
+    const techWorkflowScreen = document.getElementById('techWorkflowScreen');
+    if (techWorkflowScreen) {
+        techWorkflowScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showInventory() {
+    hideAllScreens();
+    const inventoryScreen = document.getElementById('inventoryScreen');
+    if (inventoryScreen) {
+        inventoryScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAppointments() {
+    hideAllScreens();
+    const appointmentScreen = document.getElementById('appointmentScreen');
+    if (appointmentScreen) {
+        appointmentScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAIPhoneDashboard() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('AI Phone Dashboard - Coming soon!');
+    }
+}
+
+function showTowing() {
+    hideAllScreens();
+    const towingManagementScreen = document.getElementById('towingManagementScreen');
+    if (towingManagementScreen) {
+        towingManagementScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showReports() {
+    hideAllScreens();
+    const reportScreen = document.getElementById('reportScreen');
+    if (reportScreen) {
+        reportScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showSettings() {
+    hideAllScreens();
+    const settingsScreen = document.getElementById('settingsScreen');
+    if (settingsScreen) {
+        settingsScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showBayBalancing() {
+    hideAllScreens();
+    const bayBalancingScreen = document.getElementById('bayBalancingScreen');
+    if (bayBalancingScreen) {
+        bayBalancingScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showUserMenu() {
+    alert('User menu - Coming soon!');
+}
+
+function hideAllScreens() {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+        if (screen) {
+            screen.classList.remove('active');
+        }
+    });
+}
+
+console.log('Navigation functions fixed with correct screen IDs');
+</script>
 </head>
 <body>
     <!-- Main Navigation -->
@@ -524,179 +1448,6 @@
 
     <script>
 
-// Navigation functions
-function showHome() {
-    hideAllScreens();
-    document.getElementById('homeScreen').classList.add('active');
-}
-
-function showCustomers() {
-    hideAllScreens();
-    const customersScreen = document.getElementById('customersScreen');
-    if (customersScreen) {
-        customersScreen.classList.add('active');
-        loadCustomers();
-    } else {
-        alert('Customers screen not found');
-    }
-}
-
-function showQuickQuote() {
-    hideAllScreens();
-    const quickQuoteScreen = document.getElementById('quickQuoteScreen');
-    if (quickQuoteScreen) {
-        quickQuoteScreen.classList.add('active');
-        console.log('Quick Quote screen activated');
-    } else {
-        alert('Quick Quote screen not found');
-    }
-}
-
-function showVehicles() {
-    hideAllScreens();
-    const vehiclesScreen = document.getElementById('vehiclesScreen');
-    if (vehiclesScreen) {
-        vehiclesScreen.classList.add('active');
-        loadVehicles();
-    } else {
-        alert('Vehicles screen not found');
-    }
-}
-
-function showTechDashboard() {
-    hideAllScreens();
-    const techDashboard = document.getElementById('techDashboard');
-    if (techDashboard) {
-        techDashboard.classList.add('active');
-        loadTechJobs();
-    } else {
-        alert('Tech Dashboard not found');
-    }
-}
-
-function showInventory() {
-    hideAllScreens();
-    const inventoryScreen = document.getElementById('inventoryScreen');
-    if (inventoryScreen) {
-        inventoryScreen.classList.add('active');
-        loadInventory();
-    } else {
-        alert('Inventory screen not found');
-    }
-}
-
-function showAppointments() {
-    hideAllScreens();
-    const appointmentsScreen = document.getElementById('appointmentsScreen');
-    if (appointmentsScreen) {
-        appointmentsScreen.classList.add('active');
-        loadAppointments();
-    } else {
-        alert('Appointments screen not found');
-    }
-}
-
-function showAIPhoneDashboard() {
-    hideAllScreens();
-    const aiPhoneDashboard = document.getElementById('aiPhoneDashboard');
-    if (aiPhoneDashboard) {
-        aiPhoneDashboard.classList.add('active');
-        loadAIPhoneData();
-    } else {
-        alert('AI Phone Dashboard not found');
-    }
-}
-
-function showTowing() {
-    hideAllScreens();
-    const towingScreen = document.getElementById('towingScreen');
-    if (towingScreen) {
-        towingScreen.classList.add('active');
-        loadTowingProviders();
-    } else {
-        alert('Towing screen not found');
-    }
-}
-
-function showReports() {
-    hideAllScreens();
-    const reportsScreen = document.getElementById('reportsScreen');
-    if (reportsScreen) {
-        reportsScreen.classList.add('active');
-        loadReports();
-    } else {
-        alert('Reports screen not found');
-    }
-}
-
-function showSettings() {
-    hideAllScreens();
-    const settingsScreen = document.getElementById('settingsScreen');
-    if (settingsScreen) {
-        settingsScreen.classList.add('active');
-        loadSettings();
-    } else {
-        alert('Settings screen not found');
-    }
-}
-
-function showUserMenu() {
-    alert('User menu - coming soon!');
-}
-
-// Helper function to hide all screens
-function hideAllScreens() {
-    const screens = document.querySelectorAll('.screen');
-    screens.forEach(screen => {
-        screen.classList.remove('active');
-    });
-}
-
-// Load functions (placeholder implementations)
-function loadCustomers() {
-    console.log('Loading customers...');
-}
-
-function loadVehicles() {
-    console.log('Loading vehicles...');
-}
-
-function loadTechJobs() {
-    console.log('Loading tech jobs...');
-}
-
-function loadInventory() {
-    console.log('Loading inventory...');
-}
-
-function loadAppointments() {
-    console.log('Loading appointments...');
-}
-
-function loadAIPhoneData() {
-    console.log('Loading AI Phone data...');
-}
-
-function loadTowingProviders() {
-    console.log('Loading towing providers...');
-}
-
-function loadReports() {
-    console.log('Loading reports...');
-}
-
-function loadSettings() {
-    console.log('Loading settings...');
-}
-
-// Update today's summary
-function updateTodaySummary() {
-    console.log('Updating today\'s summary...');
-    // Placeholder - will fetch from API
-}
-
-// Console message
-console.log('All navigation functions loaded successfully');
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
@@ -1060,7 +1811,139 @@ console.log('All navigation functions loaded successfully');
         function hideLoading() {
             document.getElementById('loadingOverlay').style.display = 'none';
         }
-    </script>
+    
+// Navigation functions - using correct screen IDs
+function showHome() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+    }
+}
+
+function showCustomers() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('Customer Management - Coming soon!');
+    }
+}
+
+function showQuickQuote() {
+    hideAllScreens();
+    const quickQuoteScreen = document.getElementById('quickQuoteScreen');
+    if (quickQuoteScreen) {
+        quickQuoteScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showVehicles() {
+    hideAllScreens();
+    const vehicleScreen = document.getElementById('vehicleScreen');
+    if (vehicleScreen) {
+        vehicleScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showTechDashboard() {
+    hideAllScreens();
+    const techWorkflowScreen = document.getElementById('techWorkflowScreen');
+    if (techWorkflowScreen) {
+        techWorkflowScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showInventory() {
+    hideAllScreens();
+    const inventoryScreen = document.getElementById('inventoryScreen');
+    if (inventoryScreen) {
+        inventoryScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAppointments() {
+    hideAllScreens();
+    const appointmentScreen = document.getElementById('appointmentScreen');
+    if (appointmentScreen) {
+        appointmentScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showAIPhoneDashboard() {
+    hideAllScreens();
+    const homeScreen = document.getElementById('homeScreen');
+    if (homeScreen) {
+        homeScreen.classList.add('active');
+        alert('AI Phone Dashboard - Coming soon!');
+    }
+}
+
+function showTowing() {
+    hideAllScreens();
+    const towingManagementScreen = document.getElementById('towingManagementScreen');
+    if (towingManagementScreen) {
+        towingManagementScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showReports() {
+    hideAllScreens();
+    const reportScreen = document.getElementById('reportScreen');
+    if (reportScreen) {
+        reportScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showSettings() {
+    hideAllScreens();
+    const settingsScreen = document.getElementById('settingsScreen');
+    if (settingsScreen) {
+        settingsScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showBayBalancing() {
+    hideAllScreens();
+    const bayBalancingScreen = document.getElementById('bayBalancingScreen');
+    if (bayBalancingScreen) {
+        bayBalancingScreen.classList.add('active');
+    } else {
+        showHome();
+    }
+}
+
+function showUserMenu() {
+    alert('User menu - Coming soon!');
+}
+
+function hideAllScreens() {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+        if (screen) {
+            screen.classList.remove('active');
+        }
+    });
+}
+
+console.log('Navigation functions fixed with correct screen IDs');
+</script>
     
     <!-- Appointment Form Modal -->
     <div id="appointment-form-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
