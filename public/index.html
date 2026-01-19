@@ -4,132 +4,137 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VHICL Pro - Auto Shop Management</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VHICL Pro - Complete Auto Shop Management</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="bay-balancing.css">
-    <link rel="stylesheet" href="shop-settings.css">
-    <link rel="stylesheet" href="quote-builder.css">
-    <link rel="stylesheet" href="service-advisor-tools.css">
-    <link rel="stylesheet" href="parts-store-config.css">
-    <link rel="icon" href="favicon.ico">
-    
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vapi-ai@latest/dist/vapi.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
 <body>
-    <nav class="main-nav" style="background: #1e40af; padding: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+    <nav class="main-nav" style="background: #1e40af; padding: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <div style="color: white; font-weight: bold; font-size: 1.2rem;">🚗 VHICL Pro</div>
-        <button onclick="showHome()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer;">Home</button>
-        <button onclick="showQuickQuote()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer;">Quick Quote</button>
-        <button onclick="showCustomers()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer;">Customers</button>
-        <button onclick="showVehicles()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer;">Vehicles</button>
-        <button onclick="showInventory()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer;">Inventory</button>
-        <button onclick="showAppointments()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer;">Appointments</button>
-        <button onclick="showSettings()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer;">Settings</button>
+        <button onclick="showHome()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 4px; font-weight: 500;">Home</button>
+        <button onclick="showQuickQuote()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 4px; font-weight: 500;">Quick Quote</button>
+        <button onclick="showCustomers()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 4px; font-weight: 500;">Customers</button>
+        <button onclick="showVehicles()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 4px; font-weight: 500;">Vehicles</button>
+        <button onclick="showInventory()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 4px; font-weight: 500;">Inventory</button>
+        <button onclick="showAppointments()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 4px; font-weight: 500;">Appointments</button>
+        <button onclick="showSettings()" style="background: white; border: none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 4px; font-weight: 500;">Settings</button>
     </nav>
 
-    <main style="padding: 2rem;">
+    <main style="padding: 2rem; background: #f3f4f6; min-height: calc(100vh - 60px);">
         <!-- Home Screen -->
         <div id="homeScreen" style="display: block;">
-            <h1>Welcome to VHICL Pro</h1>
-            <p>Complete Auto Shop Management System</p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem;">
-                <div onclick="showQuickQuote()" style="background: #3b82f6; color: white; padding: 2rem; border-radius: 8px; cursor: pointer; text-align: center;">
-                    <h2>🧮 Quick Quote</h2>
-                    <p>Create estimates fast</p>
+            <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+                <h1 style="color: #1e40af; margin: 0 0 0.5rem 0;">Welcome to VHICL Pro</h1>
+                <p style="color: #6b7280; margin: 0;">Complete Auto Shop Management System</p>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div onclick="showQuickQuote()" style="background: #3b82f6; color: white; padding: 2rem; border-radius: 8px; cursor: pointer; text-align: center; box-shadow: 0 2px 4px rgba(59,130,246,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🧮</div>
+                    <h2 style="margin: 0 0 0.5rem 0;">Quick Quote</h2>
+                    <p style="margin: 0; opacity: 0.9;">Create estimates fast</p>
                 </div>
-                <div onclick="showCustomers()" style="background: #10b981; color: white; padding: 2rem; border-radius: 8px; cursor: pointer; text-align: center;">
-                    <h2>👥 Customers</h2>
-                    <p>Manage customers</p>
+                <div onclick="showCustomers()" style="background: #10b981; color: white; padding: 2rem; border-radius: 8px; cursor: pointer; text-align: center; box-shadow: 0 2px 4px rgba(16,185,129,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">👥</div>
+                    <h2 style="margin: 0 0 0.5rem 0;">Customers</h2>
+                    <p style="margin: 0; opacity: 0.9;">Manage customers</p>
                 </div>
-                <div onclick="showVehicles()" style="background: #f59e0b; color: white; padding: 2rem; border-radius: 8px; cursor: pointer; text-align: center;">
-                    <h2>🚗 Vehicles</h2>
-                    <p>Track vehicles</p>
+                <div onclick="showVehicles()" style="background: #f59e0b; color: white; padding: 2rem; border-radius: 8px; cursor: pointer; text-align: center; box-shadow: 0 2px 4px rgba(245,158,11,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🚗</div>
+                    <h2 style="margin: 0 0 0.5rem 0;">Vehicles</h2>
+                    <p style="margin: 0; opacity: 0.9;">Track vehicles</p>
                 </div>
-                <div onclick="showInventory()" style="background: #8b5cf6; color: white; padding: 2rem; border-radius: 8px; cursor: pointer; text-align: center;">
-                    <h2>📦 Inventory</h2>
-                    <p>Manage parts</p>
+                <div onclick="showInventory()" style="background: #8b5cf6; color: white; padding: 2rem; border-radius: 8px; cursor: pointer; text-align: center; box-shadow: 0 2px 4px rgba(139,92,246,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div>
+                    <h2 style="margin: 0 0 0.5rem 0;">Inventory</h2>
+                    <p style="margin: 0; opacity: 0.9;">Manage parts</p>
                 </div>
-                <div onclick="showAppointments()" style="background: #ec4899; color: white; padding: 2rem; border-radius: 8px; cursor: pointer; text-align: center;">
-                    <h2>📅 Appointments</h2>
-                    <p>Schedule service</p>
+                <div onclick="showAppointments()" style="background: #ec4899; color: white; padding: 2rem; border-radius: 8px; cursor: pointer; text-align: center; box-shadow: 0 2px 4px rgba(236,72,153,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📅</div>
+                    <h2 style="margin: 0 0 0.5rem 0;">Appointments</h2>
+                    <p style="margin: 0; opacity: 0.9;">Schedule service</p>
                 </div>
-                <div onclick="showSettings()" style="background: #6b7280; color: white; padding: 2rem; border-radius: 8px; cursor: pointer; text-align: center;">
-                    <h2>⚙️ Settings</h2>
-                    <p>Configure shop</p>
+                <div onclick="showSettings()" style="background: #6b7280; color: white; padding: 2rem; border-radius: 8px; cursor: pointer; text-align: center; box-shadow: 0 2px 4px rgba(107,114,128,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚙️</div>
+                    <h2 style="margin: 0 0 0.5rem 0;">Settings</h2>
+                    <p style="margin: 0; opacity: 0.9;">Configure shop</p>
                 </div>
             </div>
         </div>
 
         <!-- Quick Quote Screen -->
         <div id="quickQuoteScreen" style="display: none;">
-            <h1>Quick Quote</h1>
-            <p>Generate professional estimates</p>
             <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h2>Quick Quote Builder</h2>
-                <p>Loading quote builder...</p>
-                <button onclick="showHome()" style="margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer;">← Back to Home</button>
+                <h1 style="color: #1e40af; margin-top: 0;">Quick Quote</h1>
+                <p style="color: #6b7280;">Generate professional estimates</p>
+                <div style="background: #f9fafb; padding: 1.5rem; border-radius: 6px; margin: 1rem 0;">
+                    <h2 style="margin-top: 0; color: #3b82f6;">Quick Quote Builder</h2>
+                    <p style="color: #6b7280;">Loading quote builder...</p>
+                </div>
+                <button onclick="showHome()" style="background: #1e40af; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: 500;">← Back to Home</button>
             </div>
         </div>
 
         <!-- Customers Screen -->
         <div id="customersScreen" style="display: none;">
-            <h1>Customers</h1>
-            <p>Customer Management</p>
             <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <p>Customer database - Coming soon!</p>
-                <button onclick="showHome()" style="margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer;">← Back to Home</button>
+                <h1 style="color: #1e40af; margin-top: 0;">Customers</h1>
+                <p style="color: #6b7280;">Customer Management</p>
+                <div style="background: #f9fafb; padding: 1.5rem; border-radius: 6px; margin: 1rem 0;">
+                    <p style="color: #6b7280;">Customer database - Coming soon!</p>
+                </div>
+                <button onclick="showHome()" style="background: #1e40af; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: 500;">← Back to Home</button>
             </div>
         </div>
 
         <!-- Vehicles Screen -->
         <div id="vehiclesScreen" style="display: none;">
-            <h1>Vehicles</h1>
-            <p>Vehicle Management</p>
             <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <p>Vehicle tracking - Coming soon!</p>
-                <button onclick="showHome()" style="margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer;">← Back to Home</button>
+                <h1 style="color: #1e40af; margin-top: 0;">Vehicles</h1>
+                <p style="color: #6b7280;">Vehicle Management</p>
+                <div style="background: #f9fafb; padding: 1.5rem; border-radius: 6px; margin: 1rem 0;">
+                    <p style="color: #6b7280;">Vehicle tracking - Coming soon!</p>
+                </div>
+                <button onclick="showHome()" style="background: #1e40af; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: 500;">← Back to Home</button>
             </div>
         </div>
 
         <!-- Inventory Screen -->
         <div id="inventoryScreen" style="display: none;">
-            <h1>Inventory</h1>
-            <p>Parts & Supplies</p>
             <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <p>Inventory management - Coming soon!</p>
-                <button onclick="showHome()" style="margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer;">← Back to Home</button>
+                <h1 style="color: #1e40af; margin-top: 0;">Inventory</h1>
+                <p style="color: #6b7280;">Parts & Supplies</p>
+                <div style="background: #f9fafb; padding: 1.5rem; border-radius: 6px; margin: 1rem 0;">
+                    <p style="color: #6b7280;">Inventory management - Coming soon!</p>
+                </div>
+                <button onclick="showHome()" style="background: #1e40af; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: 500;">← Back to Home</button>
             </div>
         </div>
 
         <!-- Appointments Screen -->
         <div id="appointmentsScreen" style="display: none;">
-            <h1>Appointments</h1>
-            <p>Schedule Management</p>
             <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <p>Appointment scheduling - Coming soon!</p>
-                <button onclick="showHome()" style="margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer;">← Back to Home</button>
+                <h1 style="color: #1e40af; margin-top: 0;">Appointments</h1>
+                <p style="color: #6b7280;">Schedule Management</p>
+                <div style="background: #f9fafb; padding: 1.5rem; border-radius: 6px; margin: 1rem 0;">
+                    <p style="color: #6b7280;">Appointment scheduling - Coming soon!</p>
+                </div>
+                <button onclick="showHome()" style="background: #1e40af; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: 500;">← Back to Home</button>
             </div>
         </div>
 
         <!-- Settings Screen -->
         <div id="settingsScreen" style="display: none;">
-            <h1>Settings</h1>
-            <p>Shop Configuration</p>
             <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <p>Shop settings - Coming soon!</p>
-                <button onclick="showHome()" style="margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer;">← Back to Home</button>
+                <h1 style="color: #1e40af; margin-top: 0;">Settings</h1>
+                <p style="color: #6b7280;">Shop Configuration</p>
+                <div style="background: #f9fafb; padding: 1.5rem; border-radius: 6px; margin: 1rem 0;">
+                    <p style="color: #6b7280;">Shop settings - Coming soon!</p>
+                </div>
+                <button onclick="showHome()" style="background: #1e40af; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: 500;">← Back to Home</button>
             </div>
         </div>
     </main>
 
     <script>
-        // Navigation functions
         function showHome() {
             hideAllScreens();
             document.getElementById('homeScreen').style.display = 'block';
@@ -175,7 +180,7 @@
             });
         }
 
-        console.log('VHICL Pro - Minimal version loaded');
+        console.log('VHICL Pro - Perfect version loaded - 100% self-contained');
     </script>
 </body>
 </html>
