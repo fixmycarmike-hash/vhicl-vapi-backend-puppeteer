@@ -1,5 +1,4 @@
 // Intake API Endpoints
-// Add to service-advisor-backend-complete-alex-final.js
 // VHICL Pro Service Advisor System
 
 /**
@@ -11,541 +10,472 @@
  * via ALEX voice assistant (VAPI)
  */
 
-// Import CarIntakeHandler (add to requires at top of file)
 const CarIntakeHandler = require('./vapi-car-intake.js');
+const EmailService = require('./email-service-updated.js');
 
-// Initialize Car Intake Handler (add after other initializations)
-const carIntakeHandler = new CarIntakeHandler(shopSettings.vapiKey, shopSettings);
-
-/**
- * POST /api/intake/start
- * Start car intake process via phone call
- */
-app.post('/api/intake/start', async (req, res) => {
-    try {
-        const { customerPhone, intakeMethod } = req.body;
-        
-        if (!customerPhone) {
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Customer phone number is required' 
-            });
-        }
-        
-        // Create intake session
-        const intakeSession = {
-            sessionId: `intake_${Date.now()}`,
-            customerPhone: customerPhone,
-            intakeMethod: intakeMethod || 'phone',
-            status: 'initiated',
-            startTime: new Date().toISOString(),
-            data: {}
-        };
-        
-        // Trigger VAPI call with intake script
-        const vapiCall = await vapiService.createCall({
-            to: customerPhone,
-            script: carIntakeHandler.getIntakeScript(),
-            metadata: {
-                type: 'car_intake',
-                sessionId: intakeSession.sessionId
-            }
-        });
-        
-        // Store session
-        intakeSessions[intakeSession.sessionId] = intakeSession;
-        
-        res.json({
-            success: true,
-            sessionId: intakeSession.sessionId,
-            callId: vapiCall.id,
-            message: 'Intake call initiated. ALEX will call customer shortly.'
-        });
-        
-    } catch (error) {
-        console.error('Error starting intake:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Failed to start intake process' 
-        });
-    }
-});
+// Intake state storage (in production, use database)
+let intakeState = {};
 
 /**
- * POST /api/intake/complete
- * Complete car intake and generate work order
+ * Initialize and register all intake endpoints
+ * @param {Express} app - Express app instance
+ * @param {Object} shopSettingsService - Shop settings service instance
  */
-app.post('/api/intake/complete', async (req, res) => {
-    try {
-        const { sessionId, intakeData } = req.body;
-        
-        if (!sessionId || !intakeData) {
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Session ID and intake data are required' 
-            });
-        }
-        
-        // Validate required fields (VIN removed)
-        const requiredFields = [
-            'customerName', 'customerPhone', 'customerEmail',
-            'vehicleMake', 'vehicleModel', 'vehicleYear',
-            'primaryIssue'
-        ];
-        
-        const missingFields = requiredFields.filter(field => !intakeData[field]);
-        if (missingFields.length > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                error: `Missing required fields: ${missingFields.join(', ')}` 
-            });
-        }
-        
-        // Generate work order
-        const workOrder = carIntakeHandler.generateWorkOrder({
-            ...intakeData,
-            intakeMethod: 'phone'
-        });
-        
-        // Store work order
-        workOrders[workOrder.workOrderId] = workOrder;
-        
-        // Update session
-        if (intakeSessions[sessionId]) {
-            intakeSessions[sessionId].status = 'completed';
-            intakeSessions[sessionId].workOrderId = workOrder.workOrderId;
-            intakeSessions[sessionId].completedAt = new Date().toISOString();
-        }
-        
-        // Send confirmation email
+function registerIntakeEndpoints(app, shopSettingsService) {
+    /**
+     * POST /api/intake/start
+     * Start car intake process via phone call
+     */
+    app.post('/api/intake/start', async (req, res) => {
         try {
-            await emailService.sendWorkOrderConfirmation({
-                to: workOrder.customer.email,
-                workOrderId: workOrder.workOrderId,
-                workOrder: workOrder
-            });
-        } catch (emailError) {
-            console.error('Error sending work order email:', emailError);
-            // Continue even if email fails
-        }
-        
-        // Send SMS confirmation (if configured)
-        if (shopSettings.smsEnabled) {
-            try {
-                await smsService.sendWorkOrderSMS({
-                    to: workOrder.customer.phone,
-                    workOrderId: workOrder.workOrderId
+            const { customerPhone, intakeMethod } = req.body;
+            
+            if (!customerPhone) {
+                return res.status(400).json({ 
+                    success: false, 
+                    error: 'Customer phone number is required' 
                 });
-            } catch (smsError) {
-                console.error('Error sending SMS:', smsError);
             }
-        }
-        
-        res.json({
-            success: true,
-            workOrderId: workOrder.workOrderId,
-            message: 'Work order created successfully',
-            workOrder: workOrder
-        });
-        
-    } catch (error) {
-        console.error('Error completing intake:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Failed to complete intake process' 
-        });
-    }
-});
 
-/**
- * GET /api/intake/status/:sessionId
- * Get intake session status
- */
-app.get('/api/intake/status/:sessionId', async (req, res) => {
-    try {
-        const { sessionId } = req.params;
-        
-        const session = intakeSessions[sessionId];
-        if (!session) {
-            return res.status(404).json({ 
-                success: false, 
-                error: 'Intake session not found' 
-            });
-        }
-        
-        // Get VAPI call status
-        if (session.callId) {
-            const callStatus = await vapiService.getCallStatus(session.callId);
-            session.callStatus = callStatus;
-        }
-        
-        res.json({
-            success: true,
-            session: session
-        });
-        
-    } catch (error) {
-        console.error('Error getting intake status:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Failed to get intake status' 
-        });
-    }
-});
+            // Get shop settings
+            const shopSettings = await shopSettingsService.getSettings();
+            
+            // Initialize handler with current settings
+            const carIntakeHandler = new CarIntakeHandler(shopSettings.voice?.vapiApiKey, shopSettings);
 
-/**
- * POST /api/intake/walkin
- * Create work order for walk-in customer (staff initiated)
- */
-app.post('/api/intake/walkin', async (req, res) => {
-    try {
-        const intakeData = req.body;
-        
-        // Validate required fields (VIN removed)
-        const requiredFields = [
-            'customerName', 'customerPhone', 'customerEmail',
-            'vehicleMake', 'vehicleModel', 'vehicleYear',
-            'primaryIssue', 'intakeType'
-        ];
-        
-        const missingFields = requiredFields.filter(field => !intakeData[field]);
-        if (missingFields.length > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                error: `Missing required fields: ${missingFields.join(', ')}` 
-            });
-        }
-        
-        // Generate work order
-        const workOrder = carIntakeHandler.generateWorkOrder({
-            ...intakeData,
-            intakeMethod: 'inperson',
-            serviceType: 'walkin'
-        });
-        
-        // Store work order
-        workOrders[workOrder.workOrderId] = workOrder;
-        
-        // Send confirmation email
-        try {
-            await emailService.sendWorkOrderConfirmation({
-                to: workOrder.customer.email,
-                workOrderId: workOrder.workOrderId,
-                workOrder: workOrder
-            });
-        } catch (emailError) {
-            console.error('Error sending work order email:', emailError);
-        }
-        
-        res.json({
-            success: true,
-            workOrderId: workOrder.workOrderId,
-            message: 'Work order created successfully',
-            workOrder: workOrder
-        });
-        
-    } catch (error) {
-        console.error('Error creating walk-in work order:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Failed to create work order' 
-        });
-    }
-});
-
-/**
- * POST /api/intake/dropoff
- * Handle vehicle drop-off from home (customer calls from home)
- */
-app.post('/api/intake/dropoff', async (req, res) => {
-    try {
-        const { customerPhone, customerEmail, vehicleInfo, serviceInfo } = req.body;
-        
-        // Start phone call for detailed intake
-        const vapiCall = await vapiService.createCall({
-            to: customerPhone,
-            script: carIntakeHandler.getIntakeScript(),
-            metadata: {
-                type: 'dropoff_from_home',
-                customerPhone: customerPhone,
-                customerEmail: customerEmail,
-                vehicleInfo: vehicleInfo,
-                serviceInfo: serviceInfo
+            // Start intake based on method
+            let result;
+            if (intakeMethod === 'appointment') {
+                result = await carIntakeHandler.handleAppointmentArrival(customerPhone);
+            } else if (intakeMethod === 'walkin') {
+                result = await carIntakeHandler.handleWalkIn(customerPhone);
+            } else if (intakeMethod === 'dropoff') {
+                result = await carIntakeHandler.handleDropOff(customerPhone);
+            } else {
+                result = await carIntakeHandler.startIntake(customerPhone);
             }
-        });
-        
-        // Create intake session
-        const intakeSession = {
-            sessionId: `dropoff_${Date.now()}`,
-            customerPhone: customerPhone,
-            customerEmail: customerEmail,
-            intakeMethod: 'phone',
-            intakeType: 'dropoff_from_home',
-            status: 'initiated',
-            startTime: new Date().toISOString(),
-            callId: vapiCall.id,
-            data: {
-                vehicleInfo: vehicleInfo,
-                serviceInfo: serviceInfo
+
+            // Store intake state
+            intakeState[result.intakeId] = result;
+
+            res.json({
+                success: true,
+                intakeId: result.intakeId,
+                status: result.status,
+                message: result.message
+            });
+
+        } catch (error) {
+            console.error('Error starting intake:', error);
+            res.status(500).json({ 
+                success: false, 
+                error: error.message 
+            });
+        }
+    });
+
+    /**
+     * POST /api/intake/complete
+     * Complete car intake and generate work order
+     */
+    app.post('/api/intake/complete', async (req, res) => {
+        try {
+            const { 
+                intakeId,
+                customerName,
+                email,
+                phone,
+                vehicleInfo,
+                serviceDescription,
+                notes
+            } = req.body;
+
+            // Get intake state
+            const intake = intakeState[intakeId];
+            if (!intake) {
+                return res.status(404).json({ 
+                    success: false, 
+                    error: 'Intake not found' 
+                });
             }
-        };
-        
-        intakeSessions[intakeSession.sessionId] = intakeSession;
-        
-        res.json({
-            success: true,
-            sessionId: intakeSession.sessionId,
-            callId: vapiCall.id,
-            message: 'ALEX will call customer to complete drop-off intake process'
-        });
-        
-    } catch (error) {
-        console.error('Error starting drop-off intake:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Failed to start drop-off intake' 
-        });
-    }
-});
 
-/**
- * GET /api/intake/workorder/:workOrderId
- * Get work order details
- */
-app.get('/api/intake/workorder/:workOrderId', async (req, res) => {
-    try {
-        const { workOrderId } = req.params;
-        
-        const workOrder = workOrders[workOrderId];
-        if (!workOrder) {
-            return res.status(404).json({ 
+            // Get shop settings
+            const shopSettings = await shopSettingsService.getSettings();
+
+            // Create work order
+            const workOrder = {
+                id: `WO-${Date.now()}`,
+                intakeId,
+                customer: {
+                    name: customerName,
+                    email,
+                    phone
+                },
+                vehicle: vehicleInfo,
+                service: serviceDescription,
+                notes,
+                status: 'pending',
+                createdAt: new Date().toISOString(),
+                createdBy: 'ALEX'
+            };
+
+            // Send work order email
+            try {
+                const emailService = new EmailService({
+                    apiKey: shopSettings.email?.sendgridApiKey,
+                    fromEmail: shopSettings.email?.sendgridFromEmail,
+                    fromName: shopSettings.shopInfo?.shopName || 'VHICL Pro'
+                });
+
+                await emailService.sendWorkOrder(workOrder);
+            } catch (emailError) {
+                console.error('Error sending work order email:', emailError);
+                // Continue anyway
+            }
+
+            // Update intake state
+            intakeState[intakeId] = {
+                ...intake,
+                status: 'completed',
+                workOrder,
+                completedAt: new Date().toISOString()
+            };
+
+            res.json({
+                success: true,
+                workOrder,
+                message: 'Car intake completed successfully'
+            });
+
+        } catch (error) {
+            console.error('Error completing intake:', error);
+            res.status(500).json({ 
                 success: false, 
-                error: 'Work order not found' 
+                error: error.message 
             });
         }
-        
-        res.json({
-            success: true,
-            workOrder: workOrder
-        });
-        
-    } catch (error) {
-        console.error('Error getting work order:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Failed to get work order' 
-        });
-    }
-});
+    });
 
-/**
- * PUT /api/intake/workorder/:workOrderId
- * Update work order
- */
-app.put('/api/intake/workorder/:workOrderId', async (req, res) => {
-    try {
-        const { workOrderId } = req.params;
-        const updates = req.body;
-        
-        const workOrder = workOrders[workOrderId];
-        if (!workOrder) {
-            return res.status(404).json({ 
-                success: false, 
-                error: 'Work order not found' 
-            });
-        }
-        
-        // Update work order
-        Object.assign(workOrder, updates);
-        workOrder.updatedAt = new Date().toISOString();
-        
-        res.json({
-            success: true,
-            message: 'Work order updated successfully',
-            workOrder: workOrder
-        });
-        
-    } catch (error) {
-        console.error('Error updating work order:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Failed to update work order' 
-        });
-    }
-});
-
-/**
- * GET /api/intake/workorders
- * Get all work orders (with filters)
- */
-app.get('/api/intake/workorders', async (req, res) => {
-    try {
-        const { status, type, date } = req.query;
-        
-        let filteredOrders = Object.values(workOrders);
-        
-        // Apply filters
-        if (status) {
-            filteredOrders = filteredOrders.filter(wo => wo.status === status);
-        }
-        
-        if (type) {
-            filteredOrders = filteredOrders.filter(wo => 
-                wo.service.type === type || wo.intake.intakeType === type
-            );
-        }
-        
-        if (date) {
-            filteredOrders = filteredOrders.filter(wo => 
-                wo.createdAt.startsWith(date)
-            );
-        }
-        
-        // Sort by creation date (newest first)
-        filteredOrders.sort((a, b) => 
-            new Date(b.createdAt) - new Date(a.createdAt)
-        );
-        
-        res.json({
-            success: true,
-            count: filteredOrders.length,
-            workOrders: filteredOrders
-        });
-        
-    } catch (error) {
-        console.error('Error getting work orders:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Failed to get work orders' 
-        });
-    }
-});
-
-/**
- * POST /api/intake/diagnose/:workOrderId
- * Mark diagnosis complete and provide quote
- */
-app.post('/api/intake/diagnose/:workOrderId', async (req, res) => {
-    try {
-        const { workOrderId } = req.params;
-        const { diagnosticResults, quote, needsApproval } = req.body;
-        
-        const workOrder = workOrders[workOrderId];
-        if (!workOrder) {
-            return res.status(404).json({ 
-                success: false, 
-                error: 'Work order not found' 
-            });
-        }
-        
-        // Update work order with diagnosis
-        workOrder.diagnosis = {
-            completedAt: new Date().toISOString(),
-            results: diagnosticResults,
-            quote: quote,
-            needsApproval: needsApproval !== false
-        };
-        
-        workOrder.status = 'awaiting_approval';
-        
-        // Send quote to customer
+    /**
+     * POST /api/intake/walk-in
+     * Create work order for walk-in customer (no phone call)
+     */
+    app.post('/api/intake/walk-in', async (req, res) => {
         try {
-            await emailService.sendQuote({
-                to: workOrder.customer.email,
-                workOrderId: workOrder.workOrderId,
-                quote: quote,
-                workOrder: workOrder
-            });
-        } catch (emailError) {
-            console.error('Error sending quote email:', emailError);
-        }
-        
-        res.json({
-            success: true,
-            message: 'Diagnosis completed and quote sent to customer',
-            workOrder: workOrder
-        });
-        
-    } catch (error) {
-        console.error('Error completing diagnosis:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Failed to complete diagnosis' 
-        });
-    }
-});
+            const { 
+                customerName,
+                email,
+                phone,
+                vehicleInfo,
+                serviceDescription,
+                notes
+            } = req.body;
 
-/**
- * POST /api/intake/approve/:workOrderId
- * Customer approves quote/repairs
- */
-app.post('/api/intake/approve/:workOrderId', async (req, res) => {
-    try {
-        const { workOrderId } = req.params;
-        const { approvedBy, notes } = req.body;
-        
-        const workOrder = workOrders[workOrderId];
-        if (!workOrder) {
-            return res.status(404).json({ 
+            // Get shop settings
+            const shopSettings = await shopSettingsService.getSettings();
+
+            // Create work order
+            const workOrder = {
+                id: `WO-${Date.now()}`,
+                intakeId: `WALKIN-${Date.now()}`,
+                customer: {
+                    name: customerName,
+                    email,
+                    phone
+                },
+                vehicle: vehicleInfo,
+                service: serviceDescription,
+                notes,
+                status: 'pending',
+                intakeMethod: 'walk-in',
+                createdAt: new Date().toISOString(),
+                createdBy: 'Staff'
+            };
+
+            // Send work order email if email provided
+            if (email) {
+                try {
+                    const emailService = new EmailService({
+                        apiKey: shopSettings.email?.sendgridApiKey,
+                        fromEmail: shopSettings.email?.sendgridFromEmail,
+                        fromName: shopSettings.shopInfo?.shopName || 'VHICL Pro'
+                    });
+
+                    await emailService.sendWorkOrder(workOrder);
+                } catch (emailError) {
+                    console.error('Error sending work order email:', emailError);
+                }
+            }
+
+            res.json({
+                success: true,
+                workOrder,
+                message: 'Walk-in work order created successfully'
+            });
+
+        } catch (error) {
+            console.error('Error creating walk-in work order:', error);
+            res.status(500).json({ 
                 success: false, 
-                error: 'Work order not found' 
+                error: error.message 
             });
         }
-        
-        // Update approval
-        workOrder.approval.repairApproved = true;
-        workOrder.approval.approvedBy = approvedBy;
-        workOrder.approval.approvalDate = new Date().toISOString();
-        workOrder.approval.notes = notes;
-        workOrder.status = 'approved';
-        
-        // Send approval confirmation
+    });
+
+    /**
+     * POST /api/intake/drop-off
+     * Create work order for drop-off from home
+     */
+    app.post('/api/intake/drop-off', async (req, res) => {
         try {
-            await emailService.sendApprovalConfirmation({
-                to: workOrder.customer.email,
-                workOrderId: workOrder.workOrderId,
-                workOrder: workOrder
+            const { 
+                customerName,
+                email,
+                phone,
+                vehicleInfo,
+                serviceDescription,
+                notes,
+                dropOffInstructions
+            } = req.body;
+
+            // Get shop settings
+            const shopSettings = await shopSettingsService.getSettings();
+
+            // Create work order
+            const workOrder = {
+                id: `WO-${Date.now()}`,
+                intakeId: `DROPOFF-${Date.now()}`,
+                customer: {
+                    name: customerName,
+                    email,
+                    phone
+                },
+                vehicle: vehicleInfo,
+                service: serviceDescription,
+                notes,
+                dropOffInstructions,
+                status: 'pending',
+                intakeMethod: 'drop-off',
+                createdAt: new Date().toISOString(),
+                createdBy: 'Customer'
+            };
+
+            // Send work order email if email provided
+            if (email) {
+                try {
+                    const emailService = new EmailService({
+                        apiKey: shopSettings.email?.sendgridApiKey,
+                        fromEmail: shopSettings.email?.sendgridFromEmail,
+                        fromName: shopSettings.shopInfo?.shopName || 'VHICL Pro'
+                    });
+
+                    await emailService.sendWorkOrder(workOrder);
+                } catch (emailError) {
+                    console.error('Error sending work order email:', emailError);
+                }
+            }
+
+            res.json({
+                success: true,
+                workOrder,
+                message: 'Drop-off work order created successfully'
             });
-        } catch (emailError) {
-            console.error('Error sending approval email:', emailError);
+
+        } catch (error) {
+            console.error('Error creating drop-off work order:', error);
+            res.status(500).json({ 
+                success: false, 
+                error: error.message 
+            });
         }
-        
-        res.json({
-            success: true,
-            message: 'Quote approved successfully',
-            workOrder: workOrder
-        });
-        
-    } catch (error) {
-        console.error('Error approving quote:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Failed to approve quote' 
-        });
-    }
-});
+    });
 
-// Storage for intake sessions and work orders (add to global scope)
-const intakeSessions = {};
-const workOrders = {};
+    /**
+     * GET /api/intake/status/:intakeId
+     * Get intake status by ID
+     */
+    app.get('/api/intake/status/:intakeId', async (req, res) => {
+        try {
+            const { intakeId } = req.params;
+            const intake = intakeState[intakeId];
 
-console.log('📋 Car Intake API endpoints loaded');
-console.log('   POST /api/intake/start - Start intake process');
-console.log('   POST /api/intake/complete - Complete intake and generate work order');
-console.log('   GET /api/intake/status/:sessionId - Get intake status');
-console.log('   POST /api/intake/walkin - Create walk-in work order');
-console.log('   POST /api/intake/dropoff - Handle drop-off from home');
-console.log('   GET /api/intake/workorder/:workOrderId - Get work order');
-console.log('   PUT /api/intake/workorder/:workOrderId - Update work order');
-console.log('   GET /api/intake/workorders - Get all work orders');
-console.log('   POST /api/intake/diagnose/:workOrderId - Complete diagnosis');
-console.log('   POST /api/intake/approve/:workOrderId - Approve quote');
-// Export function to register intake endpoints
-module.exports = function registerIntakeEndpoints(app, shopSettingsService, emailService, laborService) {
-  // Return the router or register routes
-  // This file is meant to be included, not instantiated
-  return {
-    intakeSessions,
-    workOrders
-  };
-};
+            if (!intake) {
+                return res.status(404).json({ 
+                    success: false, 
+                    error: 'Intake not found' 
+                });
+            }
+
+            res.json({
+                success: true,
+                intake
+            });
+
+        } catch (error) {
+            console.error('Error getting intake status:', error);
+            res.status(500).json({ 
+                success: false, 
+                error: error.message 
+            });
+        }
+    });
+
+    /**
+     * GET /api/intake/all
+     * Get all intakes
+     */
+    app.get('/api/intake/all', async (req, res) => {
+        try {
+            const intakes = Object.values(intakeState);
+
+            res.json({
+                success: true,
+                intakes,
+                total: intakes.length
+            });
+
+        } catch (error) {
+            console.error('Error getting all intakes:', error);
+            res.status(500).json({ 
+                success: false, 
+                error: error.message 
+            });
+        }
+    });
+
+    /**
+     * POST /api/intake/quote
+     * Get quote for service
+     */
+    app.post('/api/intake/quote', async (req, res) => {
+        try {
+            const { 
+                vehicleInfo,
+                serviceDescription
+            } = req.body;
+
+            // Get shop settings
+            const shopSettings = await shopSettingsService.getSettings();
+            const LaborService = require('./labor-service.js');
+            const laborService = new LaborService({
+                shopId: 'default',
+                laborRate: shopSettings.labor?.laborRate || 100,
+                laborMultiplier: shopSettings.labor?.laborMultiplier || 1.0
+            });
+
+            // Get labor estimate
+            const laborEstimate = await laborService.quickEstimate(serviceDescription);
+
+            // Calculate quote
+            const quote = {
+                labor: {
+                    hours: laborEstimate.hours,
+                    rate: shopSettings.labor?.laborRate || 100,
+                    total: laborEstimate.hours * (shopSettings.labor?.laborRate || 100)
+                },
+                diagnosticFee: shopSettings.labor?.diagnosticFee || 0,
+                subtotal: 0,
+                tax: 0,
+                total: 0
+            };
+
+            // Calculate totals
+            quote.subtotal = quote.labor.total + quote.diagnosticFee;
+            quote.tax = quote.subtotal * (shopSettings.pricing?.taxRate || 0);
+            quote.total = quote.subtotal + quote.tax;
+
+            res.json({
+                success: true,
+                quote
+            });
+
+        } catch (error) {
+            console.error('Error getting quote:', error);
+            res.status(500).json({ 
+                success: false, 
+                error: error.message 
+            });
+        }
+    });
+
+    /**
+     * POST /api/intake/approve-quote
+     * Approve quote and schedule appointment
+     */
+    app.post('/api/intake/approve-quote', async (req, res) => {
+        try {
+            const { 
+                intakeId,
+                quote,
+                appointmentDate,
+                appointmentTime
+            } = req.body;
+
+            // Get intake state
+            const intake = intakeState[intakeId];
+            if (!intake) {
+                return res.status(404).json({ 
+                    success: false, 
+                    error: 'Intake not found' 
+                });
+            }
+
+            // Get shop settings
+            const shopSettings = await shopSettingsService.getSettings();
+
+            // Create appointment
+            const appointment = {
+                id: `APT-${Date.now()}`,
+                intakeId,
+                quote,
+                appointmentDate,
+                appointmentTime,
+                status: 'scheduled',
+                createdAt: new Date().toISOString(),
+                createdBy: 'ALEX'
+            };
+
+            // Update intake state
+            intakeState[intakeId] = {
+                ...intake,
+                status: 'scheduled',
+                appointment,
+                scheduledAt: new Date().toISOString()
+            };
+
+            // Send confirmation email if email available
+            if (intake.customer?.email) {
+                try {
+                    const emailService = new EmailService({
+                        apiKey: shopSettings.email?.sendgridApiKey,
+                        fromEmail: shopSettings.email?.sendgridFromEmail,
+                        fromName: shopSettings.shopInfo?.shopName || 'VHICL Pro'
+                    });
+
+                    await emailService.sendAppointmentConfirmation({
+                        to: intake.customer.email,
+                        appointment
+                    });
+                } catch (emailError) {
+                    console.error('Error sending confirmation email:', emailError);
+                }
+            }
+
+            res.json({
+                success: true,
+                appointment,
+                message: 'Quote approved and appointment scheduled'
+            });
+
+        } catch (error) {
+            console.error('Error approving quote:', error);
+            res.status(500).json({ 
+                success: false, 
+                error: error.message 
+            });
+        }
+    });
+}
+
+// Export the registration function
+module.exports = registerIntakeEndpoints;
