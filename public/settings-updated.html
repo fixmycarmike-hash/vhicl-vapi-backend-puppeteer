@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VHICL Pro - Shop Settings</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --secondary: #64748b;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --background: #f8fafc;
+      --text: #1e293b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      padding: 20px;
+    }
+
+    .settings-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .settings-header {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .settings-header h1 {
+      color: var(--primary);
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .settings-header p {
+      color: var(--secondary);
+      font-size: 16px;
+    }
+
+    .settings-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .tab-btn {
+      padding: 12px 24px;
+      background: #e5e7eb;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: #d1d5db;
+    }
+
+    .settings-content {
+      display: none;
+    }
+
+    .settings-content.active {
+      display: block;
+    }
+
+    .settings-section {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .settings-section h2 {
+      color: var(--primary);
+      margin-bottom: 25px;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .form-group label .required {
+      color: var(--error);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-group .help-text {
+      font-size: 13px;
+      color: var(--secondary);
+      margin-top: 5px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 15px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-secondary {
+      background: var(--secondary);
+      color: #ffffff;
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #ffffff;
+    }
+
+    .btn-success:hover {
+      background: #16a34a;
+    }
+
+    .color-picker-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .color-picker-group input[type="color"] {
+      width: 60px;
+      height: 40px;
+      padding: 2px;
+      cursor: pointer;
+    }
+
+    .color-preview {
+      width: 100%;
+      height: 40px;
+      border-radius: 8px;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .logo-upload {
+      border: 2px dashed #e5e7eb;
+      border-radius: 10px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .logo-upload:hover {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .logo-upload i {
+      font-size: 48px;
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+
+    .logo-preview {
+      max-width: 200px;
+      max-height: 100px;
+      margin-top: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: #f8fafc;
+      border-radius: 6px;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .checkbox-item label {
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .success-message {
+      background: #d1fae5;
+      color: #065f46;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .success-message i {
+      font-size: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .settings-tabs {
+        flex-direction: column;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-header {
+        text-align: center;
+      }
+    }
+  </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+  <div class="settings-container">
+    <div class="settings-header">
+      <h1><i class="fas fa-cog"></i> Shop Settings</h1>
+      <p>Configure your shop's preferences, branding, and system settings</p>
+    </div>
+
+    <div class="settings-tabs">
+      <button class="tab-btn active" onclick="switchTab('general')">
+        <i class="fas fa-store"></i> General
+      </button>
+      <button class="tab-btn" onclick="switchTab('branding')">
+        <i class="fas fa-palette"></i> Branding
+      </button>
+      <button class="tab-btn" onclick="switchTab('contact')">
+        <i class="fas fa-envelope"></i> Contact Preferences
+      </button>
+      <button class="tab-btn" onclick="switchTab('towing')">
+        <i class="fas fa-truck"></i> Towing
+      </button>
+      <button class="tab-btn" onclick="switchTab('technicians')">
+        <i class="fas fa-users"></i> Technicians
+      </button>
+      <button class="tab-btn" onclick="switchTab('bays')">
+        <i class="fas fa-warehouse"></i> Bays
+      </button>
+      <button class="tab-btn" onclick="switchTab('reports')">
+        <i class="fas fa-chart-bar"></i> Reports
+      </button>
+      <button class="tab-btn" onclick="switchTab('integrations')">
+        <i class="fas fa-plug"></i> Integrations
+      </button>
+    </div>
+
+    <div id="successMessage" class="success-message" style="display: none;">
+      <i class="fas fa-check-circle"></i>
+      <span>Settings saved successfully!</span>
+    </div>
+
+    <!-- General Settings -->
+    <div id="general" class="settings-content active">
+      <div class="settings-section">
+        <h2><i class="fas fa-store"></i> Shop Information</h2>
+        <form id="generalSettingsForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Shop Name <span class="required">*</span></label>
+              <input type="text" name="shopName" required placeholder="e.g., AutoCare Plus">
+            </div>
+            <div class="form-group">
+              <label>Phone Number <span class="required">*</span></label>
+              <input type="tel" name="shopPhone" required placeholder="e.g., (555) 123-4567">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Email Address <span class="required">*</span></label>
+            <input type="email" name="shopEmail" required placeholder="e.g., info@autocare.com">
+          </div>
+          <div class="form-group">
+            <label>Address</label>
+            <input type="text" name="shopAddress" placeholder="e.g., 123 Main Street">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>City</label>
+              <input type="text" name="shopCity" placeholder="e.g., Los Angeles">
+            </div>
+            <div class="form-group">
+              <label>State</label>
+              <input type="text" name="shopState" placeholder="e.g., CA">
+            </div>
+            <div class="form-group">
+              <label>ZIP Code</label>
+              <input type="text" name="shopZip" placeholder="e.g., 90210">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Website</label>
+            <input type="url" name="shopWebsite" placeholder="e.g., https://www.autocare.com">
+          </div>
+        </form>
+      </div>
+
+      <div class="settings-section">
+        <h2><i class="fas fa-clock"></i> Business Hours</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Opening Time</label>
+            <input type="time" name="openingTime" value="08:00">
+          </div>
+          <div class="form-group">
+            <label>Closing Time</label>
+            <input type="time" name="closingTime" value="18:00">
+          </div>
+        </div>
+        <div class="checkbox-group">
+          <div class="checkbox-item">
+            <input type="checkbox" name="workDays" value="Monday" checked>
+            <label>Monday</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" name="workDays" value="Tuesday" checked>
+            <label>Tuesday</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" name="workDays" value="Wednesday" checked>
+            <label>Wednesday</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" name="workDays" value="Thursday" checked>
+            <label>Thursday</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" name="workDays" value="Friday" checked>
+            <label>Friday</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" name="workDays" value="Saturday">
+            <label>Saturday</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" name="workDays" value="Sunday">
+            <label>Sunday</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2><i class="fas fa-dollar-sign"></i> Labor & Pricing</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Labor Rate ($/hour) <span class="required">*</span></label>
+            <input type="number" name="laborRate" min="0" step="0.01" required value="100">
+            <p class="help-text">Standard hourly labor rate for all services</p>
+          </div>
+          <div class="form-group">
+            <label>Labor Multiplier</label>
+            <input type="number" name="laborMultiplier" min="0.5" max="3" step="0.1" value="1.0">
+            <p class="help-text">Multiplier for labor estimates (1.0 = standard)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Branding Settings -->
+    <div id="branding" class="settings-content">
+      <div class="settings-section">
+        <h2><i class="fas fa-image"></i> Shop Logo</h2>
+        <div class="logo-upload" onclick="document.getElementById('logoInput').click()">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <h3>Upload Logo</h3>
+          <p>Click to select an image file</p>
+          <p style="font-size: 13px; color: var(--secondary);">PNG, JPG, or SVG (max 5MB)</p>
+          <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="uploadLogo(this)">
+        </div>
+        <div id="logoPreviewContainer" style="display: none;">
+          <h4 style="margin: 20px 0 10px 0;">Current Logo:</h4>
+          <img id="logoPreview" class="logo-preview" alt="Shop Logo">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2><i class="fas fa-palette"></i> Color Scheme</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Primary Color</label>
+            <div class="color-picker-group">
+              <input type="color" id="primaryColor" value="#2563eb" onchange="updateColorPreview()">
+              <input type="text" id="primaryColorText" value="#2563eb" oninput="syncColor('primary')">
+            </div>
+            <div class="color-preview" id="primaryPreview" style="background: #2563eb;">Primary</div>
+          </div>
+          <div class="form-group">
+            <label>Secondary Color</label>
+            <div class="color-picker-group">
+              <input type="color" id="secondaryColor" value="#64748b" onchange="updateColorPreview()">
+              <input type="text" id="secondaryColorText" value="#64748b" oninput="syncColor('secondary')">
+            </div>
+            <div class="color-preview" id="secondaryPreview" style="background: #64748b;">Secondary</div>
+          </div>
+          <div class="form-group">
+            <label>Accent Color</label>
+            <div class="color-picker-group">
+              <input type="color" id="accentColor" value="#3b82f6" onchange="updateColorPreview()">
+              <input type="text" id="accentColorText" value="#3b82f6" oninput="syncColor('accent')">
+            </div>
+            <div class="color-preview" id="accentPreview" style="background: #3b82f6;">Accent</div>
+          </div>
+        </div>
+        <div class="form-row" style="margin-top: 20px;">
+          <div class="form-group">
+            <label>Success Color</label>
+            <div class="color-picker-group">
+              <input type="color" id="successColor" value="#22c55e" onchange="updateColorPreview()">
+              <input type="text" id="successColorText" value="#22c55e" oninput="syncColor('success')">
+            </div>
+            <div class="color-preview" id="successPreview" style="background: #22c55e;">Success</div>
+          </div>
+          <div class="form-group">
+            <label>Warning Color</label>
+            <div class="color-picker-group">
+              <input type="color" id="warningColor" value="#f59e0b" onchange="updateColorPreview()">
+              <input type="text" id="warningColorText" value="#f59e0b" oninput="syncColor('warning')">
+            </div>
+            <div class="color-preview" id="warningPreview" style="background: #f59e0b;">Warning</div>
+          </div>
+          <div class="form-group">
+            <label>Error Color</label>
+            <div class="color-picker-group">
+              <input type="color" id="errorColor" value="#ef4444" onchange="updateColorPreview()">
+              <input type="text" id="errorColorText" value="#ef4444" oninput="syncColor('error')">
+            </div>
+            <div class="color-preview" id="errorPreview" style="background: #ef4444;">Error</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top: 20px;" onclick="saveBranding()">
+          <i class="fas fa-save"></i> Save Color Scheme
+        </button>
+      </div>
+    </div>
+
+    <!-- Contact Preferences -->
+    <div id="contact" class="settings-content">
+      <div class="settings-section">
+        <h2><i class="fas fa-envelope"></i> Default Contact Preferences</h2>
+        <div class="form-group">
+          <label>Primary Contact Method</label>
+          <select name="primaryContactMethod">
+            <option value="email">Email</option>
+            <option value="phone">Phone Call</option>
+            <option value="text">Text Message</option>
+            <option value="mail">Postal Mail</option>
+          </select>
+          <p class="help-text">Default method for contacting customers</p>
+        </div>
+        <div class="form-group">
+          <label>Preferred Contact Time</label>
+          <select name="preferredContactTime">
+            <option value="morning">Morning (8 AM - 12 PM)</option>
+            <option value="afternoon">Afternoon (12 PM - 5 PM)</option>
+            <option value="evening">Evening (5 PM - 8 PM)</option>
+            <option value="anytime">Anytime</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2><i class="fas fa-bell"></i> Communication Settings</h2>
+        <div class="checkbox-group">
+          <div class="checkbox-item">
+            <input type="checkbox" name="allowMarketing" checked>
+            <label>Allow marketing emails by default</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" name="allowReminders" checked>
+            <label>Allow service reminders by default</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" name="allowPromotions" checked>
+            <label>Allow promotional offers by default</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" name="allowUpdates" checked>
+            <label>Allow status updates by default</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Towing Settings -->
+    <div id="towing" class="settings-content">
+      <div class="settings-section">
+        <h2><i class="fas fa-truck"></i> Towing Configuration</h2>
+        <div class="form-group">
+          <label>Default Towing Provider</label>
+          <select name="defaultTowingProvider" id="defaultTowingProvider">
+            <option value="">Auto-select best provider</option>
+          </select>
+          <p class="help-text">Provider to use by default for towing requests</p>
+        </div>
+        <div class="form-group">
+          <label>Auto-assign Towing Provider</label>
+          <select name="autoAssignTowing">
+            <option value="yes">Yes, automatically assign best provider</option>
+            <option value="no">No, require manual selection</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Default Towing Priority</label>
+          <select name="defaultTowingPriority">
+            <option value="normal">Normal (1-2 hours)</option>
+            <option value="urgent">Urgent (30-60 minutes)</option>
+            <option value="emergency">Emergency (ASAP)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2><i class="fas fa-truck-pickup"></i> Manage Towing Providers</h2>
+        <p style="color: var(--secondary); margin-bottom: 15px;">Add and manage your towing service providers</p>
+        <button class="btn btn-primary" onclick="openModal('addTowingProviderModal')">
+          <i class="fas fa-plus"></i> Add Towing Provider
+        </button>
+        <div id="towingProvidersList" style="margin-top: 20px;">
+          <p>Loading providers...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technicians Settings -->
+    <div id="technicians" class="settings-content">
+      <div class="settings-section">
+        <h2><i class="fas fa-user-plus"></i> Technician Management</h2>
+        <p style="color: var(--secondary); margin-bottom: 15px;">Add and manage your technicians</p>
+        <button class="btn btn-primary" onclick="openModal('addTechnicianModal')">
+          <i class="fas fa-plus"></i> Add Technician
+        </button>
+        <div id="techniciansList" style="margin-top: 20px;">
+          <p>Loading technicians...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bays Settings -->
+    <div id="bays" class="settings-content">
+      <div class="settings-section">
+        <h2><i class="fas fa-warehouse"></i> Bay Management</h2>
+        <p style="color: var(--secondary); margin-bottom: 15px;">Manage your service bays</p>
+        <button class="btn btn-primary" onclick="window.location.href='/bay-balancing.html'">
+          <i class="fas fa-cog"></i> Manage Bays
+        </button>
+        <div id="baysList" style="margin-top: 20px;">
+          <p>Loading bays...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reports Settings -->
+    <div id="reports" class="settings-content">
+      <div class="settings-section">
+        <h2><i class="fas fa-chart-bar"></i> Report Settings</h2>
+        <div class="form-group">
+          <label>Default Report Period</label>
+          <select name="defaultReportPeriod">
+            <option value="day">Daily</option>
+            <option value="week">Weekly</option>
+            <option value="month" selected>Monthly</option>
+            <option value="year">Yearly</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Auto-generate Reports</label>
+          <select name="autoGenerateReports">
+            <option value="yes">Yes, generate reports automatically</option>
+            <option value="no">No, manual only</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Report Export Format</label>
+          <select name="reportExportFormat">
+            <option value="csv">CSV</option>
+            <option value="pdf">PDF (coming soon)</option>
+            <option value="excel">Excel (coming soon)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Integrations Settings -->
+    <div id="integrations" class="settings-content">
+      <div class="settings-section">
+        <h2><i class="fas fa-envelope"></i> Email Integration (SendGrid)</h2>
+        <div class="form-group">
+          <label>SendGrid API Key</label>
+          <input type="password" name="sendGridApiKey" placeholder="SG.xxxxxxxx">
+          <p class="help-text">Your SendGrid API key for sending emails</p>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>From Email</label>
+            <input type="email" name="sendGridFromEmail" placeholder="noreply@yourshop.com">
+          </div>
+          <div class="form-group">
+            <label>From Name</label>
+            <input type="text" name="sendGridFromName" placeholder="Your Shop Name">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2><i class="fas fa-car"></i> Parts Scraper (Nexpart)</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nexpart Username</label>
+            <input type="text" name="nexpartUsername" placeholder="Your Nexpart username">
+          </div>
+          <div class="form-group">
+            <label>Nexpart Password</label>
+            <input type="password" name="nexpartPassword" placeholder="Your Nexpart password">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2><i class="fas fa-clock"></i> Labor Scraper (Auto Labor Experts)</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Auto Labor Username</label>
+            <input type="text" name="autoLaborUsername" placeholder="Your Auto Labor username">
+          </div>
+          <div class="form-group">
+            <label>Auto Labor Password</label>
+            <input type="password" name="autoLaborPassword" placeholder="Your Auto Labor password">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2><i class="fas fa-microphone"></i> Voice Assistant (VAPI)</h2>
+        <div class="form-group">
+          <label>VAPI API Key</label>
+          <input type="password" name="vapiKey" placeholder="Your VAPI API key">
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Button -->
+    <div style="text-align: center; margin-top: 30px; padding-bottom: 30px;">
+      <button class="btn btn-success btn-lg" onclick="saveAllSettings()">
+        <i class="fas fa-save"></i> Save All Settings
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let authToken = localStorage.getItem('authToken');
+    let currentSettings = {};
+
+    // Initialize settings
+    async function initSettings() {
+      if (!authToken) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      await loadSettings();
+      await loadTowingProviders();
+      await loadTechnicians();
+      await loadBays();
+    }
+
+    // Load settings
+    async function loadSettings() {
+      try {
+        const response = await fetch('/api/shop/settings', {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          currentSettings = data.settings || {};
+          populateSettingsForm();
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
+    }
+
+    // Populate settings form
+    function populateSettingsForm() {
+      const form = document.getElementById('generalSettingsForm');
+      
+      Object.keys(currentSettings).forEach(key => {
+        const input = form.querySelector(`[name="${key}"]`);
+        if (input) {
+          if (input.type === 'checkbox') {
+            input.checked = currentSettings[key];
+          } else {
+            input.value = currentSettings[key] || '';
+          }
+        }
+      });
+
+      // Populate branding colors
+      if (currentSettings.branding && currentSettings.branding.colors) {
+        const colors = currentSettings.branding.colors;
+        Object.keys(colors).forEach(colorKey => {
+          const colorInput = document.getElementById(`${colorKey}Color`);
+          const colorText = document.getElementById(`${colorKey}ColorText`);
+          if (colorInput && colorText) {
+            colorInput.value = colors[colorKey];
+            colorText.value = colors[colorKey];
+            updateColorPreview();
+          }
+        });
+      }
+
+      // Show logo if exists
+      if (currentSettings.branding && currentSettings.branding.logoUrl) {
+        document.getElementById('logoPreview').src = currentSettings.branding.logoUrl;
+        document.getElementById('logoPreviewContainer').style.display = 'block';
+      }
+    }
+
+    // Switch tab
+    function switchTab(tabId) {
+      // Update tab buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Update content
+      document.querySelectorAll('.settings-content').forEach(content => content.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Update color preview
+    function updateColorPreview() {
+      const colors = ['primary', 'secondary', 'accent', 'success', 'warning', 'error'];
+      
+      colors.forEach(color => {
+        const colorInput = document.getElementById(`${color}Color`);
+        const colorText = document.getElementById(`${color}ColorText`);
+        const colorPreview = document.getElementById(`${color}Preview`);
+        
+        if (colorInput && colorText && colorPreview) {
+          colorText.value = colorInput.value;
+          colorPreview.style.background = colorInput.value;
+        }
+      });
+    }
+
+    // Sync color between input and text
+    function syncColor(color) {
+      const colorInput = document.getElementById(`${color}Color`);
+      const colorText = document.getElementById(`${color}ColorText`);
+      const colorPreview = document.getElementById(`${color}Preview`);
+      
+      if (colorInput && colorText && colorPreview) {
+        colorInput.value = colorText.value;
+        colorPreview.style.background = colorText.value;
+      }
+    }
+
+    // Upload logo
+    async function uploadLogo(input) {
+      if (!input.files || input.files.length === 0) return;
+
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append('logo', file);
+
+      try {
+        const response = await fetch('/api/branding/logo', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          document.getElementById('logoPreview').src = data.logoUrl;
+          document.getElementById('logoPreviewContainer').style.display = 'block';
+          showSuccess('Logo uploaded successfully!');
+        } else {
+          throw new Error('Failed to upload logo');
+        }
+      } catch (error) {
+        console.error('Error uploading logo:', error);
+        alert('Failed to upload logo. Please try again.');
+      }
+    }
+
+    // Save branding
+    async function saveBranding() {
+      const colors = {
+        primary: document.getElementById('primaryColor').value,
+        secondary: document.getElementById('secondaryColor').value,
+        accent: document.getElementById('accentColor').value,
+        success: document.getElementById('successColor').value,
+        warning: document.getElementById('warningColor').value,
+        error: document.getElementById('errorColor').value
+      };
+
+      try {
+        const response = await fetch('/api/branding', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ colors })
+        });
+
+        if (response.ok) {
+          showSuccess('Color scheme saved successfully!');
+        } else {
+          throw new Error('Failed to save branding');
+        }
+      } catch (error) {
+        console.error('Error saving branding:', error);
+        alert('Failed to save branding. Please try again.');
+      }
+    }
+
+    // Load towing providers
+    async function loadTowingProviders() {
+      try {
+        const response = await fetch('/api/towing/providers', {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          updateTowingProvidersList(data.providers);
+        }
+      } catch (error) {
+        console.error('Error loading towing providers:', error);
+      }
+    }
+
+    // Update towing providers list
+    function updateTowingProvidersList(providers) {
+      const container = document.getElementById('towingProvidersList');
+      
+      if (!providers || providers.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--secondary); padding: 20px;">No towing providers configured</p>';
+        return;
+      }
+
+      container.innerHTML = `
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 2px solid #e5e7eb;">
+              <th style="text-align: left; padding: 12px;">Name</th>
+              <th style="text-align: left; padding: 12px;">Phone</th>
+              <th style="text-align: left; padding: 12px;">Base Fee</th>
+              <th style="text-align: left; padding: 12px;">Per Mile</th>
+              <th style="text-align: left; padding: 12px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${providers.map(provider => `
+              <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 12px;">${provider.name}</td>
+                <td style="padding: 12px;">${provider.phone}</td>
+                <td style="padding: 12px;">$${provider.baseFee || 0}</td>
+                <td style="padding: 12px;">$${provider.perMileRate || 0}/mi</td>
+                <td style="padding: 12px;">
+                  <button class="btn btn-sm btn-secondary" onclick="deleteTowingProvider('${provider.id}')">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // Load technicians
+    async function loadTechnicians() {
+      try {
+        const response = await fetch('/api/technicians', {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          updateTechniciansList(data.technicians);
+        }
+      } catch (error) {
+        console.error('Error loading technicians:', error);
+      }
+    }
+
+    // Update technicians list
+    function updateTechniciansList(technicians) {
+      const container = document.getElementById('techniciansList');
+      
+      if (!technicians || technicians.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--secondary); padding: 20px;">No technicians configured</p>';
+        return;
+      }
+
+      container.innerHTML = `
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 2px solid #e5e7eb;">
+              <th style="text-align: left; padding: 12px;">Name</th>
+              <th style="text-align: left; padding: 12px;">Specialization</th>
+              <th style="text-align: left; padding: 12px;">Jobs Completed</th>
+              <th style="text-align: left; padding: 12px;">Rating</th>
+              <th style="text-align: left; padding: 12px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${technicians.map(tech => `
+              <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 12px;">${tech.name}</td>
+                <td style="padding: 12px;">${tech.specialization || 'General'}</td>
+                <td style="padding: 12px;">${tech.jobsCompleted || 0}</td>
+                <td style="padding: 12px;">${(tech.rating || 0).toFixed(1)} ⭐</td>
+                <td style="padding: 12px;">
+                  <button class="btn btn-sm btn-secondary" onclick="deleteTechnician('${tech.id}')">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // Load bays
+    async function loadBays() {
+      try {
+        const response = await fetch('/api/bays', {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          updateBaysList(data.bays);
+        }
+      } catch (error) {
+        console.error('Error loading bays:', error);
+      }
+    }
+
+    // Update bays list
+    function updateBaysList(bays) {
+      const container = document.getElementById('baysList');
+      
+      if (!bays || bays.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--secondary); padding: 20px;">No bays configured</p>';
+        return;
+      }
+
+      container.innerHTML = `
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 2px solid #e5e7eb;">
+              <th style="text-align: left; padding: 12px;">Name</th>
+              <th style="text-align: left; padding: 12px;">Specialization</th>
+              <th style="text-align: left; padding: 12px;">Capacity</th>
+              <th style="text-align: left; padding: 12px;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${bays.map(bay => `
+              <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 12px;">${bay.name}</td>
+                <td style="padding: 12px;">${bay.specialization || 'General'}</td>
+                <td style="padding: 12px;">${bay.capacity || 8} hrs</td>
+                <td style="padding: 12px;">
+                  <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: ${bay.status === 'available' ? '#d1fae5' : bay.status === 'occupied' ? '#dbeafe' : '#fee2e2'}; color: ${bay.status === 'available' ? '#065f46' : bay.status === 'occupied' ? '#1e40af' : '#991b1b'};">
+                    ${bay.status}
+                  </span>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // Save all settings
+    async function saveAllSettings() {
+      const form = document.getElementById('generalSettingsForm');
+      const formData = new FormData(form);
+      const settings = {};
+
+      formData.forEach((value, key) => {
+        if (settings[key]) {
+          if (Array.isArray(settings[key])) {
+            settings[key].push(value);
+          } else {
+            settings[key] = [settings[key], value];
+          }
+        } else {
+          settings[key] = value;
+        }
+      });
+
+      try {
+        const response = await fetch('/api/shop/settings', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(settings)
+        });
+
+        if (response.ok) {
+          showSuccess('All settings saved successfully!');
+        } else {
+          throw new Error('Failed to save settings');
+        }
+      } catch (error) {
+        console.error('Error saving settings:', error);
+        alert('Failed to save settings. Please try again.');
+      }
+    }
+
+    // Show success message
+    function showSuccess(message) {
+      const successDiv = document.getElementById('successMessage');
+      successDiv.querySelector('span').textContent = message;
+      successDiv.style.display = 'flex';
+      
+      setTimeout(() => {
+        successDiv.style.display = 'none';
+      }, 3000);
+    }
+
+    // Open modal (placeholder)
+    function openModal(modalId) {
+      alert('Modal functionality coming soon! For now, use the API endpoints directly.');
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', initSettings);
+  </script>
+</body>
+</html>
