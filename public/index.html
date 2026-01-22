@@ -3,1147 +3,1070 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VHICL Pro - Auto Shop Management</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>VHICL Pro - Complete Shop Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
         }
 
         .navbar {
-            background: #0a2540;
-            padding: 1rem 2rem;
+            background: #2c3e50;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .nav-brand {
+        .navbar h1 {
             color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .nav-buttons {
             display: flex;
-            align-items: center;
             gap: 10px;
-        }
-
-        .nav-brand i {
-            color: #00d4ff;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 5px;
+            flex-wrap: wrap;
         }
 
         .nav-btn {
-            background: transparent;
+            background: #34495e;
+            color: white;
             border: none;
-            color: #a0aec0;
-            padding: 0.75rem 1.5rem;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 0.95rem;
-            border-radius: 8px;
+            font-size: 14px;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .nav-btn:hover, .nav-btn.active {
-            background: #1e40af;
-            color: white;
+        .nav-btn:hover {
+            background: #3498db;
+            transform: translateY(-2px);
         }
 
         .nav-btn.active {
-            background: #00d4ff;
-            color: #0a2540;
+            background: #3498db;
+            box-shadow: 0 2px 5px rgba(52, 152, 219, 0.4);
         }
 
-        .main-content {
-            padding: 2rem;
+        .container {
             max-width: 1400px;
-            margin: 0 auto;
+            margin: 20px auto;
+            padding: 20px;
         }
 
         .screen {
             display: none;
-            animation: fadeIn 0.3s ease;
         }
 
         .screen.active {
             display: block;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
+            gap: 20px;
+            margin-top: 20px;
         }
 
         .card {
             background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
         }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
         }
 
-        .card-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: #1a202c;
-            margin-bottom: 0.5rem;
-        }
-
-        .card-description {
-            color: #718096;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .card-btn {
-            background: #00d4ff;
-            color: #0a2540;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-            transition: background 0.2s;
-        }
-
-        .card-btn:hover {
-            background: #00b8e6;
-        }
-
-        .stats-container {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 1rem;
-            background: #f7fafc;
-            border-radius: 8px;
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #00d4ff;
-        }
-
-        .stat-label {
-            color: #718096;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-
-        .section-header {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #1a202c;
-        }
-
-        .action-btn {
-            background: #00d4ff;
-            color: #0a2540;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s;
-        }
-
-        .action-btn:hover {
-            background: #00b8e6;
-        }
-
-        .form-container {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            font-weight: bold;
-            color: #2d3748;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.2s;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #00d4ff;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: #718096;
-        }
-
-        .loading i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .error {
-            background: #fed7d7;
-            border: 1px solid #fc8181;
-            color: #c53030;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .success {
-            background: #c6f6d5;
-            border: 1px solid #68d391;
-            color: #2f855a;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .data-list {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .data-item {
-            padding: 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .data-item:last-child {
-            border-bottom: none;
-        }
-
-        .data-item-title {
-            font-weight: bold;
-            color: #1a202c;
-            margin-bottom: 0.25rem;
-        }
-
-        .data-item-subtitle {
-            color: #718096;
-            font-size: 0.9rem;
-        }
-
-        .data-item-actions {
-            display: flex;
             gap: 10px;
         }
 
-        .icon-btn {
-            background: #edf2f7;
+        .card .stat {
+            font-size: 36px;
+            font-weight: 700;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .card .label {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .card.success .stat {
+            color: #27ae60;
+        }
+
+        .card.warning .stat {
+            color: #f39c12;
+        }
+
+        .card.danger .stat {
+            color: #e74c3c;
+        }
+
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 22px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
             border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            display: flex;
+            transition: all 0.3s;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
+            gap: 8px;
         }
 
-        .icon-btn:hover {
-            background: #e2e8f0;
+        .btn-primary {
+            background: #3498db;
+            color: white;
         }
 
-        .icon-btn.delete {
-            background: #fed7d7;
-            color: #c53030;
+        .btn-primary:hover {
+            background: #2980b9;
         }
 
-        .icon-btn.delete:hover {
-            background: #feb2b2;
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .col {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .half {
+            flex: 0 0 calc(50% - 10px);
+        }
+
+        .third {
+            flex: 0 0 calc(33.333% - 13px);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .row {
+                flex-direction: column;
+            }
+
+            .half,
+            .third {
+                flex: 1;
+            }
         }
     </style>
-
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
 <body>
     <div class="navbar">
-        <div class="nav-brand">
-            <i class="fas fa-car"></i>
-            VHICL Pro
-        </div>
-        <div class="nav-links">
-            <button class="nav-btn active" onclick="showScreen('home')">
-                <i class="fas fa-home"></i> Home
+        <h1>🚗 VHICL Pro</h1>
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showScreen('homeScreen')">
+                <i class="fas fa-home"></i> Dashboard
             </button>
-            <button class="nav-btn" onclick="showScreen('quickQuote')">
-                <i class="fas fa-bolt"></i> Quick Quote
+            <button class="nav-btn" onclick="showScreen('alexScreen')">
+                <i class="fas fa-robot"></i> ALEX
             </button>
-            <button class="nav-btn" onclick="showScreen('customers')">
-                <i class="fas fa-users"></i> Customers
-            </button>
-            <button class="nav-btn" onclick="showScreen('vehicles')">
-                <i class="fas fa-car-side"></i> Vehicles
-            </button>
-            <button class="nav-btn" onclick="showScreen('appointments')">
+            <button class="nav-btn" onclick="showScreen('appointmentsScreen')">
                 <i class="fas fa-calendar"></i> Appointments
             </button>
-            <button class="nav-btn" onclick="showScreen('settings')">
+            <button class="nav-btn" onclick="showScreen('partsStoresScreen')">
+                <i class="fas fa-store"></i> Parts Stores
+            </button>
+            <button class="nav-btn" onclick="showScreen('analyticsScreen')">
+                <i class="fas fa-chart-line"></i> Analytics
+            </button>
+            <button class="nav-btn" onclick="showScreen('techFlowScreen')">
+                <i class="fas fa-user-tie"></i> Tech Flow
+            </button>
+            <button class="nav-btn" onclick="showScreen('settingsScreen')">
                 <i class="fas fa-cog"></i> Settings
             </button>
         </div>
     </div>
 
-    <div class="main-content">
-        <!-- Home Screen -->
+    <div class="container">
+        <!-- Dashboard Screen -->
         <div id="homeScreen" class="screen active">
-            <div class="stats-container">
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value" id="totalCustomers">0</div>
-                        <div class="stat-label">Customers</div>
+            <div class="section">
+                <h2>📊 Today's Overview</h2>
+                <div class="dashboard-grid">
+                    <div class="card success">
+                        <h3><i class="fas fa-dollar-sign"></i> Revenue</h3>
+                        <div class="stat" id="todayRevenue">$0.00</div>
+                        <div class="label">Total revenue today</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="totalVehicles">0</div>
-                        <div class="stat-label">Vehicles</div>
+                    <div class="card">
+                        <h3><i class="fas fa-wrench"></i> Jobs</h3>
+                        <div class="stat" id="todayJobs">0</div>
+                        <div class="label">Jobs completed today</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="totalAppointments">0</div>
-                        <div class="stat-label">Appointments</div>
+                    <div class="card">
+                        <h3><i class="fas fa-calendar-check"></i> Appointments</h3>
+                        <div class="stat" id="todayAppointments">0</div>
+                        <div class="label">Appointments today</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="systemStatus">Active</div>
-                        <div class="stat-label">System Status</div>
+                    <div class="card warning">
+                        <h3><i class="fas fa-users"></i> Walk-ins</h3>
+                        <div class="stat" id="todayWalkIns">0</div>
+                        <div class="label">Walk-in customers today</div>
                     </div>
                 </div>
             </div>
 
-            <div class="dashboard-grid">
-                <div class="card">
-                    <div class="card-icon" style="background: #e3f2fd; color: #1976d2;">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <div class="card-title">Quick Quote</div>
-                    <div class="card-description">Get instant estimates with real-time parts pricing and labor times</div>
-                    <button class="card-btn" onclick="showScreen('quickQuote')">
-                        <i class="fas fa-arrow-right"></i> Create Quote
+            <div class="section">
+                <h2>⚡ Quick Actions</h2>
+                <div class="row">
+                    <button class="btn btn-primary" onclick="showScreen('appointmentsScreen')">
+                        <i class="fas fa-plus"></i> New Appointment
                     </button>
-                </div>
-
-                <div class="card">
-                    <div class="card-icon" style="background: #f3e5f5; color: #7b1fa2;">
-                        <i class="fas fa-phone-volume"></i>
-                    </div>
-                    <div class="card-title">ALEX Voice Assistant</div>
-                    <div class="card-description">Automated phone calls for parts pricing and customer service</div>
-                    <button class="card-btn" onclick="showScreen('appointments')">
-                        <i class="fas fa-arrow-right"></i> Manage ALEX
+                    <button class="btn btn-success" onclick="showScreen('alexScreen')">
+                        <i class="fas fa-phone"></i> Call Parts Store
                     </button>
-                </div>
-
-                <div class="card">
-                    <div class="card-icon" style="background: #e8f5e9; color: #388e3c;">
-                        <i class="fas fa-wrench"></i>
-                    </div>
-                    <div class="card-title">Labor Service</div>
-                    <div class="card-description">30+ pre-populated repair operations with industry-standard times</div>
-                    <button class="card-btn" onclick="showScreen('settings')">
-                        <i class="fas fa-arrow-right"></i> View Labor Ops
+                    <button class="btn btn-warning" onclick="showScreen('partsStoresScreen')">
+                        <i class="fas fa-box"></i> Check Parts Availability
                     </button>
-                </div>
-
-                <div class="card">
-                    <div class="card-icon" style="background: #fff3e0; color: #f57c00;">
-                        <i class="fas fa-store"></i>
-                    </div>
-                    <div class="card-title">Parts Stores</div>
-                    <div class="card-description">Manage local parts stores and pricing sources</div>
-                    <button class="card-btn" onclick="showScreen('settings')">
-                        <i class="fas fa-arrow-right"></i> Configure Stores
-                    </button>
-                </div>
-
-                <div class="card">
-                    <div class="card-icon" style="background: #fce4ec; color: #c2185b;">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <div class="card-title">Email Notifications</div>
-                    <div class="card-description">Send confirmations, quotes, and updates to customers</div>
-                    <button class="card-btn" onclick="showScreen('settings')">
-                        <i class="fas fa-arrow-right"></i> Configure Email
-                    </button>
-                </div>
-
-                <div class="card">
-                    <div class="card-icon" style="background: #e0f2f1; color: #00796b;">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="card-title">Analytics</div>
-                    <div class="card-description">Track performance, revenue, and shop metrics</div>
-                    <button class="card-btn" onclick="alert('Analytics coming soon!')">
-                        <i class="fas fa-arrow-right"></i> View Stats
+                    <button class="btn btn-danger" onclick="showScreen('settingsScreen')">
+                        <i class="fas fa-cog"></i> Configure Shop
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Quick Quote Screen -->
-        <div id="quickQuoteScreen" class="screen">
-            <div class="section-header">
-                <div class="section-title">
-                    <i class="fas fa-bolt"></i> Quick Quote
+        <!-- ALEX Screen -->
+        <div id="alexScreen" class="screen">
+            <div class="section">
+                <h2>🤖 ALEX - Voice Assistant Configuration</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-phone"></i> Voice Calling</h3>
+                        <div class="stat">
+                            <span class="status-badge success">ENABLED</span>
+                        </div>
+                        <div class="label">ALEX can call parts stores automatically</div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-shopping-cart"></i> Parts Ordering</h3>
+                        <div class="stat">
+                            <span class="status-badge success">ENABLED</span>
+                        </div>
+                        <div class="label">ALEX can order parts after approval</div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-envelope"></i> Confirmations</h3>
+                        <div class="stat">
+                            <span class="status-badge success">ENABLED</span>
+                        </div>
+                        <div class="label">ALEX sends email confirmations</div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-calendar-alt"></i> Appointments</h3>
+                        <div class="stat">
+                            <span class="status-badge success">ENABLED</span>
+                        </div>
+                        <div class="label">ALEX can book appointments</div>
+                    </div>
                 </div>
-                <button class="action-btn" onclick="resetQuoteForm()">
-                    <i class="fas fa-redo"></i> Reset
-                </button>
             </div>
 
-            <div class="form-container">
+            <div class="section">
+                <h2>🚫 Services We Don't Do</h2>
+                <p style="color: #7f8c8d; margin-bottom: 15px;">
+                    Configure services that ALEX should NOT book appointments for. ALEX will politely decline if a customer requests these services.
+                </p>
+                
                 <div class="form-group">
-                    <label class="form-label">Vehicle Information</label>
-                    <input type="text" class="form-input" id="quoteVehicle" placeholder="Year Make Model (e.g., 2020 Toyota Camry)">
+                    <label>Add Service We Don't Do</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="serviceNotOffered" placeholder="e.g., Transmission Rebuild, Body Work, Glass Repair">
+                        <button class="btn btn-danger" onclick="addServiceNotOffered()">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Service Needed</label>
-                    <input type="text" class="form-input" id="quoteService" placeholder="Describe the service (e.g., Brake pads replacement)">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Customer Email (Optional)</label>
-                    <input type="email" class="form-input" id="quoteEmail" placeholder="customer@email.com">
-                </div>
-
-                <button class="card-btn" onclick="generateQuote()">
-                    <i class="fas fa-calculator"></i> Generate Quote
-                </button>
-            </div>
-
-            <div id="quoteResults" style="display: none;">
-                <div class="form-container">
-                    <h3 style="margin-bottom: 1rem;">Quote Results</h3>
-                    <div id="quoteDetails"></div>
+                    <label>Services We Don't Do</label>
+                    <div id="servicesWeDontDoList" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <!-- Services will be added here -->
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Customers Screen -->
-        <div id="customersScreen" class="screen">
-            <div class="section-header">
-                <div class="section-title">
-                    <i class="fas fa-users"></i> Customers
-                </div>
-                <button class="action-btn" onclick="showAddCustomerForm()">
-                    <i class="fas fa-plus"></i> Add Customer
-                </button>
-            </div>
-
-            <div id="customersList" class="data-list">
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    <p>Loading customers...</p>
+            <div class="section">
+                <h2>📞 ALEX Actions</h2>
+                <div class="row">
+                    <button class="btn btn-primary" onclick="alexCallStores()">
+                        <i class="fas fa-phone"></i> Call Parts Stores for Pricing
+                    </button>
+                    <button class="btn btn-success" onclick="alexOrderParts()">
+                        <i class="fas fa-shopping-cart"></i> Order Parts
+                    </button>
+                    <button class="btn btn-warning" onclick="alexCheckAvailability()">
+                        <i class="fas fa-box"></i> Check Parts Availability
+                    </button>
                 </div>
             </div>
-        </div>
 
-        <!-- Vehicles Screen -->
-        <div id="vehiclesScreen" class="screen">
-            <div class="section-header">
-                <div class="section-title">
-                    <i class="fas fa-car-side"></i> Vehicles
-                </div>
-                <button class="action-btn" onclick="showAddVehicleForm()">
-                    <i class="fas fa-plus"></i> Add Vehicle
-                </button>
-            </div>
-
-            <div id="vehiclesList" class="data-list">
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    <p>Loading vehicles...</p>
-                </div>
+            <div class="section">
+                <h2>📊 ALEX Activity</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Action</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alexActivityLog">
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: #7f8c8d;">No recent activity</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
         <!-- Appointments Screen -->
         <div id="appointmentsScreen" class="screen">
-            <div class="section-header">
-                <div class="section-title">
-                    <i class="fas fa-calendar"></i> Appointments
+            <div class="section">
+                <h2>📅 Appointments</h2>
+                
+                <div class="form-group">
+                    <div class="row">
+                        <div class="third">
+                            <input type="text" id="searchAppointments" placeholder="Search appointments..." onkeyup="searchAppointments()">
+                        </div>
+                        <div class="third">
+                            <select id="filterAppointments" onchange="filterAppointments()">
+                                <option value="all">All Appointments</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                            </select>
+                        </div>
+                        <div class="third">
+                            <button class="btn btn-primary" style="width: 100%;" onclick="createNewAppointment()">
+                                <i class="fas fa-plus"></i> New Appointment
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <button class="action-btn" onclick="showAddAppointmentForm()">
-                    <i class="fas fa-plus"></i> Add Appointment
-                </button>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Service</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointmentsTable">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #7f8c8d;">No appointments found</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Parts Stores Screen -->
+        <div id="partsStoresScreen" class="screen">
+            <div class="section">
+                <h2>🏪 Parts Stores</h2>
+                
+                <div class="form-group">
+                    <div class="row">
+                        <div class="half">
+                            <input type="text" id="searchPartsStores" placeholder="Search stores..." onkeyup="searchPartsStores()">
+                        </div>
+                        <div class="half">
+                            <button class="btn btn-primary" style="width: 100%;" onclick="addNewPartsStore()">
+                                <i class="fas fa-plus"></i> Add Parts Store
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Store Name</th>
+                            <th>Phone</th>
+                            <th>Discount</th>
+                            <th>Delivery</th>
+                            <th>Priority</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="partsStoresTable">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #7f8c8d;">No parts stores found</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Analytics Screen -->
+        <div id="analyticsScreen" class="screen">
+            <div class="section">
+                <h2>📊 Revenue Analytics</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-calendar-day"></i> Today</h3>
+                        <div class="stat" id="analyticsTodayRevenue">$0.00</div>
+                        <div class="label">Revenue today</div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-calendar-week"></i> This Week</h3>
+                        <div class="stat" id="analyticsWeekRevenue">$0.00</div>
+                        <div class="label">Revenue this week</div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-calendar-month"></i> This Month</h3>
+                        <div class="stat" id="analyticsMonthRevenue">$0.00</div>
+                        <div class="label">Revenue this month</div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-calendar-alt"></i> This Year</h3>
+                        <div class="stat" id="analyticsYearRevenue">$0.00</div>
+                        <div class="label">Revenue this year</div>
+                    </div>
+                </div>
             </div>
 
-            <div id="appointmentsList" class="data-list">
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    <p>Loading appointments...</p>
+            <div class="section">
+                <h2>📈 Job Analytics</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-wrench"></i> Total Jobs</h3>
+                        <div class="stat" id="analyticsTotalJobs">0</div>
+                        <div class="label">Jobs completed</div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-clock"></i> Avg. Labor Time</h3>
+                        <div class="stat" id="analyticsAvgLaborTime">0.0 hrs</div>
+                        <div class="label">Average job duration</div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-users"></i> Customers</h3>
+                        <div class="stat" id="analyticsCustomers">0</div>
+                        <div class="label">Unique customers</div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-dollar-sign"></i> Avg. Job Value</h3>
+                        <div class="stat" id="analyticsAvgJobValue">$0.00</div>
+                        <div class="label">Average ticket</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔧 Parts Analytics</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-store"></i> Parts Stores</h3>
+                        <div class="stat" id="analyticsPartsStores">0</div>
+                        <div class="label">Active parts stores</div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-percent"></i> Avg. Discount</h3>
+                        <div class="stat" id="analyticsAvgDiscount">0%</div>
+                        <div class="label">Average discount rate</div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-box"></i> Parts Ordered</h3>
+                        <div class="stat" id="analyticsPartsOrdered">0</div>
+                        <div class="label">Parts ordered this month</div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-truck"></i>Deliveries</h3>
+                        <div class="stat" id="analyticsDeliveries">0</div>
+                        <div class="label">Successful deliveries</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tech Flow Screen -->
+        <div id="techFlowScreen" class="screen">
+            <div class="section">
+                <h2>👷 Technician Dashboard</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-tools"></i> Active Jobs</h3>
+                        <div class="stat" id="techActiveJobs">0</div>
+                        <div class="label">Jobs currently in progress</div>
+                    </div>
+                    <div class="card success">
+                        <h3><i class="fas fa-check-circle"></i> Completed Today</h3>
+                        <div class="stat" id="techCompletedToday">0</div>
+                        <div class="label">Jobs completed today</div>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-clock"></i> Total Hours</h3>
+                        <div class="stat" id="techTotalHours">0.0</div>
+                        <div class="label">Hours worked today</div>
+                    </div>
+                    <div class="card warning">
+                        <h3><i class="fas fa-star"></i> Rating</h3>
+                        <div class="stat" id="techRating">0.0</div>
+                        <div class="label">Customer rating (out of 5)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔧 Active Jobs</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Job ID</th>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Service</th>
+                            <th>Bay</th>
+                            <th>Progress</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="techActiveJobsTable">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #7f8c8d;">No active jobs</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>✅ Recent Completed Jobs</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Job ID</th>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Service</th>
+                            <th>Hours</th>
+                            <th>Completed</th>
+                        </tr>
+                    </thead>
+                    <tbody id="techCompletedJobsTable">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #7f8c8d;">No completed jobs today</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>⚡ Quick Actions</h2>
+                <div class="row">
+                    <button class="btn btn-primary" onclick="techStartJob()">
+                        <i class="fas fa-play"></i> Start Job
+                    </button>
+                    <button class="btn btn-success" onclick="techCompleteJob()">
+                        <i class="fas fa-check"></i> Complete Job
+                    </button>
+                    <button class="btn btn-warning" onclick="techRequestParts()">
+                        <i class="fas fa-box"></i> Request Parts
+                    </button>
+                    <button class="btn btn-primary" onclick="techAddNote()">
+                        <i class="fas fa-sticky-note"></i> Add Note
+                    </button>
+                    <button class="btn btn-danger" onclick="techViewSchedule()">
+                        <i class="fas fa-calendar"></i> View Schedule
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Settings Screen -->
         <div id="settingsScreen" class="screen">
-            <div class="section-header">
-                <div class="section-title">
-                    <i class="fas fa-cog"></i> Shop Settings
-                </div>
-                <button class="action-btn" onclick="saveSettings()">
-                    <i class="fas fa-save"></i> Save Settings
+            <div class="section">
+                <h2>⚙️ Shop Settings</h2>
+                <p style="color: #7f8c8d; margin-bottom: 20px;">
+                    Configure your shop's settings, credentials, and preferences. Click below to open the complete settings page.
+                </p>
+                <button class="btn btn-primary" onclick="window.location.href='settings-complete-with-all-settings.html'">
+                    <i class="fas fa-cog"></i> Open Complete Settings
                 </button>
-            </div>
-
-            <div class="form-container">
-                <h3 style="margin-bottom: 1rem;">Shop Information</h3>
-                <div class="form-group">
-                    <label class="form-label">Shop Name</label>
-                    <input type="text" class="form-input" id="settingsShopName" placeholder="Your Shop Name">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Shop Phone</label>
-                    <input type="tel" class="form-input" id="settingsShopPhone" placeholder="(555) 123-4567">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Shop Email</label>
-                    <input type="email" class="form-input" id="settingsShopEmail" placeholder="shop@example.com">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Shop Address</label>
-                    <input type="text" class="form-input" id="settingsShopAddress" placeholder="123 Main St, City, State ZIP">
-                </div>
-            </div>
-
-            <div class="form-container">
-                <h3 style="margin-bottom: 1rem;">Pricing</h3>
-                <div class="form-group">
-                    <label class="form-label">Labor Rate ($/hour)</label>
-                    <input type="number" class="form-input" id="settingsLaborRate" placeholder="100">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Tax Rate (%)</label>
-                    <input type="number" class="form-input" id="settingsTaxRate" placeholder="8" step="0.1">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Diagnostic Fee ($)</label>
-                    <input type="number" class="form-input" id="settingsDiagnosticFee" placeholder="50">
-                </div>
-            </div>
-
-            <div class="form-container">
-                <h3 style="margin-bottom: 1rem;">API Configuration</h3>
-                <div class="form-group">
-                    <label class="form-label">VAPI API Key</label>
-                    <input type="password" class="form-input" id="settingsVapiKey" placeholder="Enter VAPI API Key">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">SendGrid API Key</label>
-                    <input type="password" class="form-input" id="settingsSendgridKey" placeholder="Enter SendGrid API Key">
-                </div>
-            </div>
-
-            <div class="form-container">
-                <h3 style="margin-bottom: 1rem;">Labor Operations</h3>
-                <div id="laborOperationsList" class="data-list">
-                    <div class="loading">
-                        <i class="fas fa-spinner"></i>
-                        <p>Loading labor operations...</p>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // API Base URL
-        const API_BASE = window.location.origin + '/api';
+        // Services We Don't Do
+        let servicesWeDontDo = [];
 
-        // Navigation
+        // Load services we don't do from backend
+        async function loadServicesWeDontDo() {
+            try {
+                const response = await fetch('/api/alex/config');
+                const config = await response.json();
+                servicesWeDontDo = config.servicesWeDontDo || [];
+                renderServicesWeDontDo();
+            } catch (error) {
+                console.error('Error loading services:', error);
+            }
+        }
+
+        // Add service we don't do
+        async function addServiceNotOffered() {
+            const input = document.getElementById('serviceNotOffered');
+            const service = input.value.trim();
+            
+            if (!service) {
+                alert('Please enter a service name');
+                return;
+            }
+            
+            if (servicesWeDontDo.includes(service)) {
+                alert('This service is already in the list');
+                return;
+            }
+            
+            servicesWeDontDo.push(service);
+            input.value = '';
+            
+            // Save to backend
+            try {
+                await fetch('/api/alex/services-we-dont-do', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ services: servicesWeDontDo })
+                });
+                
+                renderServicesWeDontDo();
+            } catch (error) {
+                console.error('Error saving service:', error);
+            }
+        }
+
+        // Remove service we don't do
+        async function removeServiceNotOffered(service) {
+            servicesWeDontDo = servicesWeDontDo.filter(s => s !== service);
+            
+            // Save to backend
+            try {
+                await fetch('/api/alex/services-we-dont-do', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ services: servicesWeDontDo })
+                });
+                
+                renderServicesWeDontDo();
+            } catch (error) {
+                console.error('Error saving service:', error);
+            }
+        }
+
+        // Render services we don't do
+        function renderServicesWeDontDo() {
+            const container = document.getElementById('servicesWeDontDoList');
+            
+            if (servicesWeDontDo.length === 0) {
+                container.innerHTML = '<span style="color: #7f8c8d;">No services configured - ALEX will book all service types</span>';
+                return;
+            }
+            
+            container.innerHTML = servicesWeDontDo.map(service => `
+                <span class="status-badge danger" style="cursor: pointer;" onclick="removeServiceNotOffered('${service}')">
+                    ${service} <i class="fas fa-times"></i>
+                </span>
+            `).join('');
+        }
+
+        // Screen navigation
         function showScreen(screenId) {
             // Hide all screens
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
             });
-
+            
             // Remove active class from all nav buttons
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-
+            
             // Show selected screen
-            document.getElementById(screenId + 'Screen').classList.add('active');
-
+            document.getElementById(screenId).classList.add('active');
+            
             // Add active class to clicked button
-            event.target.closest('.nav-btn').classList.add('active');
-
+            event.target.classList.add('active');
+            
             // Load data for specific screens
-            if (screenId === 'home') loadDashboardStats();
-            if (screenId === 'customers') loadCustomers();
-            if (screenId === 'vehicles') loadVehicles();
-            if (screenId === 'appointments') loadAppointments();
-            if (screenId === 'settings') loadSettings();
-        }
-
-        // Dashboard Stats
-        async function loadDashboardStats() {
-            try {
-                // Try to get stats from backend
-                const healthResponse = await fetch(`${API_BASE}/health`);
-                if (healthResponse.ok) {
-                    document.getElementById('systemStatus').textContent = 'Active';
-                    document.getElementById('systemStatus').style.color = '#38a169';
-                } else {
-                    document.getElementById('systemStatus').textContent = 'Error';
-                    document.getElementById('systemStatus').style.color = '#e53e3e';
-                }
-
-                // For demo, set random stats
-                document.getElementById('totalCustomers').textContent = Math.floor(Math.random() * 50) + 10;
-                document.getElementById('totalVehicles').textContent = Math.floor(Math.random() * 100) + 20;
-                document.getElementById('totalAppointments').textContent = Math.floor(Math.random() * 30) + 5;
-
-            } catch (error) {
-                console.error('Error loading dashboard:', error);
-                document.getElementById('systemStatus').textContent = 'Offline';
-                document.getElementById('systemStatus').style.color = '#e53e3e';
+            if (screenId === 'analyticsScreen') {
+                loadAnalytics();
+            }
+            if (screenId === 'partsStoresScreen') {
+                loadPartsStores();
+            }
+            if (screenId === 'alexScreen') {
+                loadServicesWeDontDo();
             }
         }
 
-        // Quick Quote
-        async function generateQuote() {
-            const vehicle = document.getElementById('quoteVehicle').value;
-            const service = document.getElementById('quoteService').value;
-            const email = document.getElementById('quoteEmail').value;
-
-            if (!vehicle || !service) {
-                alert('Please fill in vehicle and service information');
-                return;
-            }
-
-            try {
-                // Get labor estimate from backend
-                const laborResponse = await fetch(`${API_BASE}/labor/estimate/quick?q=${encodeURIComponent(service)}`);
-                let laborCost = 0;
-                let laborTime = 0;
-
-                if (laborResponse.ok) {
-                    const laborData = await laborResponse.json();
-                    laborCost = laborData.laborCost || 0;
-                    laborTime = laborData.laborTime || 0;
-                }
-
-                // Calculate parts estimate (demo)
-                const partsCost = Math.floor(Math.random() * 200) + 50;
-
-                // Calculate totals
-                const subtotal = laborCost + partsCost;
-                const tax = subtotal * 0.08;
-                const total = subtotal + tax;
-
-                // Display results
-                document.getElementById('quoteResults').style.display = 'block';
-                document.getElementById('quoteDetails').innerHTML = `
-                    <div style="background: #f7fafc; padding: 1.5rem; border-radius: 8px;">
-                        <h4 style="margin-bottom: 1rem; color: #2d3748;">${vehicle}</h4>
-                        <p style="color: #718096; margin-bottom: 1rem;">${service}</p>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                            <div>
-                                <strong>Labor Time:</strong><br>
-                                ${laborTime} hours
-                            </div>
-                            <div>
-                                <strong>Labor Cost:</strong><br>
-                                $${laborCost.toFixed(2)}
-                            </div>
-                            <div>
-                                <strong>Parts Estimate:</strong><br>
-                                $${partsCost.toFixed(2)}
-                            </div>
-                            <div>
-                                <strong>Tax (8%):</strong><br>
-                                $${tax.toFixed(2)}
-                            </div>
-                        </div>
-                        
-                        <div style="background: #00d4ff; color: #0a2540; padding: 1rem; border-radius: 8px; text-align: center;">
-                            <strong>Estimated Total: $${total.toFixed(2)}</strong>
-                        </div>
-                        
-                        <p style="margin-top: 1rem; font-size: 0.85rem; color: #718096;">
-                            * This is an estimate. Final price may vary based on actual parts and labor.
-                        </p>
-                    </div>
-                `;
-
-            } catch (error) {
-                console.error('Error generating quote:', error);
-                alert('Error generating quote. Please try again.');
-            }
+        // ALEX Actions
+        async function alexCallStores() {
+            alert('ALEX will call parts stores for pricing. This feature requires VAPI configuration.');
         }
 
-        function resetQuoteForm() {
-            document.getElementById('quoteVehicle').value = '';
-            document.getElementById('quoteService').value = '';
-            document.getElementById('quoteEmail').value = '';
-            document.getElementById('quoteResults').style.display = 'none';
+        async function alexOrderParts() {
+            alert('ALEX will order parts. This feature requires VAPI configuration.');
         }
 
-        // Customers
-        async function loadCustomers() {
-            const listContainer = document.getElementById('customersList');
-            
+        async function alexCheckAvailability() {
+            alert('ALEX will check parts availability. This feature requires Nexpart configuration.');
+        }
+
+        // Load Analytics
+        async function loadAnalytics() {
             try {
-                const response = await fetch(`${API_BASE}/customers`);
+                const response = await fetch('/api/analytics/overview');
+                const data = await response.json();
                 
-                if (response.ok) {
-                    const customers = await response.json();
-                    displayCustomers(customers);
-                } else {
-                    // Show demo data
-                    displayDemoCustomers();
-                }
+                document.getElementById('analyticsTodayRevenue').textContent = '$' + data.today.revenue.toFixed(2);
+                document.getElementById('analyticsWeekRevenue').textContent = '$' + data.thisWeek.revenue.toFixed(2);
+                document.getElementById('analyticsMonthRevenue').textContent = '$' + data.thisMonth.revenue.toFixed(2);
+                document.getElementById('analyticsYearRevenue').textContent = '$' + data.thisYear.revenue.toFixed(2);
+                
+                document.getElementById('todayRevenue').textContent = '$' + data.today.revenue.toFixed(2);
+                document.getElementById('todayJobs').textContent = data.today.jobs;
+                document.getElementById('todayAppointments').textContent = data.today.appointments;
+                document.getElementById('todayWalkIns').textContent = data.today.walkIns;
             } catch (error) {
-                console.error('Error loading customers:', error);
-                displayDemoCustomers();
+                console.error('Error loading analytics:', error);
             }
-        }
-
-        function displayCustomers(customers) {
-            const listContainer = document.getElementById('customersList');
             
-            if (customers.length === 0) {
-                listContainer.innerHTML = `
-                    <div style="padding: 2rem; text-align: center; color: #718096;">
-                        <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                        <p>No customers yet. Add your first customer!</p>
-                    </div>
-                `;
-                return;
+            // Load labor analytics
+            try {
+                const laborResponse = await fetch('/api/analytics/labor');
+                const laborData = await laborResponse.json();
+                
+                document.getElementById('analyticsTotalJobs').textContent = laborData.totalOperations;
+                document.getElementById('analyticsAvgLaborTime').textContent = laborData.averageLaborTime.toFixed(1) + ' hrs';
+            } catch (error) {
+                console.error('Error loading labor analytics:', error);
             }
-
-            listContainer.innerHTML = customers.map(customer => `
-                <div class="data-item">
-                    <div>
-                        <div class="data-item-title">${customer.name}</div>
-                        <div class="data-item-subtitle">${customer.email} | ${customer.phone}</div>
-                    </div>
-                    <div class="data-item-actions">
-                        <button class="icon-btn" onclick="viewCustomer('${customer.id}')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="icon-btn delete" onclick="deleteCustomer('${customer.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+            
+            // Load parts analytics
+            try {
+                const partsResponse = await fetch('/api/analytics/parts');
+                const partsData = await partsResponse.json();
+                
+                document.getElementById('analyticsPartsStores').textContent = partsData.totalStores;
+                document.getElementById('analyticsAvgDiscount').textContent = partsData.averageDiscount.toFixed(1) + '%';
+            } catch (error) {
+                console.error('Error loading parts analytics:', error);
+            }
         }
 
-        function displayDemoCustomers() {
-            const demoCustomers = [
-                { id: 1, name: 'John Smith', email: 'john@email.com', phone: '(555) 123-4567' },
-                { id: 2, name: 'Jane Doe', email: 'jane@email.com', phone: '(555) 987-6543' },
-                { id: 3, name: 'Mike Johnson', email: 'mike@email.com', phone: '(555) 456-7890' }
-            ];
-            displayCustomers(demoCustomers);
+        // Load Parts Stores
+        async function loadPartsStores() {
+            try {
+                const response = await fetch('/api/parts/stores');
+                const stores = await response.json();
+                
+                const tbody = document.getElementById('partsStoresTable');
+                
+                if (stores.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">No parts stores found</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = stores.map(store => `
+                    <tr>
+                        <td><strong>${store.name}</strong></td>
+                        <td>${store.phone}</td>
+                        <td><span class="status-badge success">${store.discountRate || 0}%</span></td>
+                        <td>${store.deliveryTime || 'Same day'}</td>
+                        <td><span class="status-badge ${store.priority === 'high' ? 'success' : 'warning'}">${store.priority || 'normal'}</span></td>
+                        <td>
+                            <button class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;" onclick="editPartsStore('${store.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="deletePartsStore('${store.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading parts stores:', error);
+            }
         }
 
-        function showAddCustomerForm() {
-            const name = prompt('Customer Name:');
+        // Add new parts store
+        function addNewPartsStore() {
+            const name = prompt('Enter store name:');
             if (!name) return;
             
-            const email = prompt('Customer Email:');
-            const phone = prompt('Customer Phone:');
-
-            // Demo - just add to display
-            const demoCustomer = {
-                id: Date.now(),
-                name: name,
-                email: email || 'N/A',
-                phone: phone || 'N/A'
-            };
-
-            loadCustomers(); // Reload to show new customer
-            alert('Customer added successfully!');
-        }
-
-        function viewCustomer(id) {
-            alert(`Viewing customer ID: ${id}`);
-        }
-
-        function deleteCustomer(id) {
-            if (confirm('Are you sure you want to delete this customer?')) {
-                alert('Customer deleted (demo)');
-                loadCustomers();
-            }
-        }
-
-        // Vehicles
-        async function loadVehicles() {
-            const listContainer = document.getElementById('vehiclesList');
+            const phone = prompt('Enter phone number:');
+            if (!phone) return;
             
-            try {
-                const response = await fetch(`${API_BASE}/vehicles`);
-                
-                if (response.ok) {
-                    const vehicles = await response.json();
-                    displayVehicles(vehicles);
-                } else {
-                    displayDemoVehicles();
-                }
-            } catch (error) {
-                console.error('Error loading vehicles:', error);
-                displayDemoVehicles();
-            }
-        }
-
-        function displayVehicles(vehicles) {
-            const listContainer = document.getElementById('vehiclesList');
+            const discount = prompt('Enter discount rate (%):', '0');
+            const delivery = prompt('Enter delivery time:', 'Same day');
+            const priority = prompt('Enter priority (high/normal/low):', 'normal');
             
-            if (vehicles.length === 0) {
-                listContainer.innerHTML = `
-                    <div style="padding: 2rem; text-align: center; color: #718096;">
-                        <i class="fas fa-car-side" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                        <p>No vehicles yet. Add your first vehicle!</p>
-                    </div>
-                `;
-                return;
-            }
-
-            listContainer.innerHTML = vehicles.map(vehicle => `
-                <div class="data-item">
-                    <div>
-                        <div class="data-item-title">${vehicle.year} ${vehicle.make} ${vehicle.model}</div>
-                        <div class="data-item-subtitle">VIN: ${vehicle.vin || 'N/A'} | Mileage: ${vehicle.mileage || 'N/A'}</div>
-                    </div>
-                    <div class="data-item-actions">
-                        <button class="icon-btn" onclick="viewVehicle('${vehicle.id}')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="icon-btn delete" onclick="deleteVehicle('${vehicle.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+            fetch('/api/parts/stores', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    phone,
+                    discountRate: parseFloat(discount) || 0,
+                    deliveryTime: delivery || 'Same day',
+                    priority: priority || 'normal',
+                    active: true
+                })
+            }).then(() => {
+                loadPartsStores();
+                alert('Parts store added successfully!');
+            }).catch(error => {
+                alert('Error adding parts store: ' + error.message);
+            });
         }
 
-        function displayDemoVehicles() {
-            const demoVehicles = [
-                { id: 1, year: 2020, make: 'Toyota', model: 'Camry', vin: '1HGBH41JXMN109186', mileage: '45,000' },
-                { id: 2, year: 2019, make: 'Honda', model: 'Civic', vin: '2HGFC2F59KH534123', mileage: '32,000' },
-                { id: 3, year: 2021, make: 'Ford', model: 'F-150', vin: '1FTEW1EP5MFA12345', mileage: '28,000' }
-            ];
-            displayVehicles(demoVehicles);
+        // Edit parts store
+        function editPartsStore(storeId) {
+            alert('Edit functionality coming soon');
         }
 
-        function showAddVehicleForm() {
-            const year = prompt('Vehicle Year:');
-            if (!year) return;
+        // Delete parts store
+        function deletePartsStore(storeId) {
+            if (!confirm('Are you sure you want to delete this parts store?')) return;
             
-            const make = prompt('Vehicle Make:');
-            const model = prompt('Vehicle Model:');
-            const vin = prompt('VIN (optional):');
-            const mileage = prompt('Mileage (optional):');
-
-            loadVehicles();
-            alert('Vehicle added successfully!');
+            fetch(`/api/parts/stores/${storeId}`, {
+                method: 'DELETE'
+            }).then(() => {
+                loadPartsStores();
+                alert('Parts store deleted successfully!');
+            }).catch(error => {
+                alert('Error deleting parts store: ' + error.message);
+            });
         }
 
-        function viewVehicle(id) {
-            alert(`Viewing vehicle ID: ${id}`);
-        }
-
-        function deleteVehicle(id) {
-            if (confirm('Are you sure you want to delete this vehicle?')) {
-                alert('Vehicle deleted (demo)');
-                loadVehicles();
-            }
+        // Search parts stores
+        function searchPartsStores() {
+            // Implement search functionality
+            console.log('Searching parts stores...');
         }
 
         // Appointments
-        async function loadAppointments() {
-            const listContainer = document.getElementById('appointmentsList');
-            
-            try {
-                const response = await fetch(`${API_BASE}/appointments`);
-                
-                if (response.ok) {
-                    const appointments = await response.json();
-                    displayAppointments(appointments);
-                } else {
-                    displayDemoAppointments();
-                }
-            } catch (error) {
-                console.error('Error loading appointments:', error);
-                displayDemoAppointments();
+        function createNewAppointment() {
+            alert('Appointment creation form will open here');
+        }
+
+        function searchAppointments() {
+            console.log('Searching appointments...');
+        }
+
+        function filterAppointments() {
+            console.log('Filtering appointments...');
+        }
+
+        // Technician Functions
+        function techStartJob() {
+            alert('Start Job form will open here');
+        }
+
+        function techCompleteJob() {
+            alert('Complete Job form will open here');
+        }
+
+        function techRequestParts() {
+            alert('Parts request form will open here');
+        }
+
+        function techAddNote() {
+            const note = prompt('Enter technician note:');
+            if (note) {
+                alert('Note added: ' + note);
             }
         }
 
-        function displayAppointments(appointments) {
-            const listContainer = document.getElementById('appointmentsList');
-            
-            if (appointments.length === 0) {
-                listContainer.innerHTML = `
-                    <div style="padding: 2rem; text-align: center; color: #718096;">
-                        <i class="fas fa-calendar" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                        <p>No appointments yet. Add your first appointment!</p>
-                    </div>
-                `;
-                return;
-            }
-
-            listContainer.innerHTML = appointments.map(apt => `
-                <div class="data-item">
-                    <div>
-                        <div class="data-item-title">${apt.customerName}</div>
-                        <div class="data-item-subtitle">${apt.date} at ${apt.time} | ${apt.service}</div>
-                    </div>
-                    <div class="data-item-actions">
-                        <button class="icon-btn" onclick="viewAppointment('${apt.id}')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="icon-btn delete" onclick="deleteAppointment('${apt.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function displayDemoAppointments() {
-            const demoAppointments = [
-                { id: 1, customerName: 'John Smith', date: '2025-01-20', time: '10:00 AM', service: 'Oil Change' },
-                { id: 2, customerName: 'Jane Doe', date: '2025-01-20', time: '2:00 PM', service: 'Brake Inspection' },
-                { id: 3, customerName: 'Mike Johnson', date: '2025-01-21', time: '9:00 AM', service: 'Tire Rotation' }
-            ];
-            displayAppointments(demoAppointments);
-        }
-
-        function showAddAppointmentForm() {
-            const customerName = prompt('Customer Name:');
-            if (!customerName) return;
-            
-            const date = prompt('Date (YYYY-MM-DD):');
-            const time = prompt('Time (HH:MM AM/PM):');
-            const service = prompt('Service:');
-
-            loadAppointments();
-            alert('Appointment added successfully!');
-        }
-
-        function viewAppointment(id) {
-            alert(`Viewing appointment ID: ${id}`);
-        }
-
-        function deleteAppointment(id) {
-            if (confirm('Are you sure you want to delete this appointment?')) {
-                alert('Appointment deleted (demo)');
-                loadAppointments();
-            }
-        }
-
-        // Settings
-        async function loadSettings() {
-            try {
-                const response = await fetch(`${API_BASE}/shop/settings`);
-                
-                if (response.ok) {
-                    const settings = await response.json();
-                    document.getElementById('settingsShopName').value = settings.shopName || '';
-                    document.getElementById('settingsShopPhone').value = settings.shopPhone || '';
-                    document.getElementById('settingsShopEmail').value = settings.shopEmail || '';
-                    document.getElementById('settingsShopAddress').value = settings.shopAddress || '';
-                    document.getElementById('settingsLaborRate').value = settings.laborRate || '';
-                    document.getElementById('settingsTaxRate').value = (settings.taxRate * 100) || '';
-                    document.getElementById('settingsDiagnosticFee').value = settings.diagnosticFee || '';
-                }
-            } catch (error) {
-                console.error('Error loading settings:', error);
-            }
-
-            // Load labor operations
-            loadLaborOperations();
-        }
-
-        async function loadLaborOperations() {
-            const listContainer = document.getElementById('laborOperationsList');
-            
-            try {
-                const response = await fetch(`${API_BASE}/labor/operations`);
-                
-                if (response.ok) {
-                    const operations = await response.json();
-                    displayLaborOperations(operations);
-                } else {
-                    displayDemoLaborOperations();
-                }
-            } catch (error) {
-                console.error('Error loading labor operations:', error);
-                displayDemoLaborOperations();
-            }
-        }
-
-        function displayLaborOperations(operations) {
-            const listContainer = document.getElementById('laborOperationsList');
-            
-            if (operations.length === 0) {
-                listContainer.innerHTML = `
-                    <div style="padding: 2rem; text-align: center; color: #718096;">
-                        <p>No labor operations found.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            listContainer.innerHTML = operations.slice(0, 10).map(op => `
-                <div class="data-item">
-                    <div>
-                        <div class="data-item-title">${op.operation}</div>
-                        <div class="data-item-subtitle">Time: ${op.laborTime} hrs | Base Price: $${(op.laborTime * 100).toFixed(2)}</div>
-                    </div>
-                    <div class="data-item-actions">
-                        <button class="icon-btn" onclick="editOperation('${op.id}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function displayDemoLaborOperations() {
-            const demoOps = [
-                { id: 'oil-change', operation: 'Oil Change', laborTime: 0.5 },
-                { id: 'brake-pads', operation: 'Brake Pads Replacement', laborTime: 1.0 },
-                { id: 'tire-rotation', operation: 'Tire Rotation', laborTime: 0.5 },
-                { id: 'battery-replacement', operation: 'Battery Replacement', laborTime: 0.5 },
-                { id: 'air-filter', operation: 'Air Filter Replacement', laborTime: 0.25 }
-            ];
-            displayLaborOperations(demoOps);
-        }
-
-        async function saveSettings() {
-            const settings = {
-                shopName: document.getElementById('settingsShopName').value,
-                shopPhone: document.getElementById('settingsShopPhone').value,
-                shopEmail: document.getElementById('settingsShopEmail').value,
-                shopAddress: document.getElementById('settingsShopAddress').value,
-                laborRate: parseFloat(document.getElementById('settingsLaborRate').value),
-                taxRate: parseFloat(document.getElementById('settingsTaxRate').value) / 100,
-                diagnosticFee: parseFloat(document.getElementById('settingsDiagnosticFee').value),
-                vapiKey: document.getElementById('settingsVapiKey').value,
-                sendgridKey: document.getElementById('settingsSendgridKey').value
-            };
-
-            try {
-                const response = await fetch(`${API_BASE}/shop/settings`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(settings)
-                });
-
-                if (response.ok) {
-                    alert('Settings saved successfully!');
-                } else {
-                    alert('Error saving settings. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error saving settings:', error);
-                alert('Settings saved (demo mode)!');
-            }
-        }
-
-        function editOperation(id) {
-            alert(`Edit operation: ${id}`);
+        function techViewSchedule() {
+            alert('Technician schedule will open here');
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            loadDashboardStats();
+            loadServicesWeDontDo();
+            loadAnalytics();
+            loadPartsStores();
         });
     </script>
 </body>
