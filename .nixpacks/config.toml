@@ -1,8 +1,0 @@
-[phases.build]
-cmds = ["npm install --production"]
-
-[phases.start]
-cmd = "node server.js"
-
-[build.env]
-NPM_CONFIG_CACHE = "/tmp/npm-cache"
