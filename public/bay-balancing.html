@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VHICL Pro - Bay Balancing Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --secondary: #64748b;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --background: #f8fafc;
+      --text: #1e293b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      padding: 20px;
+    }
+
+    .dashboard {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .dashboard-header h1 {
+      color: var(--primary);
+      font-size: 28px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .bay-summary {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .summary-card {
+      padding: 15px 25px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .summary-card span {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .summary-card.available {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .summary-card.occupied {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .summary-card.maintenance {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .bay-board {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .bay-card {
+      background: #ffffff;
+      border: 3px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 25px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .bay-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .bay-card.available {
+      border-color: var(--success);
+      background: linear-gradient(135deg, #f0fdf4, #ffffff);
+    }
+
+    .bay-card.occupied {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, #eff6ff, #ffffff);
+    }
+
+    .bay-card.maintenance {
+      border-color: var(--error);
+      background: linear-gradient(135deg, #fef2f2, #ffffff);
+    }
+
+    .bay-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .bay-card-header h3 {
+      margin: 0;
+      font-size: 24px;
+      color: var(--text);
+    }
+
+    .bay-status {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .bay-status.available {
+      background: var(--success);
+      color: #ffffff;
+    }
+
+    .bay-status.occupied {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .bay-status.maintenance {
+      background: var(--error);
+      color: #ffffff;
+    }
+
+    .bay-info {
+      margin: 10px 0;
+      font-size: 15px;
+      color: var(--secondary);
+    }
+
+    .bay-info i {
+      margin-right: 8px;
+      width: 20px;
+    }
+
+    .current-job {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      border: 2px solid #e5e7eb;
+    }
+
+    .current-job h4 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: var(--primary);
+    }
+
+    .current-job p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: var(--secondary);
+    }
+
+    .current-job .vehicle {
+      font-weight: bold;
+      color: var(--text);
+    }
+
+    .bay-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--secondary);
+      color: #ffffff;
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #ffffff;
+    }
+
+    .btn-success:hover {
+      background: #16a34a;
+      transform: translateY(-2px);
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: #ffffff;
+    }
+
+    .btn-warning:hover {
+      background: #d97706;
+      transform: translateY(-2px);
+    }
+
+    .recommendations {
+      background: #fef3c7;
+      padding: 25px;
+      border-radius: 10px;
+      border: 3px solid var(--warning);
+      margin-bottom: 20px;
+    }
+
+    .recommendations h3 {
+      color: #92400e;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .recommendation-item {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border-left: 4px solid var(--warning);
+    }
+
+    .recommendation-item h4 {
+      margin: 0 0 5px 0;
+      color: #92400e;
+      font-size: 16px;
+    }
+
+    .recommendation-item p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--secondary);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      color: var(--primary);
+      margin: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: var(--secondary);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: var(--text);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--secondary);
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .auto-refresh {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--secondary);
+      font-size: 14px;
+    }
+
+    .auto-refresh i {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @media (max-width: 768px) {
+      .bay-summary {
+        flex-direction: column;
+      }
+
+      .bay-board {
+        grid-template-columns: 1fr;
+      }
+
+      .header-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .dashboard-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+      }
+    }
+  </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="dashboard-header">
+      <h1><i class="fas fa-warehouse"></i> Service Bay Management</h1>
+      <div class="header-actions">
+        <div class="auto-refresh">
+          <i class="fas fa-sync-alt"></i>
+          <span>Auto-refresh: 30s</span>
+        </div>
+        <button class="btn btn-primary" onclick="refreshBoard()">
+          <i class="fas fa-sync"></i> Refresh
+        </button>
+        <button class="btn btn-warning" onclick="getRecommendations()">
+          <i class="fas fa-lightbulb"></i> Get Recommendations
+        </button>
+        <button class="btn btn-secondary" onclick="openModal('addBayModal')">
+          <i class="fas fa-plus"></i> Add Bay
+        </button>
+      </div>
+    </div>
+
+    <div class="bay-summary">
+      <div class="summary-card available">
+        <span id="availableBays">0</span>
+        <i class="fas fa-check-circle"></i> Available
+      </div>
+      <div class="summary-card occupied">
+        <span id="occupiedBays">0</span>
+        <i class="fas fa-car"></i> Occupied
+      </div>
+      <div class="summary-card maintenance">
+        <span id="maintenanceBays">0</span>
+        <i class="fas fa-tools"></i> Maintenance
+      </div>
+    </div>
+
+    <div id="recommendationsSection" style="display: none;">
+      <div class="recommendations">
+        <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
+        <div id="recommendationsList"></div>
+      </div>
+    </div>
+
+    <div class="bay-actions">
+      <button class="btn btn-primary" onclick="openModal('assignJobModal')">
+        <i class="fas fa-car"></i> Assign Job to Bay
+      </button>
+      <button class="btn btn-success" onclick="openModal('releaseBayModal')">
+        <i class="fas fa-check"></i> Release Bay
+      </button>
+      <button class="btn btn-secondary" onclick="openModal('scheduleBayModal')">
+        <i class="fas fa-calendar-alt"></i> Schedule Bay
+      </button>
+      <button class="btn btn-secondary" onclick="viewEfficiency()">
+        <i class="fas fa-chart-line"></i> View Efficiency
+      </button>
+    </div>
+
+    <div id="bayBoard" class="bay-board">
+      <div class="loading">
+        <div class="spinner"></div>
+        Loading bay board...
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Bay Modal -->
+  <div id="addBayModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add Service Bay</h2>
+        <button class="modal-close" onclick="closeModal('addBayModal')">&times;</button>
+      </div>
+      <form id="addBayForm" onsubmit="addBay(event)">
+        <div class="form-group">
+          <label>Bay Name</label>
+          <input type="text" id="bayName" required placeholder="e.g., Bay 1">
+        </div>
+        <div class="form-group">
+          <label>Capacity (hours/day)</label>
+          <input type="number" id="bayCapacity" min="1" max="24" value="8" required>
+        </div>
+        <div class="form-group">
+          <label>Specialization</label>
+          <select id="baySpecialization">
+            <option value="general">General</option>
+            <option value="brakes">Brakes</option>
+            <option value="engine">Engine</option>
+            <option value="electrical">Electrical</option>
+            <option value="transmission">Transmission</option>
+            <option value="suspension">Suspension</option>
+            <option value="ac">AC/Climate Control</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Bay</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Assign Job Modal -->
+  <div id="assignJobModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Assign Job to Bay</h2>
+        <button class="modal-close" onclick="closeModal('assignJobModal')">&times;</button>
+      </div>
+      <form id="assignJobForm" onsubmit="assignJob(event)">
+        <div class="form-group">
+          <label>Select Job</label>
+          <select id="assignJobSelect" required>
+            <option value="">Choose a job...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Select Bay</label>
+          <select id="assignBaySelect" required>
+            <option value="">Choose a bay...</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Assign Job</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Release Bay Modal -->
+  <div id="releaseBayModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Release Bay</h2>
+        <button class="modal-close" onclick="closeModal('releaseBayModal')">&times;</button>
+      </div>
+      <form id="releaseBayForm" onsubmit="releaseBay(event)">
+        <div class="form-group">
+          <label>Select Occupied Bay</label>
+          <select id="releaseBaySelect" required>
+            <option value="">Choose a bay...</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-success">Release Bay</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Schedule Bay Modal -->
+  <div id="scheduleBayModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Schedule Bay</h2>
+        <button class="modal-close" onclick="closeModal('scheduleBayModal')">&times;</button>
+      </div>
+      <form id="scheduleBayForm" onsubmit="scheduleBay(event)">
+        <div class="form-group">
+          <label>Select Job</label>
+          <select id="scheduleJobSelect" required>
+            <option value="">Choose a job...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Select Bay</label>
+          <select id="scheduleBaySelect" required>
+            <option value="">Choose a bay...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Scheduled Date & Time</label>
+          <input type="datetime-local" id="scheduleTime" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Schedule Bay</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Efficiency Modal -->
+  <div id="efficiencyModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Bay Efficiency Report</h2>
+        <button class="modal-close" onclick="closeModal('efficiencyModal')">&times;</button>
+      </div>
+      <div id="efficiencyContent">
+        <p>Loading efficiency data...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let authToken = localStorage.getItem('authToken');
+    let bays = [];
+    let refreshInterval;
+
+    // Initialize dashboard
+    async function initDashboard() {
+      if (!authToken) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      await loadBayBoard();
+      
+      // Set up auto-refresh every 30 seconds
+      refreshInterval = setInterval(loadBayBoard, 30000);
+    }
+
+    // Load bay board
+    async function loadBayBoard() {
+      try {
+        const response = await fetch('/api/bays/board', {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          updateBayBoard(data.board);
+          populateBaySelects(data.board.bays);
+        } else {
+          throw new Error('Failed to load bay board');
+        }
+      } catch (error) {
+        console.error('Error loading bay board:', error);
+        showError('Failed to load bay board. Please try again.');
+      }
+    }
+
+    // Update bay board
+    function updateBayBoard(board) {
+      bays = board.bays;
+      
+      // Update summary
+      document.getElementById('availableBays').textContent = board.summary.available;
+      document.getElementById('occupiedBays').textContent = board.summary.occupied;
+      document.getElementById('maintenanceBays').textContent = board.summary.maintenance;
+
+      const container = document.getElementById('bayBoard');
+
+      if (bays.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--secondary); padding: 40px;">No bays configured. Click "Add Bay" to create your first service bay.</p>';
+        return;
+      }
+
+      container.innerHTML = bays.map(bay => `
+        <div class="bay-card ${bay.status}" onclick="showBayDetails('${bay.id}')">
+          <div class="bay-card-header">
+            <h3><i class="fas fa-warehouse"></i> ${bay.name}</h3>
+            <span class="bay-status ${bay.status}">${bay.status.replace('_', ' ')}</span>
+          </div>
+          <div class="bay-info">
+            <i class="fas fa-cog"></i> ${bay.specialization || 'General'}
+          </div>
+          <div class="bay-info">
+            <i class="fas fa-clock"></i> ${bay.capacity || 8} hours capacity
+          </div>
+          <div class="bay-info">
+            <i class="fas fa-chart-line"></i> ${(bay.utilization || 0).toFixed(0)}% utilized
+          </div>
+          ${bay.currentJob ? `
+            <div class="current-job">
+              <h4><i class="fas fa-car"></i> Current Job</h4>
+              <p class="vehicle">${bay.currentJob.vehicleInfo || 'Unknown Vehicle'}</p>
+              <p><i class="fas fa-user"></i> ${bay.currentJob.customerName || 'Unknown Customer'}</p>
+              <p><i class="fas fa-user-cog"></i> ${bay.currentJob.assignedTechnicianName || 'Unassigned'}</p>
+            </div>
+          ` : `
+            <div class="current-job" style="background: #f0fdf4; border-color: var(--success);">
+              <h4 style="color: var(--success);"><i class="fas fa-check-circle"></i> Available</h4>
+              <p>Ready for new job assignment</p>
+            </div>
+          `}
+        </div>
+      `).join('');
+    }
+
+    // Populate bay selects
+    function populateBaySelects(bays) {
+      const availableOptions = bays.filter(b => b.status === 'available').map(b => 
+        `<option value="${b.id}">${b.name} (${b.specialization || 'General'})</option>`
+      ).join('');
+
+      const occupiedOptions = bays.filter(b => b.status === 'occupied').map(b => 
+        `<option value="${b.id}">${b.name} - ${b.currentJob?.vehicleInfo || 'Occupied'}</option>`
+      ).join('');
+
+      const allOptions = bays.map(b => 
+        `<option value="${b.id}">${b.name} (${b.specialization || 'General'})</option>`
+      ).join('');
+
+      document.getElementById('assignBaySelect').innerHTML = '<option value="">Choose a bay...</option>' + availableOptions;
+      document.getElementById('releaseBaySelect').innerHTML = '<option value="">Choose a bay...</option>' + occupiedOptions;
+      document.getElementById('scheduleBaySelect').innerHTML = '<option value="">Choose a bay...</option>' + allOptions;
+    }
+
+    // Populate job selects
+    async function populateJobSelects() {
+      try {
+        const response = await fetch('/api/jobs', {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+
+        const data = await response.json();
+        const jobs = data.jobs || [];
+
+        const options = jobs.filter(j => j.status === 'pending').map(job => 
+          `<option value="${job.id}">${job.vehicleInfo || 'Unknown'} - ${job.description || 'No description'}</option>`
+        ).join('');
+
+        const jobSelects = ['assignJobSelect', 'scheduleJobSelect'];
+        jobSelects.forEach(selectId => {
+          document.getElementById(selectId).innerHTML = '<option value="">Choose a job...</option>' + options;
+        });
+
+      } catch (error) {
+        console.error('Error populating job selects:', error);
+      }
+    }
+
+    // Modal functions
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+      
+      if (modalId === 'assignJobModal' || modalId === 'scheduleBayModal') {
+        populateJobSelects();
+      }
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // Add bay
+    async function addBay(event) {
+      event.preventDefault();
+      
+      const name = document.getElementById('bayName').value;
+      const capacity = parseInt(document.getElementById('bayCapacity').value);
+      const specialization = document.getElementById('baySpecialization').value;
+      
+      try {
+        const response = await fetch('/api/bays', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name,
+            capacity,
+            specialization
+          })
+        });
+
+        if (response.ok) {
+          alert('Bay added successfully!');
+          closeModal('addBayModal');
+          document.getElementById('addBayForm').reset();
+          loadBayBoard();
+        } else {
+          throw new Error('Failed to add bay');
+        }
+      } catch (error) {
+        console.error('Error adding bay:', error);
+        alert('Failed to add bay. Please try again.');
+      }
+    }
+
+    // Assign job to bay
+    async function assignJob(event) {
+      event.preventDefault();
+      
+      const jobId = document.getElementById('assignJobSelect').value;
+      const bayId = document.getElementById('assignBaySelect').value;
+      
+      try {
+        const response = await fetch(`/api/bays/${bayId}/jobs/${jobId}/assign`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+
+        if (response.ok) {
+          alert('Job assigned to bay successfully!');
+          closeModal('assignJobModal');
+          loadBayBoard();
+        } else {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to assign job');
+        }
+      } catch (error) {
+        console.error('Error assigning job:', error);
+        alert(error.message || 'Failed to assign job. Please try again.');
+      }
+    }
+
+    // Release bay
+    async function releaseBay(event) {
+      event.preventDefault();
+      
+      const bayId = document.getElementById('releaseBaySelect').value;
+      
+      try {
+        const response = await fetch(`/api/bays/${bayId}/release`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+
+        if (response.ok) {
+          alert('Bay released successfully!');
+          closeModal('releaseBayModal');
+          loadBayBoard();
+        } else {
+          throw new Error('Failed to release bay');
+        }
+      } catch (error) {
+        console.error('Error releasing bay:', error);
+        alert('Failed to release bay. Please try again.');
+      }
+    }
+
+    // Schedule bay
+    async function scheduleBay(event) {
+      event.preventDefault();
+      
+      const jobId = document.getElementById('scheduleJobSelect').value;
+      const bayId = document.getElementById('scheduleBaySelect').value;
+      const scheduledTime = document.getElementById('scheduleTime').value;
+      
+      try {
+        const response = await fetch(`/api/bays/${bayId}/schedule`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            jobId,
+            scheduledTime
+          })
+        });
+
+        if (response.ok) {
+          alert('Bay scheduled successfully!');
+          closeModal('scheduleBayModal');
+          document.getElementById('scheduleBayForm').reset();
+        } else {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to schedule bay');
+        }
+      } catch (error) {
+        console.error('Error scheduling bay:', error);
+        alert(error.message || 'Failed to schedule bay. Please try again.');
+      }
+    }
+
+    // View efficiency
+    async function viewEfficiency() {
+      try {
+        const response = await fetch('/api/bays/recommendations', {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+
+        const data = await response.json();
+        
+        let content = `
+          <h4 style="margin-bottom: 15px; color: var(--primary);">Bay Efficiency Summary</h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: var(--success);">${data.recommendations.summary.underutilizedCount}</div>
+              <div style="font-size: 14px; color: var(--secondary);">Underutilized</div>
+            </div>
+            <div style="background: #fef2f2; padding: 15px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: var(--error);">${data.recommendations.summary.overloadedCount}</div>
+              <div style="font-size: 14px; color: var(--secondary);">Overloaded</div>
+            </div>
+            <div style="background: #fef3c7; padding: 15px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: var(--warning);">${data.recommendations.summary.conflictCount}</div>
+              <div style="font-size: 14px; color: var(--secondary);">Conflicts</div>
+            </div>
+          </div>
+        `;
+
+        if (data.recommendations.recommendations.length > 0) {
+          content += '<h4 style="margin-bottom: 15px; color: var(--primary);">Recommendations</h4>';
+          content += data.recommendations.recommendations.map(rec => `
+            <div class="recommendation-item" style="border-left-color: ${rec.type === 'overload' ? 'var(--error)' : rec.type === 'underutilization' ? 'var(--success)' : 'var(--warning)'};">
+              <h4 style="color: ${rec.type === 'overload' ? 'var(--error)' : rec.type === 'underutilization' ? 'var(--success)' : 'var(--warning)'};">${rec.message}</h4>
+              <p>${rec.suggestion}</p>
+            </div>
+          `).join('');
+        } else {
+          content += '<p style="text-align: center; color: var(--success); font-weight: bold;">All bays are well balanced! 🎉</p>';
+        }
+
+        document.getElementById('efficiencyContent').innerHTML = content;
+        openModal('efficiencyModal');
+
+      } catch (error) {
+        console.error('Error getting recommendations:', error);
+        alert('Failed to get recommendations. Please try again.');
+      }
+    }
+
+    // Get recommendations
+    async function getRecommendations() {
+      try {
+        const response = await fetch('/api/bays/recommendations', {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+
+        const data = await response.json();
+        
+        const container = document.getElementById('recommendationsList');
+        const section = document.getElementById('recommendationsSection');
+
+        if (data.recommendations.recommendations.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: var(--success); font-weight: bold; font-size: 16px;">All bays are well balanced! 🎉</p>';
+        } else {
+          container.innerHTML = data.recommendations.recommendations.map(rec => `
+            <div class="recommendation-item">
+              <h4 style="color: ${rec.type === 'overload' ? 'var(--error)' : rec.type === 'underutilization' ? 'var(--success)' : 'var(--warning)'};">${rec.message}</h4>
+              <p>${rec.suggestion}</p>
+            </div>
+          `).join('');
+        }
+
+        section.style.display = 'block';
+
+      } catch (error) {
+        console.error('Error getting recommendations:', error);
+        alert('Failed to get recommendations. Please try again.');
+      }
+    }
+
+    // Show bay details
+    function showBayDetails(bayId) {
+      const bay = bays.find(b => b.id === bayId);
+      if (!bay) return;
+
+      let details = `
+        <h4 style="margin-bottom: 15px; color: var(--primary);">${bay.name} Details</h4>
+        <div class="stat-row">
+          <span class="stat-label">Status</span>
+          <span class="stat-value">${bay.status.replace('_', ' ')}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Specialization</span>
+          <span class="stat-value">${bay.specialization || 'General'}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Capacity</span>
+          <span class="stat-value">${bay.capacity || 8} hours/day</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Utilization</span>
+          <span class="stat-value">${(bay.utilization || 0).toFixed(0)}%</span>
+        </div>
+      `;
+
+      if (bay.currentJob) {
+        details += `
+          <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--primary);">Current Job</h4>
+          <div class="stat-row">
+            <span class="stat-label">Vehicle</span>
+            <span class="stat-value">${bay.currentJob.vehicleInfo || 'Unknown'}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Customer</span>
+            <span class="stat-value">${bay.currentJob.customerName || 'Unknown'}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Technician</span>
+            <span class="stat-value">${bay.currentJob.assignedTechnicianName || 'Unassigned'}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Estimated Hours</span>
+            <span class="stat-value">${bay.currentJob.estimatedHours || 0} hrs</span>
+          </div>
+        `;
+      }
+
+      document.getElementById('efficiencyContent').innerHTML = details;
+      openModal('efficiencyModal');
+    }
+
+    // Refresh board
+    function refreshBoard() {
+      loadBayBoard();
+    }
+
+    // Show error
+    function showError(message) {
+      alert(message);
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', initDashboard);
+
+    // Clean up on unload
+    window.addEventListener('beforeunload', () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    });
+  </script>
+</body>
+</html>
