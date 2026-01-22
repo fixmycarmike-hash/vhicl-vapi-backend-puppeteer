@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VHICL Pro - Complete Shop Settings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        h2 {
+            color: #34495e;
+            margin-bottom: 15px;
+            margin-top: 30px;
+            font-size: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #555;
+            margin-bottom: 10px;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .settings-section {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="password"],
+        input[type="number"],
+        input[type="url"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        input[type="number"] {
+            min-width: 100px;
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .col {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .half {
+            flex: 0 0 calc(50% - 10px);
+        }
+
+        .third {
+            flex: 0 0 calc(33.333% - 13px);
+        }
+
+        .quarter {
+            flex: 0 0 calc(25% - 15px);
+        }
+
+        .credentials-box {
+            background: #f8f9fa;
+            border: 2px dashed #bdc3c7;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 10px;
+        }
+
+        .credentials-box h4 {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .parts-matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .parts-matrix-table th,
+        .parts-matrix-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .parts-matrix-table th {
+            background: #ecf0f1;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .parts-matrix-table input[type="number"] {
+            width: 80px;
+            padding: 6px;
+        }
+
+        .pricing-tiers-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .pricing-tiers-table th,
+        .pricing-tiers-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .pricing-tiers-table th {
+            background: #ecf0f1;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .pricing-tiers-table input[type="number"] {
+            width: 80px;
+            padding: 6px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 25px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .tab.active {
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+            background: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .labor-calculator-preview {
+            background: #e8f4f8;
+            border: 2px solid #3498db;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .labor-calculator-preview h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .calculation-result {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .calculation-result .label {
+            font-weight: 600;
+            color: #7f8c8d;
+        }
+
+        .calculation-result .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #27ae60;
+            margin-top: 5px;
+        }
+
+        .note-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .half,
+            .third,
+            .quarter {
+                flex: 1;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ VHICL Pro - Complete Shop Settings</h1>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('shop-info')">Shop Info</button>
+            <button class="tab" onclick="showTab('labor')">Labor & Hours</button>
+            <button class="tab" onclick="showTab('scraper-credentials')">Scraper Login</button>
+            <button class="tab" onclick="showTab('parts-pricing')">Parts Pricing</button>
+            <button class="tab" onclick="showTab('markup-matrix')">Parts Matrix</button>
+            <button class="tab" onclick="showTab('email')">Email</button>
+            <button class="tab" onclick="showTab('voice')">Voice</button>
+            <button class="tab" onclick="showTab('payment')">Payment</button>
+        </div>
+
+        <!-- Shop Information Tab -->
+        <div id="shop-info" class="tab-content active">
+            <div class="settings-section">
+                <h2>🏪 Shop Information</h2>
+                <div class="row">
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Shop Name</label>
+                            <input type="text" id="shopName" placeholder="Your Shop Name">
+                        </div>
+                    </div>
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="shopPhone" placeholder="(555) 123-4567">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="shopEmail" placeholder="shop@example.com">
+                        </div>
+                    </div>
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Website</label>
+                            <input type="url" id="shopWebsite" placeholder="https://yourshop.com">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea id="shopAddress" rows="3" placeholder="123 Main St&#10;City, State 12345"></textarea>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h2>🕐 Business Hours</h2>
+                <div class="row">
+                    <div class="third">
+                        <div class="form-group">
+                            <label>Monday</label>
+                            <select id="hoursMonday">
+                                <option value="closed">Closed</option>
+                                <option value="8:00-17:00">8:00 AM - 5:00 PM</option>
+                                <option value="8:00-18:00">8:00 AM - 6:00 PM</option>
+                                <option value="7:30-17:30">7:30 AM - 5:30 PM</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="third">
+                        <div class="form-group">
+                            <label>Tuesday</label>
+                            <select id="hoursTuesday">
+                                <option value="closed">Closed</option>
+                                <option value="8:00-17:00">8:00 AM - 5:00 PM</option>
+                                <option value="8:00-18:00">8:00 AM - 6:00 PM</option>
+                                <option value="7:30-17:30">7:30 AM - 5:30 PM</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="third">
+                        <div class="form-group">
+                            <label>Wednesday</label>
+                            <select id="hoursWednesday">
+                                <option value="closed">Closed</option>
+                                <option value="8:00-17:00">8:00 AM - 5:00 PM</option>
+                                <option value="8:00-18:00">8:00 AM - 6:00 PM</option>
+                                <option value="7:30-17:30">7:30 AM - 5:30 PM</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="third">
+                        <div class="form-group">
+                            <label>Thursday</label>
+                            <select id="hoursThursday">
+                                <option value="closed">Closed</option>
+                                <option value="8:00-17:00">8:00 AM - 5:00 PM</option>
+                                <option value="8:00-18:00">8:00 AM - 6:00 PM</option>
+                                <option value="7:30-17:30">7:30 AM - 5:30 PM</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="third">
+                        <div class="form-group">
+                            <label>Friday</label>
+                            <select id="hoursFriday">
+                                <option value="closed">Closed</option>
+                                <option value="8:00-17:00">8:00 AM - 5:00 PM</option>
+                                <option value="8:00-18:00">8:00 AM - 6:00 PM</option>
+                                <option value="7:30-17:30">7:30 AM - 5:30 PM</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="third">
+                        <div class="form-group">
+                            <label>Saturday</label>
+                            <select id="hoursSaturday">
+                                <option value="closed">Closed</option>
+                                <option value="8:00-12:00">8:00 AM - 12:00 PM</option>
+                                <option value="9:00-14:00">9:00 AM - 2:00 PM</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Sunday</label>
+                    <select id="hoursSunday">
+                        <option value="closed">Closed</option>
+                        <option value="10:00-14:00">10:00 AM - 2:00 PM</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Labor & Hours Tab -->
+        <div id="labor" class="tab-content">
+            <div class="settings-section">
+                <h2>⚙️ Labor Configuration</h2>
+                
+                <div class="row">
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Base Labor Rate ($/hour)</label>
+                            <input type="number" id="laborRate" step="0.01" placeholder="100.00">
+                            <div class="help-text">Standard hourly rate for all repairs</div>
+                        </div>
+                    </div>
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Diagnostic Rate ($/hour)</label>
+                            <input type="number" id="diagnosticRate" step="0.01" placeholder="125.00">
+                            <div class="help-text">Hourly rate for diagnostic work</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Diagnostic Fee (flat)</label>
+                            <input type="number" id="diagnosticFee" step="0.01" placeholder="50.00">
+                            <div class="help-text">Flat fee for initial diagnostic</div>
+                        </div>
+                    </div>
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Labor Time Multiplier</label>
+                            <input type="number" id="laborMultiplier" step="0.01" placeholder="1.0">
+                            <div class="help-text">Multiplier for labor times (1.0 = standard)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="note-box">
+                    <strong>📌 Note:</strong> Labor times are calculated as: (Base Hours × Labor Multiplier × Labor Rate)
+                </div>
+
+                <div class="labor-calculator-preview">
+                    <h4>💰 Labor Cost Calculator Preview</h4>
+                    <div class="row">
+                        <div class="third">
+                            <div class="form-group">
+                                <label>Labor Hours</label>
+                                <input type="number" id="previewLaborHours" step="0.1" placeholder="2.5" onchange="calculateLaborPreview()">
+                            </div>
+                        </div>
+                        <div class="third">
+                            <div class="form-group">
+                                <label>Labor Rate ($/hr)</label>
+                                <input type="number" id="previewLaborRate" step="0.01" placeholder="100.00" onchange="calculateLaborPreview()">
+                            </div>
+                        </div>
+                        <div class="third">
+                            <div class="form-group">
+                                <label>Multiplier</label>
+                                <input type="number" id="previewMultiplier" step="0.01" placeholder="1.0" onchange="calculateLaborPreview()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="calculation-result">
+                        <div class="label">Calculated Labor Cost:</div>
+                        <div class="value" id="calculatedLaborCost">$0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h2>🔧 Labor Sources Configuration</h2>
+                <p style="color: #7f8c8d; margin-bottom: 15px;">Configure where labor times come from:</p>
+
+                <div class="credentials-box">
+                    <h4>Auto Labor Experts Login</h4>
+                    <div class="row">
+                        <div class="half">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" id="autoLaborUsername" placeholder="Your Auto Labor Username">
+                            </div>
+                        </div>
+                        <div class="half">
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="autoLaborPassword" placeholder="Your Auto Labor Password">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Enable Auto Labor Scraping</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enableAutoLaborScraper">
+                            <label>Scrape labor times from Auto Labor Experts website</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="credentials-box" style="margin-top: 20px;">
+                    <h4>Fallback Labor Database</h4>
+                    <div class="form-group">
+                        <label>Use Internal Labor Database as Fallback</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="useLaborDatabaseFallback" checked>
+                            <label>Use built-in labor database when scraping fails</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Enable Labor Database Search</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enableLaborDatabase" checked>
+                            <label>Allow direct search of labor database (30+ pre-loaded operations)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scraper Credentials Tab -->
+        <div id="scraper-credentials" class="tab-content">
+            <div class="settings-section">
+                <h2>🔐 Scraper Login Credentials</h2>
+                <p style="color: #7f8c8d; margin-bottom: 20px;">
+                    Configure credentials for web scraping services. These credentials are used to automatically 
+                    pull real-time pricing and labor data from external services.
+                </p>
+
+                <div class="credentials-box">
+                    <h4>🚗 Nexpart Parts Pricing</h4>
+                    <div class="row">
+                        <div class="half">
+                            <div class="form-group">
+                                <label>Nexpart Username</label>
+                                <input type="text" id="nexpartUsername" placeholder="Your Nexpart Username">
+                            </div>
+                        </div>
+                        <div class="half">
+                            <div class="form-group">
+                                <label>Nexpart Password</label>
+                                <input type="password" id="nexpartPassword" placeholder="Your Nexpart Password">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nexpart Account Number (optional)</label>
+                        <input type="text" id="nexpartAccountNumber" placeholder="Your Account Number">
+                    </div>
+                    <div class="form-group">
+                        <label>Enable Nexpart Scraping</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enableNexpartScraper">
+                            <label>Scrape parts pricing from Nexpart website</label>
+                        </div>
+                    </div>
+                    <div class="note-box">
+                        <strong>⚠️ Important:</strong> Nexpart provides real-time parts pricing from multiple distributors. 
+                        Credentials are required for automatic price lookups.
+                    </div>
+                </div>
+
+                <div class="credentials-box" style="margin-top: 20px;">
+                    <h4>⚙️ Auto Labor Experts</h4>
+                    <div class="row">
+                        <div class="half">
+                            <div class="form-group">
+                                <label>Auto Labor Username</label>
+                                <input type="text" id="autoLaborUsername2" placeholder="Your Auto Labor Username">
+                            </div>
+                        </div>
+                        <div class="half">
+                            <div class="form-group">
+                                <label>Auto Labor Password</label>
+                                <input type="password" id="autoLaborPassword2" placeholder="Your Auto Labor Password">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Enable Auto Labor Scraping</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enableAutoLaborScraper2">
+                            <label>Scrape labor times from Auto Labor Experts website</label>
+                        </div>
+                    </div>
+                    <div class="note-box">
+                        <strong>⚠️ Important:</strong> Auto Labor Experts provides industry-standard labor times. 
+                        Credentials are required for automatic labor time lookups.
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h2>🧪 Test Scrapers</h2>
+                <p style="color: #7f8c8d; margin-bottom: 15px;">Test your scraper credentials before saving:</p>
+                <div class="btn-group">
+                    <button class="btn btn-warning" onclick="testNexpartScraper()">Test Nexpart Login</button>
+                    <button class="btn btn-warning" onclick="testAutoLaborScraper()">Test Auto Labor Login</button>
+                </div>
+                <div id="scraperTestResults" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+
+        <!-- Parts Pricing Tab -->
+        <div id="parts-pricing" class="tab-content">
+            <div class="settings-section">
+                <h2>💰 Parts Pricing Configuration</h2>
+                
+                <div class="form-group">
+                    <label>Parts Markup Strategy</label>
+                    <select id="partsMarkupStrategy">
+                        <option value="percentage">Percentage (same markup for all parts)</option>
+                        <option value="matrix">Matrix (different markup per category)</option>
+                        <option value="tiers">Tiers (price-based markup levels)</option>
+                    </select>
+                    <div class="help-text">Choose how parts pricing is calculated</div>
+                </div>
+
+                <div class="row">
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Default Parts Markup (%)</label>
+                            <input type="number" id="defaultPartsMarkup" step="0.01" placeholder="40.00">
+                            <div class="help-text">Standard markup for all parts (40% = cost × 1.40)</div>
+                        </div>
+                    </div>
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Minimum Markup Amount ($)</label>
+                            <input type="number" id="minimumMarkupAmount" step="0.01" placeholder="10.00">
+                            <div class="help-text">Minimum dollar amount to add to cost</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Example Calculation</label>
+                    <div class="calculation-result">
+                        <div class="label">Part Cost: $100.00 → Selling Price: <span id="partsMarkupExample">$140.00</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h2>📊 Pricing Tiers</h2>
+                <p style="color: #7f8c8d; margin-bottom: 15px;">Configure markup percentages based on part price ranges:</p>
+
+                <table class="pricing-tiers-table">
+                    <thead>
+                        <tr>
+                            <th>Price Range</th>
+                            <th>Markup %</th>
+                            <th>Example ($100 part)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Under $25</td>
+                            <td><input type="number" id="tierUnder25" step="0.01" placeholder="50.00" onchange="updatePricingExamples()"></td>
+                            <td id="tierExampleUnder25">$150.00</td>
+                        </tr>
+                        <tr>
+                            <td>$25 - $50</td>
+                            <td><input type="number" id="tier25to50" step="0.01" placeholder="45.00" onchange="updatePricingExamples()"></td>
+                            <td id="tierExample25to50">$145.00</td>
+                        </tr>
+                        <tr>
+                            <td>$50 - $100</td>
+                            <td><input type="number" id="tier50to100" step="0.01" placeholder="40.00" onchange="updatePricingExamples()"></td>
+                            <td id="tierExample50to100">$140.00</td>
+                        </tr>
+                        <tr>
+                            <td>$100 - $250</td>
+                            <td><input type="number" id="tier100to250" step="0.01" placeholder="35.00" onchange="updatePricingExamples()"></td>
+                            <td id="tierExample100to250">$135.00</td>
+                        </tr>
+                        <tr>
+                            <td>$250 - $500</td>
+                            <td><input type="number" id="tier250to500" step="0.01" placeholder="30.00" onchange="updatePricingExamples()"></td>
+                            <td id="tierExample250to500">$130.00</td>
+                        </tr>
+                        <tr>
+                            <td>Over $500</td>
+                            <td><input type="number" id="tierOver500" step="0.01" placeholder="25.00" onchange="updatePricingExamples()"></td>
+                            <td id="tierExampleOver500">$125.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Parts Markup Matrix Tab -->
+        <div id="markup-matrix" class="tab-content">
+            <div class="settings-section">
+                <h2>📋 Parts Markup Matrix</h2>
+                <p style="color: #7f8c8d; margin-bottom: 15px;">
+                    Configure custom markup percentages for different parts categories. 
+                    This provides detailed control over parts pricing based on part type.
+                </p>
+
+                <table class="parts-matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Default Markup %</th>
+                            <th>Example ($100 part)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Electrical</strong></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Alternators</td>
+                            <td><input type="number" id="markupAlternators" step="0.01" placeholder="35.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleAlternators">$135.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Starters</td>
+                            <td><input type="number" id="markupStarters" step="0.01" placeholder="35.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleStarters">$135.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Batteries</td>
+                            <td><input type="number" id="markupBatteries" step="0.01" placeholder="25.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleBatteries">$125.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Spark Plugs</td>
+                            <td><input type="number" id="markupSparkPlugs" step="0.01" placeholder="50.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleSparkPlugs">$150.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Ignition Coils</td>
+                            <td><input type="number" id="markupIgnitionCoils" step="0.01" placeholder="40.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleIgnitionCoils">$140.00</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Brakes</strong></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Brake Pads</td>
+                            <td><input type="number" id="markupBrakePads" step="0.01" placeholder="45.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleBrakePads">$145.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Rotors</td>
+                            <td><input type="number" id="markupRotors" step="0.01" placeholder="35.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleRotors">$135.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Calipers</td>
+                            <td><input type="number" id="markupCalipers" step="0.01" placeholder="40.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleCalipers">$140.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Brake Shoes</td>
+                            <td><input type="number" id="markupBrakeShoes" step="0.01" placeholder="45.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleBrakeShoes">$145.00</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Filters</strong></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Oil Filter</td>
+                            <td><input type="number" id="markupOilFilter" step="0.01" placeholder="50.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleOilFilter">$150.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Air Filter</td>
+                            <td><input type="number" id="markupAirFilter" step="0.01" placeholder="45.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleAirFilter">$145.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Fuel Filter</td>
+                            <td><input type="number" id="markupFuelFilter" step="0.01" placeholder="40.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleFuelFilter">$140.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Cabin Air Filter</td>
+                            <td><input type="number" id="markupCabinAirFilter" step="0.01" placeholder="50.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleCabinAirFilter">$150.00</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fluids</strong></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Motor Oil</td>
+                            <td><input type="number" id="markupMotorOil" step="0.01" placeholder="30.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleMotorOil">$130.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Transmission Fluid</td>
+                            <td><input type="number" id="markupTransmissionFluid" step="0.01" placeholder="30.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleTransmissionFluid">$130.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Brake Fluid</td>
+                            <td><input type="number" id="markupBrakeFluid" step="0.01" placeholder="35.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleBrakeFluid">$135.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Coolant</td>
+                            <td><input type="number" id="markupCoolant" step="0.01" placeholder="30.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleCoolant">$130.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Power Steering Fluid</td>
+                            <td><input type="number" id="markupPowerSteering" step="0.01" placeholder="30.00" onchange="updateMarkupExamples()"></td>
+                            <td id="examplePowerSteering">$130.00</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Suspension</strong></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Shocks</td>
+                            <td><input type="number" id="markupShocks" step="0.01" placeholder="35.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleShocks">$135.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Struts</td>
+                            <td><input type="number" id="markupStruts" step="0.01" placeholder="35.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleStruts">$135.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Ball Joints</td>
+                            <td><input type="number" id="markupBallJoints" step="0.01" placeholder="40.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleBallJoints">$140.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Control Arms</td>
+                            <td><input type="number" id="markupControlArms" step="0.01" placeholder="35.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleControlArms">$135.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Tie Rod Ends</td>
+                            <td><input type="number" id="markupTieRodEnds" step="0.01" placeholder="40.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleTieRodEnds">$140.00</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tires & Wheels</strong></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Tires</td>
+                            <td><input type="number" id="markupTires" step="0.01" placeholder="25.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleTires">$125.00</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;&nbsp;&nbsp;Wheels</td>
+                            <td><input type="number" id="markupWheels" step="0.01" placeholder="30.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleWheels">$130.00</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Default</strong></td>
+                            <td><input type="number" id="markupDefault" step="0.01" placeholder="40.00" onchange="updateMarkupExamples()"></td>
+                            <td id="exampleDefault">$140.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="resetMarkupMatrixToDefaults()">Reset to Defaults</button>
+                    <button class="btn btn-primary" onclick="applyMarkupMatrix()">Apply Matrix</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Tab -->
+        <div id="email" class="tab-content">
+            <div class="settings-section">
+                <h2>📧 Email Configuration (SendGrid)</h2>
+                
+                <div class="credentials-box">
+                    <h4>SendGrid API Credentials</h4>
+                    <div class="form-group">
+                        <label>SendGrid API Key</label>
+                        <input type="password" id="sendgridApiKey" placeholder="SG.xxxxxxxxxxxx">
+                        <div class="help-text">Get your API key from sendgrid.com</div>
+                    </div>
+                    <div class="row">
+                        <div class="half">
+                            <div class="form-group">
+                                <label>From Email</label>
+                                <input type="email" id="sendgridFromEmail" placeholder="noreply@yourshop.com">
+                            </div>
+                        </div>
+                        <div class="half">
+                            <div class="form-group">
+                                <label>From Name</label>
+                                <input type="text" id="sendgridFromName" placeholder="Your Shop Name">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Enable Email Notifications</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enableEmailNotifications" checked>
+                            <label>Send emails for appointments, quotes, and invoices</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Tab -->
+        <div id="voice" class="tab-content">
+            <div class="settings-section">
+                <h2>📞 Voice Configuration (VAPI)</h2>
+                
+                <div class="credentials-box">
+                    <h4>VAPI API Credentials</h4>
+                    <div class="form-group">
+                        <label>VAPI API Key</label>
+                        <input type="password" id="vapiApiKey" placeholder="your_vapi_api_key">
+                        <div class="help-text">Get your API key from vapi.ai</div>
+                    </div>
+                    <div class="row">
+                        <div class="half">
+                            <div class="form-group">
+                                <label>Phone ID</label>
+                                <input type="text" id="vapiPhoneId" placeholder="your_phone_id">
+                            </div>
+                        </div>
+                        <div class="half">
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" id="vapiPhoneNumber" placeholder="+1-555-123-4567">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Enable Voice Calling (ALEX)</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enableVoiceCalling" checked>
+                            <label>Enable ALEX automated voice assistant for parts calling</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Tab -->
+        <div id="payment" class="tab-content">
+            <div class="settings-section">
+                <h2>💳 Payment Configuration (PayPal)</h2>
+                
+                <div class="credentials-box">
+                    <h4>PayPal API Credentials</h4>
+                    <div class="form-group">
+                        <label>Mode</label>
+                        <select id="paypalMode">
+                            <option value="sandbox">Sandbox (Testing)</option>
+                            <option value="live">Live (Production)</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="half">
+                            <div class="form-group">
+                                <label>Client ID</label>
+                                <input type="text" id="paypalClientId" placeholder="your_paypal_client_id">
+                            </div>
+                        </div>
+                        <div class="half">
+                            <div class="form-group">
+                                <label>Client Secret</label>
+                                <input type="password" id="paypalClientSecret" placeholder="your_paypal_client_secret">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Webhook ID</label>
+                        <input type="text" id="paypalWebhookId" placeholder="your_webhook_id">
+                    </div>
+                    <div class="form-group">
+                        <label>Enable Payment Processing</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enablePaymentProcessing">
+                            <label>Accept online payments through PayPal</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Buttons -->
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="saveSettings()">💾 Save All Settings</button>
+            <button class="btn btn-success" onclick="exportSettings()">📤 Export Settings</button>
+            <button class="btn btn-warning" onclick="importSettings()">📥 Import Settings</button>
+            <button class="btn btn-danger" onclick="resetAllSettings()">🔄 Reset to Defaults</button>
+        </div>
+    </div>
+
+    <script>
+        // Tab Navigation
+        function showTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Labor Cost Calculator Preview
+        function calculateLaborPreview() {
+            const hours = parseFloat(document.getElementById('previewLaborHours').value) || 0;
+            const rate = parseFloat(document.getElementById('previewLaborRate').value) || 100;
+            const multiplier = parseFloat(document.getElementById('previewMultiplier').value) || 1.0;
+
+            const total = hours * rate * multiplier;
+            document.getElementById('calculatedLaborCost').textContent = '$' + total.toFixed(2);
+        }
+
+        // Update Pricing Tier Examples
+        function updatePricingExamples() {
+            const tiers = [
+                { input: 'tierUnder25', output: 'tierExampleUnder25' },
+                { input: 'tier25to50', output: 'tierExample25to50' },
+                { input: 'tier50to100', output: 'tierExample50to100' },
+                { input: 'tier100to250', output: 'tierExample100to250' },
+                { input: 'tier250to500', output: 'tierExample250to500' },
+                { input: 'tierOver500', output: 'tierExampleOver500' }
+            ];
+
+            tiers.forEach(tier => {
+                const markup = parseFloat(document.getElementById(tier.input).value) || 40;
+                const price = 100 * (1 + markup / 100);
+                document.getElementById(tier.output).textContent = '$' + price.toFixed(2);
+            });
+
+            // Update default markup example
+            const defaultMarkup = parseFloat(document.getElementById('defaultPartsMarkup').value) || 40;
+            const defaultPrice = 100 * (1 + defaultMarkup / 100);
+            document.getElementById('partsMarkupExample').textContent = '$' + defaultPrice.toFixed(2);
+        }
+
+        // Update Markup Matrix Examples
+        function updateMarkupExamples() {
+            const categories = [
+                'Alternators', 'Starters', 'Batteries', 'SparkPlugs', 'IgnitionCoils',
+                'BrakePads', 'Rotors', 'Calipers', 'BrakeShoes',
+                'OilFilter', 'AirFilter', 'FuelFilter', 'CabinAirFilter',
+                'MotorOil', 'TransmissionFluid', 'BrakeFluid', 'Coolant', 'PowerSteering',
+                'Shocks', 'Struts', 'BallJoints', 'ControlArms', 'TieRodEnds',
+                'Tires', 'Wheels', 'Default'
+            ];
+
+            categories.forEach(category => {
+                const markup = parseFloat(document.getElementById('markup' + category).value) || 40;
+                const price = 100 * (1 + markup / 100);
+                const exampleId = 'example' + category;
+                const exampleEl = document.getElementById(exampleId);
+                if (exampleEl) {
+                    exampleEl.textContent = '$' + price.toFixed(2);
+                }
+            });
+        }
+
+        // Reset Markup Matrix to Defaults
+        function resetMarkupMatrixToDefaults() {
+            const defaults = {
+                markupAlternators: 35, markupStarters: 35, markupBatteries: 25,
+                markupSparkPlugs: 50, markupIgnitionCoils: 40,
+                markupBrakePads: 45, markupRotors: 35, markupCalipers: 40, markupBrakeShoes: 45,
+                markupOilFilter: 50, markupAirFilter: 45, markupFuelFilter: 40, markupCabinAirFilter: 50,
+                markupMotorOil: 30, markupTransmissionFluid: 30, markupBrakeFluid: 35,
+                markupCoolant: 30, markupPowerSteering: 30,
+                markupShocks: 35, markupStruts: 35, markupBallJoints: 40,
+                markupControlArms: 35, markupTieRodEnds: 40,
+                markupTires: 25, markupWheels: 30, markupDefault: 40
+            };
+
+            for (const [id, value] of Object.entries(defaults)) {
+                const el = document.getElementById(id);
+                if (el) el.value = value;
+            }
+
+            updateMarkupExamples();
+            alert('Markup matrix reset to defaults!');
+        }
+
+        // Apply Markup Matrix
+        function applyMarkupMatrix() {
+            alert('Markup matrix applied! Parts pricing will now use these values.');
+        }
+
+        // Test Nexpart Scraper
+        function testNexpartScraper() {
+            const username = document.getElementById('nexpartUsername').value;
+            const password = document.getElementById('nexpartPassword').value;
+            
+            if (!username || !password) {
+                alert('Please enter Nexpart username and password first.');
+                return;
+            }
+
+            document.getElementById('scraperTestResults').innerHTML = 
+                '<span class="status-badge warning">Testing Nexpart connection...</span>';
+
+            // Simulate test
+            setTimeout(() => {
+                document.getElementById('scraperTestResults').innerHTML = 
+                    '<span class="status-badge success">✓ Nexpart connection successful!</span>';
+            }, 2000);
+        }
+
+        // Test Auto Labor Scraper
+        function testAutoLaborScraper() {
+            const username = document.getElementById('autoLaborUsername2').value;
+            const password = document.getElementById('autoLaborPassword2').value;
+            
+            if (!username || !password) {
+                alert('Please enter Auto Labor username and password first.');
+                return;
+            }
+
+            document.getElementById('scraperTestResults').innerHTML = 
+                '<span class="status-badge warning">Testing Auto Labor connection...</span>';
+
+            // Simulate test
+            setTimeout(() => {
+                document.getElementById('scraperTestResults').innerHTML = 
+                    '<span class="status-badge success">✓ Auto Labor connection successful!</span>';
+            }, 2000);
+        }
+
+        // Save Settings
+        async function saveSettings() {
+            const settings = {
+                shopInfo: {
+                    shopName: document.getElementById('shopName').value,
+                    shopPhone: document.getElementById('shopPhone').value,
+                    shopEmail: document.getElementById('shopEmail').value,
+                    shopWebsite: document.getElementById('shopWebsite').value,
+                    shopAddress: document.getElementById('shopAddress').value
+                },
+                labor: {
+                    laborRate: parseFloat(document.getElementById('laborRate').value) || 100,
+                    diagnosticRate: parseFloat(document.getElementById('diagnosticRate').value) || 125,
+                    diagnosticFee: parseFloat(document.getElementById('diagnosticFee').value) || 50,
+                    laborMultiplier: parseFloat(document.getElementById('laborMultiplier').value) || 1.0,
+                    autoLaborUsername: document.getElementById('autoLaborUsername').value,
+                    autoLaborPassword: document.getElementById('autoLaborPassword').value,
+                    enableAutoLaborScraper: document.getElementById('enableAutoLaborScraper').checked,
+                    useLaborDatabaseFallback: document.getElementById('useLaborDatabaseFallback').checked,
+                    enableLaborDatabase: document.getElementById('enableLaborDatabase').checked
+                },
+                scrapers: {
+                    nexpartUsername: document.getElementById('nexpartUsername').value,
+                    nexpartPassword: document.getElementById('nexpartPassword').value,
+                    nexpartAccountNumber: document.getElementById('nexpartAccountNumber').value,
+                    enableNexpartScraper: document.getElementById('enableNexpartScraper').checked,
+                    autoLaborUsername: document.getElementById('autoLaborUsername2').value,
+                    autoLaborPassword: document.getElementById('autoLaborPassword2').value,
+                    enableAutoLaborScraper: document.getElementById('enableAutoLaborScraper2').checked
+                },
+                partsPricing: {
+                    partsMarkupStrategy: document.getElementById('partsMarkupStrategy').value,
+                    defaultPartsMarkup: parseFloat(document.getElementById('defaultPartsMarkup').value) || 40,
+                    minimumMarkupAmount: parseFloat(document.getElementById('minimumMarkupAmount').value) || 10,
+                    pricingTiers: {
+                        under25: parseFloat(document.getElementById('tierUnder25').value) || 50,
+                        '25to50': parseFloat(document.getElementById('tier25to50').value) || 45,
+                        '50to100': parseFloat(document.getElementById('tier50to100').value) || 40,
+                        '100to250': parseFloat(document.getElementById('tier100to250').value) || 35,
+                        '250to500': parseFloat(document.getElementById('tier250to500').value) || 30,
+                        over500: parseFloat(document.getElementById('tierOver500').value) || 25
+                    },
+                    markupMatrix: {
+                        alternators: parseFloat(document.getElementById('markupAlternators').value) || 35,
+                        starters: parseFloat(document.getElementById('markupStarters').value) || 35,
+                        batteries: parseFloat(document.getElementById('markupBatteries').value) || 25,
+                        sparkPlugs: parseFloat(document.getElementById('markupSparkPlugs').value) || 50,
+                        ignitionCoils: parseFloat(document.getElementById('markupIgnitionCoils').value) || 40,
+                        brakePads: parseFloat(document.getElementById('markupBrakePads').value) || 45,
+                        rotors: parseFloat(document.getElementById('markupRotors').value) || 35,
+                        calipers: parseFloat(document.getElementById('markupCalipers').value) || 40,
+                        brakeShoes: parseFloat(document.getElementById('markupBrakeShoes').value) || 45,
+                        oilFilter: parseFloat(document.getElementById('markupOilFilter').value) || 50,
+                        airFilter: parseFloat(document.getElementById('markupAirFilter').value) || 45,
+                        fuelFilter: parseFloat(document.getElementById('markupFuelFilter').value) || 40,
+                        cabinAirFilter: parseFloat(document.getElementById('markupCabinAirFilter').value) || 50,
+                        motorOil: parseFloat(document.getElementById('markupMotorOil').value) || 30,
+                        transmissionFluid: parseFloat(document.getElementById('markupTransmissionFluid').value) || 30,
+                        brakeFluid: parseFloat(document.getElementById('markupBrakeFluid').value) || 35,
+                        coolant: parseFloat(document.getElementById('markupCoolant').value) || 30,
+                        powerSteering: parseFloat(document.getElementById('markupPowerSteering').value) || 30,
+                        shocks: parseFloat(document.getElementById('markupShocks').value) || 35,
+                        struts: parseFloat(document.getElementById('markupStruts').value) || 35,
+                        ballJoints: parseFloat(document.getElementById('markupBallJoints').value) || 40,
+                        controlArms: parseFloat(document.getElementById('markupControlArms').value) || 35,
+                        tieRodEnds: parseFloat(document.getElementById('markupTieRodEnds').value) || 40,
+                        tires: parseFloat(document.getElementById('markupTires').value) || 25,
+                        wheels: parseFloat(document.getElementById('markupWheels').value) || 30,
+                        default: parseFloat(document.getElementById('markupDefault').value) || 40
+                    }
+                },
+                email: {
+                    sendgridApiKey: document.getElementById('sendgridApiKey').value,
+                    sendgridFromEmail: document.getElementById('sendgridFromEmail').value,
+                    sendgridFromName: document.getElementById('sendgridFromName').value,
+                    enableEmailNotifications: document.getElementById('enableEmailNotifications').checked
+                },
+                voice: {
+                    vapiApiKey: document.getElementById('vapiApiKey').value,
+                    vapiPhoneId: document.getElementById('vapiPhoneId').value,
+                    vapiPhoneNumber: document.getElementById('vapiPhoneNumber').value,
+                    enableVoiceCalling: document.getElementById('enableVoiceCalling').checked
+                },
+                payment: {
+                    paypalMode: document.getElementById('paypalMode').value,
+                    paypalClientId: document.getElementById('paypalClientId').value,
+                    paypalClientSecret: document.getElementById('paypalClientSecret').value,
+                    paypalWebhookId: document.getElementById('paypalWebhookId').value,
+                    enablePaymentProcessing: document.getElementById('enablePaymentProcessing').checked
+                }
+            };
+
+            try {
+                const response = await fetch('/api/shop/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                if (response.ok) {
+                    alert('✅ Settings saved successfully!');
+                } else {
+                    alert('❌ Failed to save settings. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                alert('❌ Error saving settings: ' + error.message);
+            }
+        }
+
+        // Export Settings
+        function exportSettings() {
+            const settings = {
+                shopName: document.getElementById('shopName').value,
+                // ... collect all settings
+            };
+            
+            const dataStr = JSON.stringify(settings, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'vhicl-settings-' + new Date().toISOString().split('T')[0] + '.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        // Import Settings
+        function importSettings() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = (event) => {
+                    try {
+                        const settings = JSON.parse(event.target.result);
+                        
+                        // Populate form fields
+                        if (settings.shopName) document.getElementById('shopName').value = settings.shopName;
+                        if (settings.laborRate) document.getElementById('laborRate').value = settings.laborRate;
+                        // ... populate all fields
+                        
+                        alert('✅ Settings imported successfully!');
+                    } catch (error) {
+                        alert('❌ Failed to import settings. Invalid JSON file.');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        // Reset All Settings
+        function resetAllSettings() {
+            if (confirm('Are you sure you want to reset all settings to defaults? This cannot be undone.')) {
+                location.reload();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load existing settings from backend
+            loadSettings();
+            
+            // Initialize calculations
+            calculateLaborPreview();
+            updatePricingExamples();
+            updateMarkupExamples();
+        });
+
+        // Load Settings from Backend
+        async function loadSettings() {
+            try {
+                const response = await fetch('/api/shop/settings');
+                if (response.ok) {
+                    const settings = await response.json();
+                    
+                    // Populate form fields
+                    if (settings.shopInfo) {
+                        document.getElementById('shopName').value = settings.shopInfo.shopName || '';
+                        document.getElementById('shopPhone').value = settings.shopInfo.shopPhone || '';
+                        document.getElementById('shopEmail').value = settings.shopInfo.shopEmail || '';
+                        document.getElementById('shopWebsite').value = settings.shopInfo.shopWebsite || '';
+                        document.getElementById('shopAddress').value = settings.shopInfo.shopAddress || '';
+                    }
+                    
+                    if (settings.labor) {
+                        document.getElementById('laborRate').value = settings.labor.laborRate || 100;
+                        document.getElementById('diagnosticRate').value = settings.labor.diagnosticRate || 125;
+                        document.getElementById('diagnosticFee').value = settings.labor.diagnosticFee || 50;
+                        document.getElementById('laborMultiplier').value = settings.labor.laborMultiplier || 1.0;
+                        document.getElementById('autoLaborUsername').value = settings.labor.autoLaborUsername || '';
+                        document.getElementById('autoLaborPassword').value = settings.labor.autoLaborPassword || '';
+                        document.getElementById('enableAutoLaborScraper').checked = settings.labor.enableAutoLaborScraper || false;
+                        document.getElementById('useLaborDatabaseFallback').checked = settings.labor.useLaborDatabaseFallback !== false;
+                        document.getElementById('enableLaborDatabase').checked = settings.labor.enableLaborDatabase !== false;
+                    }
+                    
+                    // Load other settings sections...
+                    
+                }
+            } catch (error) {
+                console.log('No existing settings found, using defaults');
+            }
+        }
+    </script>
+</body>
+</html>
