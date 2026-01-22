@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Shop Settings - VHICL Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #1a202c;
+            font-size: 2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #00d4ff;
+            color: #0a2540;
+        }
+
+        .btn-primary:hover {
+            background: #00b8e6;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .settings-nav {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .settings-nav-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: #718096;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .settings-nav-btn:hover {
+            background: #f7fafc;
+        }
+
+        .settings-nav-btn.active {
+            background: #00d4ff;
+            color: #0a2540;
+        }
+
+        .settings-section {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .settings-section.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #1a202c;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-section {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-section h3 {
+            color: #1a202c;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .credentials-section {
+            background: #fff5f5;
+            border: 2px solid #fed7d7;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .credentials-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .credentials-header h3 {
+            color: #c53030;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toggle-switch input[type="checkbox"] {
+            width: 50px;
+            height: 26px;
+            cursor: pointer;
+        }
+
+        .toggle-switch label {
+            font-weight: 600;
+            color: #2d3748;
+            cursor: pointer;
+        }
+
+        .parts-matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .parts-matrix-table th,
+        .parts-matrix-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .parts-matrix-table th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .parts-matrix-table input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+        }
+
+        .parts-store-list {
+            margin-top: 1rem;
+        }
+
+        .parts-store-item {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .parts-store-info h4 {
+            color: #1a202c;
+            margin-bottom: 0.25rem;
+        }
+
+        .parts-store-info p {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .parts-store-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: #f7fafc;
+        }
+
+        .icon-btn.delete {
+            color: #c53030;
+            border-color: #fc8181;
+        }
+
+        .icon-btn.delete:hover {
+            background: #fff5f5;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #2f855a;
+            border: 1px solid #68d391;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #fc8181;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+        }
+
+        .loading i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-cog"></i> Complete Shop Settings</h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="exportSettings()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">
+                    <i class="fas fa-upload"></i> Import
+                </button>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importSettings(event)">
+                <button class="btn btn-primary" onclick="saveAllSettings()">
+                    <i class="fas fa-save"></i> Save All Settings
+                </button>
+            </div>
+        </div>
+
+        <div class="settings-nav">
+            <button class="settings-nav-btn active" onclick="showSection('shop-info')">
+                <i class="fas fa-store"></i> Shop Info
+            </button>
+            <button class="settings-nav-btn" onclick="showSection('labor')">
+                <i class="fas fa-wrench"></i> Labor
+            </button>
+            <button class="settings-nav-btn" onclick="showSection('parts')">
+                <i class="fas fa-car-parts"></i> Parts
+            </button>
+            <button class="settings-nav-btn" onclick="showSection('pricing')">
+                <i class="fas fa-dollar-sign"></i> Pricing
+            </button>
+            <button class="settings-nav-btn" onclick="showSection('email')">
+                <i class="fas fa-envelope"></i> Email
+            </button>
+            <button class="settings-nav-btn" onclick="showSection('voice')">
+                <i class="fas fa-phone"></i> Voice (VAPI)
+            </button>
+            <button class="settings-nav-btn" onclick="showSection('payment')">
+                <i class="fas fa-credit-card"></i> Payment (PayPal)
+            </button>
+            <button class="settings-nav-btn" onclick="showSection('parts-stores')">
+                <i class="fas fa-store"></i> Parts Stores
+            </button>
+            <button class="settings-nav-btn" onclick="showSection('scraper-credentials')">
+                <i class="fas fa-key"></i> Scraper Credentials
+            </button>
+            <button class="settings-nav-btn" onclick="showSection('quotes')">
+                <i class="fas fa-file-invoice"></i> Quotes & Invoices
+            </button>
+            <button class="settings-nav-btn" onclick="showSection('system')">
+                <i class="fas fa-cogs"></i> System
+            </button>
+        </div>
+
+        <!-- Shop Info Section -->
+        <div id="shop-info" class="settings-section active">
+            <h2 class="section-title"><i class="fas fa-store"></i> Shop Information</h2>
+            
+            <div class="form-section">
+                <h3>Basic Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Shop Name *</label>
+                        <input type="text" id="shopName" placeholder="My Auto Shop">
+                    </div>
+                    <div class="form-group">
+                        <label>Shop Phone *</label>
+                        <input type="tel" id="shopPhone" placeholder="(555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label>Shop Email *</label>
+                        <input type="email" id="shopEmail" placeholder="shop@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Shop Address</label>
+                        <input type="text" id="shopAddress" placeholder="123 Main St, City, State ZIP">
+                    </div>
+                    <div class="form-group">
+                        <label>Shop Website</label>
+                        <input type="url" id="shopWebsite" placeholder="https://myshop.com">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Business Hours</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Monday</label>
+                        <select id="mondayStatus">
+                            <option value="open">Open</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Monday Hours</label>
+                        <input type="text" id="mondayHours" placeholder="8:00 AM - 5:00 PM">
+                    </div>
+                    <div class="form-group">
+                        <label>Tuesday</label>
+                        <select id="tuesdayStatus">
+                            <option value="open">Open</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tuesday Hours</label>
+                        <input type="text" id="tuesdayHours" placeholder="8:00 AM - 5:00 PM">
+                    </div>
+                    <div class="form-group">
+                        <label>Wednesday</label>
+                        <select id="wednesdayStatus">
+                            <option value="open">Open</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Wednesday Hours</label>
+                        <input type="text" id="wednesdayHours" placeholder="8:00 AM - 5:00 PM">
+                    </div>
+                    <div class="form-group">
+                        <label>Thursday</label>
+                        <select id="thursdayStatus">
+                            <option value="open">Open</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Thursday Hours</label>
+                        <input type="text" id="thursdayHours" placeholder="8:00 AM - 5:00 PM">
+                    </div>
+                    <div class="form-group">
+                        <label>Friday</label>
+                        <select id="fridayStatus">
+                            <option value="open">Open</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Friday Hours</label>
+                        <input type="text" id="fridayHours" placeholder="8:00 AM - 5:00 PM">
+                    </div>
+                    <div class="form-group">
+                        <label>Saturday</label>
+                        <select id="saturdayStatus">
+                            <option value="open">Open</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Saturday Hours</label>
+                        <input type="text" id="saturdayHours" placeholder="9:00 AM - 2:00 PM">
+                    </div>
+                    <div class="form-group">
+                        <label>Sunday</label>
+                        <select id="sundayStatus">
+                            <option value="open">Open</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Sunday Hours</label>
+                        <input type="text" id="sundayHours" placeholder="Closed">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Labor Section -->
+        <div id="labor" class="settings-section">
+            <h2 class="section-title"><i class="fas fa-wrench"></i> Labor Configuration</h2>
+            
+            <div class="form-section">
+                <h3>Labor Rates</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Base Labor Rate ($/hour) *</label>
+                        <input type="number" id="laborRate" placeholder="100.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Diagnostic Rate ($/hour)</label>
+                        <input type="number" id="diagnosticRate" placeholder="125.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Diagnostic Fee ($)</label>
+                        <input type="number" id="diagnosticFee" placeholder="50.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Labor Multiplier</label>
+                        <input type="number" id="laborMultiplier" placeholder="1.0" step="0.1" min="0.5" max="3.0">
+                    </div>
+                    <div class="form-group">
+                        <label>Labor Time Multiplier</label>
+                        <input type="number" id="laborTimeMultiplier" placeholder="1.0" step="0.1" min="0.5" max="3.0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="credentials-section">
+                <div class="credentials-header">
+                    <h3><i class="fas fa-key"></i> Auto Labor Experts Credentials</h3>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="autoLaborEnabled">
+                        <label for="autoLaborEnabled">Enabled</label>
+                    </div>
+                </div>
+                <div id="autoLaborCredentials" style="display: none;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Username *</label>
+                            <input type="text" id="autoLaborUsername" placeholder="your_username">
+                        </div>
+                        <div class="form-group">
+                            <label>Password *</label>
+                            <input type="password" id="autoLaborPassword" placeholder="your_password">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parts Section -->
+        <div id="parts" class="settings-section">
+            <h2 class="section-title"><i class="fas fa-car-parts"></i> Parts Configuration</h2>
+            
+            <div class="form-section">
+                <h3>Parts Markup Strategy</h3>
+                <div class="form-group">
+                    <label>Markup Strategy</label>
+                    <select id="partsMarkupStrategy">
+                        <option value="percentage">Percentage (same markup for all parts)</option>
+                        <option value="matrix">Matrix (markup by part category)</option>
+                        <option value="tiers">Tiers (markup by price range)</option>
+                    </select>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Default Markup (%) *</label>
+                        <input type="number" id="defaultMarkup" placeholder="30.00" step="1" min="0" max="100">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Parts Pricing Tiers</h3>
+                <table class="parts-matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Price Range ($)</th>
+                            <th>Markup (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="partsPricingTiers">
+                        <tr>
+                            <td>$0 - $10</td>
+                            <td><input type="number" id="tier1" placeholder="50" step="1"></td>
+                        </tr>
+                        <tr>
+                            <td>$10 - $50</td>
+                            <td><input type="number" id="tier2" placeholder="40" step="1"></td>
+                        </tr>
+                        <tr>
+                            <td>$50 - $100</td>
+                            <td><input type="number" id="tier3" placeholder="35" step="1"></td>
+                        </tr>
+                        <tr>
+                            <td>$100 - $250</td>
+                            <td><input type="number" id="tier4" placeholder="30" step="1"></td>
+                        </tr>
+                        <tr>
+                            <td>$250 - $500</td>
+                            <td><input type="number" id="tier5" placeholder="25" step="1"></td>
+                        </tr>
+                        <tr>
+                            <td>$500+</td>
+                            <td><input type="number" id="tier6" placeholder="20" step="1"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-section">
+                <h3>Parts Markup Matrix (by Category)</h3>
+                <table class="parts-matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Markup (%)</th>
+                            <th>Min (%)</th>
+                            <th>Max (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="partsMarkupMatrix">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pricing Section -->
+        <div id="pricing" class="settings-section">
+            <h2 class="section-title"><i class="fas fa-dollar-sign"></i> Pricing Configuration</h2>
+            
+            <div class="form-section">
+                <h3>Tax & Fees</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tax Rate (%) *</label>
+                        <input type="number" id="taxRate" placeholder="8" step="0.1" min="0" max="15">
+                    </div>
+                    <div class="form-group">
+                        <label>Shop Supplies Fee ($)</label>
+                        <input type="number" id="shopSuppliesFee" placeholder="2.50" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Disposal Fee ($)</label>
+                        <input type="number" id="disposalFee" placeholder="5.00" step="0.01">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Section -->
+        <div id="email" class="settings-section">
+            <h2 class="section-title"><i class="fas fa-envelope"></i> Email Configuration (SendGrid)</h2>
+            
+            <div class="credentials-section">
+                <div class="credentials-header">
+                    <h3><i class="fas fa-key"></i> SendGrid Credentials</h3>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="sendgridEnabled">
+                        <label for="sendgridEnabled">Enabled</label>
+                    </div>
+                </div>
+                <div id="sendgridCredentials" style="display: none;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>API Key *</label>
+                            <input type="password" id="sendgridApiKey" placeholder="SG.xxxxxx">
+                        </div>
+                        <div class="form-group">
+                            <label>From Email *</label>
+                            <input type="email" id="sendgridFromEmail" placeholder="noreply@myshop.com">
+                        </div>
+                        <div class="form-group">
+                            <label>From Name *</label>
+                            <input type="text" id="sendgridFromName" placeholder="VHICL Pro - My Shop">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Section -->
+        <div id="voice" class="settings-section">
+            <h2 class="section-title"><i class="fas fa-phone"></i> Voice Assistant (VAPI)</h2>
+            
+            <div class="credentials-section">
+                <div class="credentials-header">
+                    <h3><i class="fas fa-key"></i> VAPI Credentials</h3>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="vapiEnabled">
+                        <label for="vapiEnabled">Enabled</label>
+                    </div>
+                </div>
+                <div id="vapiCredentials" style="display: none;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>API Key *</label>
+                            <input type="password" id="vapiKey" placeholder="vapi_xxxxxx">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone ID *</label>
+                            <input type="text" id="vapiPhoneId" placeholder="phone_xxxxxx">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" id="vapiPhoneNumber" placeholder="+15551234567">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Section -->
+        <div id="payment" class="settings-section">
+            <h2 class="section-title"><i class="fas fa-credit-card"></i> Payment Processing (PayPal)</h2>
+            
+            <div class="credentials-section">
+                <div class="credentials-header">
+                    <h3><i class="fas fa-key"></i> PayPal Credentials</h3>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="paypalEnabled">
+                        <label for="paypalEnabled">Enabled</label>
+                    </div>
+                </div>
+                <div id="paypalCredentials" style="display: none;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Mode</label>
+                            <select id="paypalMode">
+                                <option value="sandbox">Sandbox (Testing)</option>
+                                <option value="live">Live (Production)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Client ID *</label>
+                            <input type="text" id="paypalClientId" placeholder="your_client_id">
+                        </div>
+                        <div class="form-group">
+                            <label>Client Secret *</label>
+                            <input type="password" id="paypalClientSecret" placeholder="your_client_secret">
+                        </div>
+                        <div class="form-group">
+                            <label>Webhook ID</label>
+                            <input type="text" id="paypalWebHookId" placeholder="webhook_xxxxxx">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parts Stores Section -->
+        <div id="parts-stores" class="settings-section">
+            <h2 class="section-title"><i class="fas fa-store"></i> Parts Store Directory</h2>
+            
+            <div class="form-section">
+                <h3>Add Parts Store</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Store Name *</label>
+                        <input type="text" id="newStoreName" placeholder="AutoZone Downtown">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone *</label>
+                        <input type="tel" id="newStorePhone" placeholder="+15551112222">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="newStoreEmail" placeholder="store@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" id="newStoreAddress" placeholder="123 Commerce St">
+                    </div>
+                    <div class="form-group">
+                        <label>Priority (1 = highest)</label>
+                        <input type="number" id="newStorePriority" placeholder="1" min="1" max="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Discount Rate (%)</label>
+                        <input type="number" id="newStoreDiscount" placeholder="5" step="0.1" min="0" max="20">
+                    </div>
+                    <div class="form-group">
+                        <label>Delivery Time</label>
+                        <input type="text" id="newStoreDelivery" placeholder="same day">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Notes</label>
+                        <textarea id="newStoreNotes" placeholder="Best pricing for brakes"></textarea>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addPartsStore()">
+                    <i class="fas fa-plus"></i> Add Store
+                </button>
+            </div>
+
+            <div class="form-section">
+                <h3>Your Parts Stores</h3>
+                <div id="partsStoresList" class="parts-store-list">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>Loading parts stores...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scraper Credentials Section -->
+        <div id="scraper-credentials" class="settings-section">
+            <h2 class="section-title"><i class="fas fa-key"></i> Scraper Credentials</h2>
+            
+            <div class="credentials-section">
+                <div class="credentials-header">
+                    <h3><i class="fas fa-key"></i> Nexpart Credentials</h3>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="nexpartEnabled">
+                        <label for="nexpartEnabled">Enabled</label>
+                    </div>
+                </div>
+                <div id="nexpartCredentials" style="display: none;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Username *</label>
+                            <input type="text" id="nexpartUsername" placeholder="your_nexpart_username">
+                        </div>
+                        <div class="form-group">
+                            <label>Password *</label>
+                            <input type="password" id="nexpartPassword" placeholder="your_nexpart_password">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quotes & Invoices Section -->
+        <div id="quotes" class="settings-section">
+            <h2 class="section-title"><i class="fas fa-file-invoice"></i> Quotes & Invoices</h2>
+            
+            <div class="form-section">
+                <h3>Quote Settings</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="autoIncludeDiagnosticFee" checked>
+                            <label for="autoIncludeDiagnosticFee">Auto-include Diagnostic Fee</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="autoIncludeShopSuppliesFee" checked>
+                            <label for="autoIncludeShopSuppliesFee">Auto-include Shop Supplies Fee</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="autoIncludeDisposalFee" checked>
+                            <label for="autoIncludeDisposalFee">Auto-include Disposal Fee</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Quote Expiration (days)</label>
+                        <input type="number" id="quoteExpirationDays" placeholder="30" min="1" max="90">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Invoice Settings</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="autoGenerateInvoice" checked>
+                            <label for="autoGenerateInvoice">Auto-generate Invoice</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Invoice Number Prefix</label>
+                        <input type="text" id="invoiceNumberPrefix" placeholder="INV-">
+                    </div>
+                    <div class="form-group">
+                        <label>Invoice Number Start</label>
+                        <input type="number" id="invoiceNumberStart" placeholder="1001">
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Terms</label>
+                        <select id="paymentTerms">
+                            <option value="Net 15">Net 15</option>
+                            <option value="Net 30">Net 30</option>
+                            <option value="Net 60">Net 60</option>
+                            <option value="Due on Receipt">Due on Receipt</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Late Fee (%)</label>
+                        <input type="number" id="lateFeePercentage" placeholder="5" step="0.1" min="0" max="20">
+                    </div>
+                    <div class="form-group">
+                        <label>Late Fee Days</label>
+                        <input type="number" id="lateFeeDays" placeholder="30" min="1" max="90">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Section -->
+        <div id="system" class="settings-section">
+            <h2 class="section-title"><i class="fas fa-cogs"></i> System Configuration</h2>
+            
+            <div class="form-section">
+                <h3>General Settings</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Timezone</label>
+                        <select id="timezone">
+                            <option value="America/New_York">Eastern Time (ET)</option>
+                            <option value="America/Chicago">Central Time (CT)</option>
+                            <option value="America/Denver">Mountain Time (MT)</option>
+                            <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date Format</label>
+                        <select id="dateFormat">
+                            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Time Format</label>
+                        <select id="timeFormat">
+                            <option value="12h">12-hour (AM/PM)</option>
+                            <option value="24h">24-hour</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Currency</label>
+                        <select id="currency">
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="CAD">CAD ($)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Feature Flags</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="partsScraping">
+                            <label for="partsScraping">Parts Scraping (Nexpart)</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="laborScraping">
+                            <label for="laborScraping">Labor Scraping (Auto Labor)</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="voiceCalling">
+                            <label for="voiceCalling">Voice Calling (VAPI)</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="emailNotifications">
+                            <label for="emailNotifications">Email Notifications</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="paymentProcessing">
+                            <label for="paymentProcessing">Payment Processing (PayPal)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_BASE = window.location.origin + '/api';
+
+        // Current settings
+        let currentSettings = null;
+
+        // Default parts markup matrix
+        const defaultPartsMarkupMatrix = {
+            'alternators': { markup: 35.00, minMarkup: 20.00, maxMarkup: 50.00 },
+            'starters': { markup: 35.00, minMarkup: 20.00, maxMarkup: 50.00 },
+            'batteries': { markup: 25.00, minMarkup: 15.00, maxMarkup: 40.00 },
+            'spark plugs': { markup: 40.00, minMarkup: 25.00, maxMarkup: 60.00 },
+            'ignition coils': { markup: 40.00, minMarkup: 30.00, maxMarkup: 55.00 },
+            'brake pads': { markup: 30.00, minMarkup: 20.00, maxMarkup: 45.00 },
+            'brake rotors': { markup: 30.00, minMarkup: 20.00, maxMarkup: 45.00 },
+            'brake calipers': { markup: 35.00, minMarkup: 25.00, maxMarkup: 50.00 },
+            'brake shoes': { markup: 30.00, minMarkup: 20.00, maxMarkup: 45.00 },
+            'oil filter': { markup: 35.00, minMarkup: 25.00, maxMarkup: 50.00 },
+            'air filter': { markup: 40.00, minMarkup: 30.00, maxMarkup: 55.00 },
+            'fuel filter': { markup: 35.00, minMarkup: 25.00, maxMarkup: 50.00 },
+            'cabin air filter': { markup: 40.00, minMarkup: 30.00, maxMarkup: 55.00 },
+            'motor oil': { markup: 25.00, minMarkup: 15.00, maxMarkup: 40.00 },
+            'transmission fluid': { markup: 30.00, minMarkup: 20.00, maxMarkup: 45.00 },
+            'brake fluid': { markup: 30.00, minMarkup: 20.00, maxMarkup: 45.00 },
+            'coolant': { markup: 30.00, minMarkup: 20.00, maxMarkup: 45.00 },
+            'power steering fluid': { markup: 30.00, minMarkup: 20.00, maxMarkup: 45.00 },
+            'shocks': { markup: 35.00, minMarkup: 25.00, maxMarkup: 50.00 },
+            'struts': { markup: 35.00, minMarkup: 25.00, maxMarkup: 50.00 },
+            'ball joints': { markup: 40.00, minMarkup: 30.00, maxMarkup: 55.00 },
+            'control arms': { markup: 35.00, minMarkup: 25.00, maxMarkup: 50.00 },
+            'tie rod ends': { markup: 35.00, minMarkup: 25.00, maxMarkup: 50.00 },
+            'tires': { markup: 20.00, minMarkup: 15.00, maxMarkup: 30.00 },
+            'wheels': { markup: 25.00, minMarkup: 20.00, maxMarkup: 40.00 },
+            'default': { markup: 30.00, minMarkup: 20.00, maxMarkup: 45.00 }
+        };
+
+        // Load settings on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            populatePartsMarkupMatrix();
+            setupToggleListeners();
+        });
+
+        // Show settings section
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.settings-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.settings-nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.closest('.settings-nav-btn').classList.add('active');
+        }
+
+        // Load settings from backend
+        async function loadSettings() {
+            try {
+                const response = await fetch(`${API_BASE}/shop/settings`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentSettings = data;
+                    populateForm(data);
+                } else {
+                    showAlert('Error loading settings', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                showAlert('Error loading settings', 'error');
+            }
+        }
+
+        // Populate form with settings
+        function populateForm(settings) {
+            // Shop Info
+            document.getElementById('shopName').value = settings.shopName || '';
+            document.getElementById('shopPhone').value = settings.shopPhone || '';
+            document.getElementById('shopEmail').value = settings.shopEmail || '';
+            document.getElementById('shopAddress').value = settings.shopAddress || '';
+            document.getElementById('shopWebsite').value = settings.shopWebsite || '';
+
+            // Labor
+            document.getElementById('laborRate').value = settings.laborRate || '';
+            document.getElementById('diagnosticRate').value = settings.diagnosticRate || '';
+            document.getElementById('diagnosticFee').value = settings.diagnosticFee || '';
+            document.getElementById('laborMultiplier').value = settings.laborMultiplier || '';
+            document.getElementById('laborTimeMultiplier').value = settings.laborTimeMultiplier || '';
+
+            // Auto Labor
+            document.getElementById('autoLaborEnabled').checked = settings.autoLabor?.enabled || false;
+            document.getElementById('autoLaborUsername').value = settings.autoLabor?.username || '';
+            document.getElementById('autoLaborPassword').value = settings.autoLabor?.password || '';
+
+            // Parts
+            document.getElementById('partsMarkupStrategy').value = settings.partsMarkupStrategy || 'percentage';
+            document.getElementById('defaultMarkup').value = settings.defaultMarkup || '';
+
+            // Parts Pricing Tiers
+            if (settings.partsPricingTiers && settings.partsPricingTiers.length >= 6) {
+                document.getElementById('tier1').value = settings.partsPricingTiers[0].markup;
+                document.getElementById('tier2').value = settings.partsPricingTiers[1].markup;
+                document.getElementById('tier3').value = settings.partsPricingTiers[2].markup;
+                document.getElementById('tier4').value = settings.partsPricingTiers[3].markup;
+                document.getElementById('tier5').value = settings.partsPricingTiers[4].markup;
+                document.getElementById('tier6').value = settings.partsPricingTiers[5].markup;
+            }
+
+            // Parts Markup Matrix
+            if (settings.partsMarkupMatrix) {
+                updatePartsMarkupMatrixForm(settings.partsMarkupMatrix);
+            }
+
+            // Pricing
+            document.getElementById('taxRate').value = (settings.taxRate * 100) || '';
+            document.getElementById('shopSuppliesFee').value = settings.shopSuppliesFee || '';
+            document.getElementById('disposalFee').value = settings.disposalFee || '';
+
+            // SendGrid
+            document.getElementById('sendgridEnabled').checked = settings.sendgrid?.enabled || false;
+            document.getElementById('sendgridApiKey').value = settings.sendgrid?.apiKey || '';
+            document.getElementById('sendgridFromEmail').value = settings.sendgrid?.fromEmail || '';
+            document.getElementById('sendgridFromName').value = settings.sendgrid?.fromName || '';
+
+            // VAPI
+            document.getElementById('vapiEnabled').checked = settings.vapi?.enabled || false;
+            document.getElementById('vapiKey').value = settings.vapi?.apiKey || '';
+            document.getElementById('vapiPhoneId').value = settings.vapi?.phoneId || '';
+            document.getElementById('vapiPhoneNumber').value = settings.vapi?.phoneNumber || '';
+
+            // PayPal
+            document.getElementById('paypalEnabled').checked = settings.paypal?.enabled || false;
+            document.getElementById('paypalMode').value = settings.paypal?.mode || 'sandbox';
+            document.getElementById('paypalClientId').value = settings.paypal?.clientId || '';
+            document.getElementById('paypalClientSecret').value = settings.paypal?.clientSecret || '';
+            document.getElementById('paypalWebHookId').value = settings.paypal?.webHookId || '';
+
+            // Nexpart
+            document.getElementById('nexpartEnabled').checked = settings.nexpart?.enabled || false;
+            document.getElementById('nexpartUsername').value = settings.nexpart?.username || '';
+            document.getElementById('nexpartPassword').value = settings.nexpart?.password || '';
+
+            // Quotes
+            document.getElementById('autoIncludeDiagnosticFee').checked = settings.quote?.autoIncludeDiagnosticFee !== false;
+            document.getElementById('autoIncludeShopSuppliesFee').checked = settings.quote?.autoIncludeShopSuppliesFee !== false;
+            document.getElementById('autoIncludeDisposalFee').checked = settings.quote?.autoIncludeDisposalFee !== false;
+            document.getElementById('quoteExpirationDays').value = settings.quote?.quoteExpirationDays || '';
+
+            // Invoices
+            document.getElementById('autoGenerateInvoice').checked = settings.invoice?.autoGenerateInvoice !== false;
+            document.getElementById('invoiceNumberPrefix').value = settings.invoice?.invoiceNumberPrefix || '';
+            document.getElementById('invoiceNumberStart').value = settings.invoice?.invoiceNumberStart || '';
+            document.getElementById('paymentTerms').value = settings.invoice?.paymentTerms || 'Net 30';
+            document.getElementById('lateFeePercentage').value = settings.invoice?.lateFeePercentage || '';
+            document.getElementById('lateFeeDays').value = settings.invoice?.lateFeeDays || '';
+
+            // System
+            document.getElementById('timezone').value = settings.system?.timezone || 'America/New_York';
+            document.getElementById('dateFormat').value = settings.system?.dateFormat || 'MM/DD/YYYY';
+            document.getElementById('timeFormat').value = settings.system?.timeFormat || '12h';
+            document.getElementById('currency').value = settings.system?.currency || 'USD';
+
+            // Features
+            document.getElementById('partsScraping').checked = settings.features?.partsScraping || false;
+            document.getElementById('laborScraping').checked = settings.features?.laborScraping || false;
+            document.getElementById('voiceCalling').checked = settings.features?.voiceCalling || false;
+            document.getElementById('emailNotifications').checked = settings.features?.emailNotifications || false;
+            document.getElementById('paymentProcessing').checked = settings.features?.paymentProcessing || false;
+
+            // Parts Stores
+            renderPartsStores(settings.partsStores || []);
+
+            // Update toggle visibility
+            updateToggleVisibility();
+        }
+
+        // Populate parts markup matrix table
+        function populatePartsMarkupMatrix() {
+            const tbody = document.getElementById('partsMarkupMatrix');
+            tbody.innerHTML = '';
+
+            for (const [category, config] of Object.entries(defaultPartsMarkupMatrix)) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${category.charAt(0).toUpperCase() + category.slice(1)}</td>
+                    <td><input type="number" class="markup-input" data-category="${category}" value="${config.markup}" step="1" min="0" max="100"></td>
+                    <td><input type="number" class="min-markup-input" data-category="${category}" value="${config.minMarkup}" step="1" min="0" max="100"></td>
+                    <td><input type="number" class="max-markup-input" data-category="${category}" value="${config.maxMarkup}" step="1" min="0" max="100"></td>
+                `;
+                tbody.appendChild(row);
+            }
+        }
+
+        // Update parts markup matrix form
+        function updatePartsMarkupMatrixForm(matrix) {
+            document.querySelectorAll('.markup-input').forEach(input => {
+                const category = input.dataset.category;
+                if (matrix[category]) {
+                    input.value = matrix[category].markup;
+                }
+            });
+
+            document.querySelectorAll('.min-markup-input').forEach(input => {
+                const category = input.dataset.category;
+                if (matrix[category]) {
+                    input.value = matrix[category].minMarkup;
+                }
+            });
+
+            document.querySelectorAll('.max-markup-input').forEach(input => {
+                const category = input.dataset.category;
+                if (matrix[category]) {
+                    input.value = matrix[category].maxMarkup;
+                }
+            });
+        }
+
+        // Setup toggle listeners
+        function setupToggleListeners() {
+            // Auto Labor
+            document.getElementById('autoLaborEnabled').addEventListener('change', function() {
+                document.getElementById('autoLaborCredentials').style.display = this.checked ? 'block' : 'none';
+            });
+
+            // SendGrid
+            document.getElementById('sendgridEnabled').addEventListener('change', function() {
+                document.getElementById('sendgridCredentials').style.display = this.checked ? 'block' : 'none';
+            });
+
+            // VAPI
+            document.getElementById('vapiEnabled').addEventListener('change', function() {
+                document.getElementById('vapiCredentials').style.display = this.checked ? 'block' : 'none';
+            });
+
+            // PayPal
+            document.getElementById('paypalEnabled').addEventListener('change', function() {
+                document.getElementById('paypalCredentials').style.display = this.checked ? 'block' : 'none';
+            });
+
+            // Nexpart
+            document.getElementById('nexpartEnabled').addEventListener('change', function() {
+                document.getElementById('nexpartCredentials').style.display = this.checked ? 'block' : 'none';
+            });
+        }
+
+        // Update toggle visibility based on checkbox state
+        function updateToggleVisibility() {
+            if (document.getElementById('autoLaborEnabled').checked) {
+                document.getElementById('autoLaborCredentials').style.display = 'block';
+            }
+            if (document.getElementById('sendgridEnabled').checked) {
+                document.getElementById('sendgridCredentials').style.display = 'block';
+            }
+            if (document.getElementById('vapiEnabled').checked) {
+                document.getElementById('vapiCredentials').style.display = 'block';
+            }
+            if (document.getElementById('paypalEnabled').checked) {
+                document.getElementById('paypalCredentials').style.display = 'block';
+            }
+            if (document.getElementById('nexpartEnabled').checked) {
+                document.getElementById('nexpartCredentials').style.display = 'block';
+            }
+        }
+
+        // Save all settings
+        async function saveAllSettings() {
+            try {
+                const settings = collectFormData();
+                
+                const response = await fetch(`${API_BASE}/shop/settings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settings)
+                });
+
+                if (response.ok) {
+                    showAlert('Settings saved successfully!', 'success');
+                } else {
+                    showAlert('Error saving settings', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showAlert('Error saving settings', 'error');
+            }
+        }
+
+        // Collect form data
+        function collectFormData() {
+            const settings = {
+                // Shop Info
+                shopName: document.getElementById('shopName').value,
+                shopPhone: document.getElementById('shopPhone').value,
+                shopEmail: document.getElementById('shopEmail').value,
+                shopAddress: document.getElementById('shopAddress').value,
+                shopWebsite: document.getElementById('shopWebsite').value,
+
+                // Labor
+                laborRate: parseFloat(document.getElementById('laborRate').value) || 0,
+                diagnosticRate: parseFloat(document.getElementById('diagnosticRate').value) || 0,
+                diagnosticFee: parseFloat(document.getElementById('diagnosticFee').value) || 0,
+                laborMultiplier: parseFloat(document.getElementById('laborMultiplier').value) || 1.0,
+                laborTimeMultiplier: parseFloat(document.getElementById('laborTimeMultiplier').value) || 1.0,
+
+                // Auto Labor
+                autoLabor: {
+                    enabled: document.getElementById('autoLaborEnabled').checked,
+                    username: document.getElementById('autoLaborUsername').value,
+                    password: document.getElementById('autoLaborPassword').value
+                },
+
+                // Parts
+                partsMarkupStrategy: document.getElementById('partsMarkupStrategy').value,
+                defaultMarkup: parseFloat(document.getElementById('defaultMarkup').value) || 30.00,
+                partsPricingTiers: [
+                    { minPrice: 0, maxPrice: 10, markup: parseFloat(document.getElementById('tier1').value) || 50.00 },
+                    { minPrice: 10, maxPrice: 50, markup: parseFloat(document.getElementById('tier2').value) || 40.00 },
+                    { minPrice: 50, maxPrice: 100, markup: parseFloat(document.getElementById('tier3').value) || 35.00 },
+                    { minPrice: 100, maxPrice: 250, markup: parseFloat(document.getElementById('tier4').value) || 30.00 },
+                    { minPrice: 250, maxPrice: 500, markup: parseFloat(document.getElementById('tier5').value) || 25.00 },
+                    { minPrice: 500, maxPrice: 9999, markup: parseFloat(document.getElementById('tier6').value) || 20.00 }
+                ],
+                partsMarkupMatrix: collectPartsMarkupMatrix(),
+
+                // Pricing
+                taxRate: parseFloat(document.getElementById('taxRate').value) / 100 || 0.08,
+                shopSuppliesFee: parseFloat(document.getElementById('shopSuppliesFee').value) || 0,
+                disposalFee: parseFloat(document.getElementById('disposalFee').value) || 0,
+
+                // SendGrid
+                sendgrid: {
+                    enabled: document.getElementById('sendgridEnabled').checked,
+                    apiKey: document.getElementById('sendgridApiKey').value,
+                    fromEmail: document.getElementById('sendgridFromEmail').value,
+                    fromName: document.getElementById('sendgridFromName').value
+                },
+
+                // VAPI
+                vapi: {
+                    enabled: document.getElementById('vapiEnabled').checked,
+                    apiKey: document.getElementById('vapiKey').value,
+                    phoneId: document.getElementById('vapiPhoneId').value,
+                    phoneNumber: document.getElementById('vapiPhoneNumber').value
+                },
+
+                // PayPal
+                paypal: {
+                    enabled: document.getElementById('paypalEnabled').checked,
+                    mode: document.getElementById('paypalMode').value,
+                    clientId: document.getElementById('paypalClientId').value,
+                    clientSecret: document.getElementById('paypalClientSecret').value,
+                    webHookId: document.getElementById('paypalWebHookId').value
+                },
+
+                // Nexpart
+                nexpart: {
+                    enabled: document.getElementById('nexpartEnabled').checked,
+                    username: document.getElementById('nexpartUsername').value,
+                    password: document.getElementById('nexpartPassword').value
+                },
+
+                // Quotes
+                quote: {
+                    autoIncludeDiagnosticFee: document.getElementById('autoIncludeDiagnosticFee').checked,
+                    autoIncludeShopSuppliesFee: document.getElementById('autoIncludeShopSuppliesFee').checked,
+                    autoIncludeDisposalFee: document.getElementById('autoIncludeDisposalFee').checked,
+                    quoteExpirationDays: parseInt(document.getElementById('quoteExpirationDays').value) || 30,
+                    requireCustomerApproval: false
+                },
+
+                // Invoices
+                invoice: {
+                    autoGenerateInvoice: document.getElementById('autoGenerateInvoice').checked,
+                    invoiceNumberPrefix: document.getElementById('invoiceNumberPrefix').value || 'INV-',
+                    invoiceNumberStart: parseInt(document.getElementById('invoiceNumberStart').value) || 1001,
+                    paymentTerms: document.getElementById('paymentTerms').value || 'Net 30',
+                    lateFeePercentage: parseFloat(document.getElementById('lateFeePercentage').value) || 5.00,
+                    lateFeeDays: parseInt(document.getElementById('lateFeeDays').value) || 30
+                },
+
+                // System
+                system: {
+                    timezone: document.getElementById('timezone').value,
+                    dateFormat: document.getElementById('dateFormat').value,
+                    timeFormat: document.getElementById('timeFormat').value,
+                    currency: document.getElementById('currency').value,
+                    language: 'en'
+                },
+
+                // Features
+                features: {
+                    partsScraping: document.getElementById('partsScraping').checked,
+                    laborScraping: document.getElementById('laborScraping').checked,
+                    voiceCalling: document.getElementById('voiceCalling').checked,
+                    emailNotifications: document.getElementById('emailNotifications').checked,
+                    paymentProcessing: document.getElementById('paymentProcessing').checked
+                },
+
+                // Parts Stores
+                partsStores: currentSettings?.partsStores || []
+            };
+
+            return settings;
+        }
+
+        // Collect parts markup matrix from form
+        function collectPartsMarkupMatrix() {
+            const matrix = {};
+
+            document.querySelectorAll('.markup-input').forEach(input => {
+                const category = input.dataset.category;
+                const minInput = document.querySelector(`.min-markup-input[data-category="${category}"]`);
+                const maxInput = document.querySelector(`.max-markup-input[data-category="${category}"]`);
+
+                matrix[category] = {
+                    markup: parseFloat(input.value) || 30.00,
+                    minMarkup: parseFloat(minInput.value) || 20.00,
+                    maxMarkup: parseFloat(maxInput.value) || 45.00
+                };
+            });
+
+            return matrix;
+        }
+
+        // Render parts stores
+        function renderPartsStores(stores) {
+            const container = document.getElementById('partsStoresList');
+            
+            if (stores.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #718096; padding: 2rem;">
+                        <i class="fas fa-store" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <p>No parts stores added yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = stores.map(store => `
+                <div class="parts-store-item">
+                    <div class="parts-store-info">
+                        <h4>${store.name}</h4>
+                        <p>${store.phone} | ${store.email || 'No email'}</p>
+                        <p>${store.address || 'No address'} | Priority: ${store.priority}</p>
+                        <p>Discount: ${store.discountRate}% | Delivery: ${store.deliveryTime}</p>
+                    </div>
+                    <div class="parts-store-actions">
+                        <button class="icon-btn" onclick="editPartsStore('${store.id}')" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="icon-btn delete" onclick="deletePartsStore('${store.id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add parts store
+        function addPartsStore() {
+            const name = document.getElementById('newStoreName').value;
+            const phone = document.getElementById('newStorePhone').value;
+            const email = document.getElementById('newStoreEmail').value;
+            const address = document.getElementById('newStoreAddress').value;
+            const priority = parseInt(document.getElementById('newStorePriority').value) || 999;
+            const discountRate = parseFloat(document.getElementById('newStoreDiscount').value) || 0;
+            const deliveryTime = document.getElementById('newStoreDelivery').value;
+            const notes = document.getElementById('newStoreNotes').value;
+
+            if (!name || !phone) {
+                showAlert('Store name and phone are required', 'error');
+                return;
+            }
+
+            const newStore = {
+                id: `store_${Date.now()}`,
+                name,
+                phone,
+                email,
+                address,
+                priority,
+                discountRate,
+                deliveryTime,
+                notes
+            };
+
+            if (!currentSettings.partsStores) {
+                currentSettings.partsStores = [];
+            }
+
+            currentSettings.partsStores.push(newStore);
+            renderPartsStores(currentSettings.partsStores);
+
+            // Clear form
+            document.getElementById('newStoreName').value = '';
+            document.getElementById('newStorePhone').value = '';
+            document.getElementById('newStoreEmail').value = '';
+            document.getElementById('newStoreAddress').value = '';
+            document.getElementById('newStorePriority').value = '';
+            document.getElementById('newStoreDiscount').value = '';
+            document.getElementById('newStoreDelivery').value = '';
+            document.getElementById('newStoreNotes').value = '';
+
+            showAlert('Parts store added!', 'success');
+        }
+
+        // Edit parts store
+        function editPartsStore(storeId) {
+            const store = currentSettings.partsStores.find(s => s.id === storeId);
+            if (!store) return;
+
+            // Populate form with store data
+            document.getElementById('newStoreName').value = store.name;
+            document.getElementById('newStorePhone').value = store.phone;
+            document.getElementById('newStoreEmail').value = store.email || '';
+            document.getElementById('newStoreAddress').value = store.address || '';
+            document.getElementById('newStorePriority').value = store.priority || '';
+            document.getElementById('newStoreDiscount').value = store.discountRate || '';
+            document.getElementById('newStoreDelivery').value = store.deliveryTime || '';
+            document.getElementById('newStoreNotes').value = store.notes || '';
+
+            // Remove old store
+            deletePartsStore(storeId, false);
+
+            showAlert('Store loaded for editing. Update and click "Add Store" to save changes.', 'success');
+        }
+
+        // Delete parts store
+        function deletePartsStore(storeId, showConfirm = true) {
+            if (showConfirm && !confirm('Are you sure you want to delete this parts store?')) {
+                return;
+            }
+
+            currentSettings.partsStores = currentSettings.partsStores.filter(s => s.id !== storeId);
+            renderPartsStores(currentSettings.partsStores);
+
+            if (showConfirm) {
+                showAlert('Parts store deleted', 'success');
+            }
+        }
+
+        // Export settings
+        function exportSettings() {
+            const settings = collectFormData();
+            const dataStr = JSON.stringify({
+                version: '1.0',
+                exportedAt: new Date().toISOString(),
+                settings: settings
+            }, null, 2);
+            
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `vhicl-pro-settings-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showAlert('Settings exported!', 'success');
+        }
+
+        // Import settings
+        function importSettings(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (!importedData.settings) {
+                        throw new Error('Invalid import file');
+                    }
+
+                    currentSettings = importedData.settings;
+                    populateForm(currentSettings);
+                    showAlert('Settings imported successfully!', 'success');
+                } catch (error) {
+                    console.error('Error importing settings:', error);
+                    showAlert('Error importing settings: Invalid file format', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Show alert
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+            
+            container.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
