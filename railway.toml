@@ -1,0 +1,9 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "node service-advisor-backend-complete-alex.js"
+healthcheckPath = "/health"
+
+[[services]]
+name = "vhicl-pro-backend"
