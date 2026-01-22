@@ -877,6 +877,9 @@
             if (screenId === 'alexScreen') {
                 loadServicesWeDontDo();
             }
+            if (screenId === 'techFlowScreen') {
+                loadTechWorkflow();
+            }
         }
 
         // ALEX Actions
@@ -898,15 +901,15 @@
                 const response = await fetch('/api/analytics/overview');
                 const data = await response.json();
                 
-                document.getElementById('analyticsTodayRevenue').textContent = '$' + data.today.revenue.toFixed(2);
-                document.getElementById('analyticsWeekRevenue').textContent = '$' + data.thisWeek.revenue.toFixed(2);
-                document.getElementById('analyticsMonthRevenue').textContent = '$' + data.thisMonth.revenue.toFixed(2);
-                document.getElementById('analyticsYearRevenue').textContent = '$' + data.thisYear.revenue.toFixed(2);
+                document.getElementById('analyticsTodayRevenue').textContent = '$' + (data.today?.revenue || 0).toFixed(2);
+                document.getElementById('analyticsWeekRevenue').textContent = '$' + (data.thisWeek?.revenue || 0).toFixed(2);
+                document.getElementById('analyticsMonthRevenue').textContent = '$' + (data.thisMonth?.revenue || 0).toFixed(2);
+                document.getElementById('analyticsYearRevenue').textContent = '$' + (data.thisYear?.revenue || 0).toFixed(2);
                 
-                document.getElementById('todayRevenue').textContent = '$' + data.today.revenue.toFixed(2);
-                document.getElementById('todayJobs').textContent = data.today.jobs;
-                document.getElementById('todayAppointments').textContent = data.today.appointments;
-                document.getElementById('todayWalkIns').textContent = data.today.walkIns;
+                document.getElementById('todayRevenue').textContent = '$' + (data.today?.revenue || 0).toFixed(2);
+                document.getElementById('todayJobs').textContent = data.today?.jobs || 0;
+                document.getElementById('todayAppointments').textContent = data.today?.appointments || 0;
+                document.getElementById('todayWalkIns').textContent = data.today?.walkIns || 0;
             } catch (error) {
                 console.error('Error loading analytics:', error);
             }
@@ -916,8 +919,8 @@
                 const laborResponse = await fetch('/api/analytics/labor');
                 const laborData = await laborResponse.json();
                 
-                document.getElementById('analyticsTotalJobs').textContent = laborData.totalOperations;
-                document.getElementById('analyticsAvgLaborTime').textContent = laborData.averageLaborTime.toFixed(1) + ' hrs';
+                document.getElementById('analyticsTotalJobs').textContent = laborData.totalOperations || 0;
+                document.getElementById('analyticsAvgLaborTime').textContent = (laborData.averageLaborTime || 0).toFixed(1) + ' hrs';
             } catch (error) {
                 console.error('Error loading labor analytics:', error);
             }
@@ -927,8 +930,8 @@
                 const partsResponse = await fetch('/api/analytics/parts');
                 const partsData = await partsResponse.json();
                 
-                document.getElementById('analyticsPartsStores').textContent = partsData.totalStores;
-                document.getElementById('analyticsAvgDiscount').textContent = partsData.averageDiscount.toFixed(1) + '%';
+                document.getElementById('analyticsPartsStores').textContent = partsData.totalStores || 0;
+                document.getElementById('analyticsAvgDiscount').textContent = (partsData.averageDiscount || 0).toFixed(1) + '%';
             } catch (error) {
                 console.error('Error loading parts analytics:', error);
             }
@@ -942,7 +945,7 @@
                 
                 const tbody = document.getElementById('partsStoresTable');
                 
-                if (stores.length === 0) {
+                if (!stores || stores.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">No parts stores found</td></tr>';
                     return;
                 }
@@ -953,7 +956,7 @@
                         <td>${store.phone}</td>
                         <td><span class="status-badge success">${store.discountRate || 0}%</span></td>
                         <td>${store.deliveryTime || 'Same day'}</td>
-                        <td><span class="status-badge ${store.priority === 'high' ? 'success' : 'warning'}">${store.priority || 'normal'}</span></td>
+                        <td><span class="status-badge ${store.priority === 1 ? 'success' : 'warning'}">${store.priority || 'normal'}</span></td>
                         <td>
                             <button class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;" onclick="editPartsStore('${store.id}')">
                                 <i class="fas fa-edit"></i>
@@ -966,6 +969,8 @@
                 `).join('');
             } catch (error) {
                 console.error('Error loading parts stores:', error);
+                document.getElementById('partsStoresTable').innerHTML = 
+                    '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">Error loading parts stores</td></tr>';
             }
         }
 
@@ -979,7 +984,7 @@
             
             const discount = prompt('Enter discount rate (%):', '0');
             const delivery = prompt('Enter delivery time:', 'Same day');
-            const priority = prompt('Enter priority (high/normal/low):', 'normal');
+            const priority = prompt('Enter priority (1-3, lower is higher priority):', '2');
             
             fetch('/api/parts/stores', {
                 method: 'POST',
@@ -989,7 +994,7 @@
                     phone,
                     discountRate: parseFloat(discount) || 0,
                     deliveryTime: delivery || 'Same day',
-                    priority: priority || 'normal',
+                    priority: parseInt(priority) || 2,
                     active: true
                 })
             }).then(() => {
@@ -1038,28 +1043,204 @@
             console.log('Filtering appointments...');
         }
 
-        // Technician Functions
-        function techStartJob() {
-            alert('Start Job form will open here');
-        }
-
-        function techCompleteJob() {
-            alert('Complete Job form will open here');
-        }
-
-        function techRequestParts() {
-            alert('Parts request form will open here');
-        }
-
-        function techAddNote() {
-            const note = prompt('Enter technician note:');
-            if (note) {
-                alert('Note added: ' + note);
+        // Load Tech Workflow Data
+        async function loadTechWorkflow() {
+            try {
+                const response = await fetch('/api/tech/stats');
+                const stats = await response.json();
+                
+                document.getElementById('techActiveJobs').textContent = stats.activeJobs;
+                document.getElementById('techCompletedToday').textContent = stats.completedToday;
+                document.getElementById('techTotalHours').textContent = stats.totalHours.toFixed(1);
+                document.getElementById('techRating').textContent = stats.rating;
+                
+                // Load active jobs
+                loadTechActiveJobs();
+                loadTechCompletedJobs();
+            } catch (error) {
+                console.error('Error loading tech workflow:', error);
             }
         }
 
-        function techViewSchedule() {
-            alert('Technician schedule will open here');
+        // Load Active Jobs
+        async function loadTechActiveJobs() {
+            try {
+                const response = await fetch('/api/tech/jobs/active');
+                const data = await response.json();
+                
+                const tbody = document.getElementById('techActiveJobsTable');
+                
+                if (data.jobs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #7f8c8d;">No active jobs</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = data.jobs.map(job => `
+                    <tr>
+                        <td><strong>${job.id}</strong></td>
+                        <td>${job.customerName || 'N/A'}</td>
+                        <td>${job.vehicleInfo || 'N/A'}</td>
+                        <td>${job.serviceDescription || 'N/A'}</td>
+                        <td><span class="status-badge warning">Bay ${job.bay || 'TBD'}</span></td>
+                        <td>${job.progress}%</td>
+                        <td>
+                            <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="completeTechJob('${job.id}')">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="addTechNote('${job.id}')">
+                                <i class="fas fa-sticky-note"></i>
+                            </button>
+                            <button class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;" onclick="requestTechParts('${job.id}')">
+                                <i class="fas fa-box"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading active jobs:', error);
+            }
+        }
+
+        // Load Completed Jobs
+        async function loadTechCompletedJobs() {
+            try {
+                const response = await fetch('/api/tech/jobs/completed');
+                const data = await response.json();
+                
+                const tbody = document.getElementById('techCompletedJobsTable');
+                
+                if (data.jobs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">No completed jobs today</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = data.jobs.map(job => `
+                    <tr>
+                        <td><strong>${job.id}</strong></td>
+                        <td>${job.customerName || 'N/A'}</td>
+                        <td>${job.vehicleInfo || 'N/A'}</td>
+                        <td>${job.serviceDescription || 'N/A'}</td>
+                        <td>${job.hours || 0} hrs</td>
+                        <td>${new Date(job.completedAt).toLocaleTimeString()}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading completed jobs:', error);
+            }
+        }
+
+        // Technician Functions
+        async function techStartJob() {
+            const customerName = prompt('Customer name:');
+            const vehicleInfo = prompt('Vehicle info:');
+            const serviceDescription = prompt('Service description:');
+            const bay = prompt('Bay number:');
+            
+            if (!customerName || !vehicleInfo || !serviceDescription) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/tech/jobs/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customerName,
+                        vehicleInfo,
+                        serviceDescription,
+                        bay
+                    })
+                });
+                
+                const result = await response.json();
+                alert('Job started: ' + result.job.id);
+                loadTechActiveJobs();
+            } catch (error) {
+                alert('Error starting job: ' + error.message);
+            }
+        }
+
+        async function completeTechJob(jobId) {
+            if (!confirm('Complete this job?')) return;
+            
+            const rating = prompt('Customer rating (1-5):', '5');
+            
+            try {
+                const response = await fetch(`/api/tech/jobs/${jobId}/complete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rating: parseInt(rating) || 5
+                    })
+                });
+                
+                const result = await response.json();
+                alert('Job completed successfully!');
+                loadTechActiveJobs();
+                loadTechCompletedJobs();
+                loadTechWorkflow();
+            } catch (error) {
+                alert('Error completing job: ' + error.message);
+            }
+        }
+
+        async function requestTechParts(jobId) {
+            const parts = prompt('Enter parts needed:');
+            if (!parts) return;
+            
+            try {
+                const response = await fetch(`/api/tech/jobs/${jobId}/parts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ parts })
+                });
+                
+                const result = await response.json();
+                alert('Parts requested: ' + parts);
+            } catch (error) {
+                alert('Error requesting parts: ' + error.message);
+            }
+        }
+
+        async function addTechNote(jobId) {
+            const note = prompt('Enter technician note:');
+            if (!note) return;
+            
+            try {
+                const response = await fetch(`/api/tech/jobs/${jobId}/notes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ note })
+                });
+                
+                const result = await response.json();
+                alert('Note added successfully!');
+            } catch (error) {
+                alert('Error adding note: ' + error.message);
+            }
+        }
+
+        async function techViewSchedule() {
+            try {
+                const response = await fetch('/api/tech/schedule');
+                const schedule = await response.json();
+                
+                let scheduleText = 'TECHNICIAN SCHEDULE\n\n';
+                scheduleText += 'Today\'s Jobs:\n';
+                schedule.today.forEach(job => {
+                    scheduleText += `- ${job.id}: ${job.serviceDescription}\n`;
+                });
+                
+                scheduleText += '\nThis Week\'s Jobs:\n';
+                schedule.thisWeek.forEach(job => {
+                    scheduleText += `- ${job.id}: ${job.serviceDescription} (${new Date(job.scheduledDate).toLocaleDateString()})\n`;
+                });
+                
+                alert(scheduleText || 'No upcoming jobs');
+            } catch (error) {
+                alert('Error loading schedule: ' + error.message);
+            }
         }
 
         // Initialize
@@ -1067,6 +1248,7 @@
             loadServicesWeDontDo();
             loadAnalytics();
             loadPartsStores();
+            loadTechWorkflow();
         });
     </script>
 </body>
