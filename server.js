@@ -1,698 +1,630 @@
-#!/usr/bin/env node
-
-/**
- * VHICL Pro - Complete Backend System
- * Hosted on DigitalOcean Droplet
- * 
- * Features:
- * - Nexpart Scraper (real-time parts pricing)
- * - Auto Labor Experts Scraper (real-time labor times)
- * - ALEX Voice Assistant (VAPI integration)
- * - Labor Service (30+ operations)
- * - Email Service (SendGrid)
- * - Shop Settings (configurable)
- */
-
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
 
-// Import services
-const NexpartScraper = require('./nexpart-scraper.js');
-const AutoLaborScraper = require('./auto-labor-scraper.js');
+// Import all services
+const ShopSettingsService = require('./shop-settings-service.js');
 const LaborService = require('./labor-service.js');
 const EmailService = require('./email-service-updated.js');
-const shopSettingsService = require('./shop-settings-service.js'); // FIXED: Use instance directly
+const NexpartScraper = require('./nexpart-scraper.js');
+const AutoLaborScraper = require('./auto-labor-scraper.js');
+const VapiPartsCalling = require('./vapi-parts-calling.js');
+const VapiPartsOrdering = require('./vapi-parts-ordering.js');
+const VapiCarIntake = require('./vapi-car-intake.js');
+const IntakeEndpoints = require('./intake-endpoints.js');
+const PartsQuoteComparator = require('./parts-quote-comparator.js');
+const SmartQuoteSelector = require('./smart-quote-selector.js');
+const PartsStoreDirectory = require('./parts-store-directory.js');
 
-// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Serve static frontend files
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
 
 // Initialize services
+let shopSettingsService;
 let laborService;
 let emailService;
+let partsStoreDirectory;
 let nexpartScraper;
 let autoLaborScraper;
 
+// ALEX Configuration
+let alexConfig = {
+    servicesWeDontDo: [], // Services ALEX shouldn't book
+    autoCallEnabled: true,
+    autoOrderEnabled: true,
+    appointmentConfirmationEnabled: true
+};
+
+// Initialize all services
 async function initializeServices() {
     try {
-        console.log('\ud83d\udd27 Initializing services...');
+        console.log('🔧 Initializing VHICL Pro services...');
         
-        // Load shop settings - FIXED: Use instance directly, don't use 'new'
-        const shopSettings = await shopSettingsService.getSettings();
+        // Initialize shop settings
+        shopSettingsService = require('./shop-settings-service.js');
+        const settings = await shopSettingsService.getSettings();
         
         // Initialize labor service
         laborService = new LaborService({
             shopId: 'default',
-            laborRate: shopSettings.laborRate || 100,
-            laborMultiplier: shopSettings.laborMultiplier || 1.0
+            laborRate: settings.labor?.laborRate || 100,
+            laborMultiplier: settings.labor?.laborMultiplier || 1.0
         });
         
         // Initialize email service
         emailService = new EmailService({
-            apiKey: process.env.SENDGRID_API_KEY || shopSettings.sendGridApiKey,
-            fromEmail: shopSettings.sendGridFromEmail || 'noreply@vhiclpro.com',
-            fromName: shopSettings.sendGridFromName || 'VHICL Pro'
+            apiKey: settings.email?.sendgridApiKey || '',
+            fromEmail: settings.email?.sendgridFromEmail || '',
+            fromName: settings.email?.sendgridFromName || 'VHICL Pro'
         });
         
-        // Initialize scrapers
-        nexpartScraper = new NexpartScraper({
-            username: process.env.NEXPART_USERNAME || '',
-            password: process.env.NEXPART_PASSWORD || '',
-            headless: process.env.SCRAPER_HEADLESS !== 'false'
-        });
+        // Initialize parts store directory
+        partsStoreDirectory = new PartsStoreDirectory();
         
-        autoLaborScraper = new AutoLaborScraper({
-            username: process.env.AUTO_LABOR_USERNAME || '',
-            password: process.env.AUTO_LABOR_PASSWORD || '',
-            headless: process.env.SCRAPER_HEADLESS !== 'false'
-        });
+        // Initialize scrapers if credentials exist
+        if (settings.scrapers?.enableNexpartScraper && 
+            settings.scrapers?.nexpartUsername && 
+            settings.scrapers?.nexpartPassword) {
+            nexpartScraper = new NexpartScraper({
+                username: settings.scrapers.nexpartUsername,
+                password: settings.scrapers.nexpartPassword,
+                accountNumber: settings.scrapers.nexpartAccountNumber
+            });
+            console.log('✅ Nexpart scraper initialized');
+        }
         
-        console.log('\u2705 All services initialized successfully');
-        console.log(`\ud83d\udcca Labor rate: $${shopSettings.laborRate}/hour`);
-        console.log(`\ud83c\udf10 Scrapers: ${process.env.SCRAPER_HEADLESS !== 'false' ? 'Headless' : 'Headed'}`);
+        if (settings.scrapers?.enableAutoLaborScraper && 
+            settings.scrapers?.autoLaborUsername && 
+            settings.scrapers?.autoLaborPassword) {
+            autoLaborScraper = new AutoLaborScraper({
+                username: settings.scrapers.autoLaborUsername,
+                password: settings.scrapers.autoLaborPassword
+            });
+            console.log('✅ Auto Labor scraper initialized');
+        }
+        
+        // Load ALEX configuration
+        alexConfig.servicesWeDontDo = settings.alex?.servicesWeDontDo || [];
+        alexConfig.autoCallEnabled = settings.alex?.autoCallEnabled !== false;
+        alexConfig.autoOrderEnabled = settings.alex?.autoOrderEnabled !== false;
+        alexConfig.appointmentConfirmationEnabled = settings.alex?.appointmentConfirmationEnabled !== false;
+        
+        console.log('✅ All services initialized successfully');
         
     } catch (error) {
-        console.error('\u274c Error initializing services:', error);
-        throw error;
+        console.error('❌ Error initializing services:', error);
+        // Continue anyway with default settings
     }
 }
 
-// ========================================
-// HEALTH CHECK ENDPOINT
-// ========================================
-
+// Health Check
 app.get('/health', (req, res) => {
     res.json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
         services: {
-            backend: true,
+            shopSettings: !!shopSettingsService,
             laborService: !!laborService,
             emailService: !!emailService,
-            shopSettings: !!shopSettingsService,
+            partsStoreDirectory: !!partsStoreDirectory,
             nexpartScraper: !!nexpartScraper,
             autoLaborScraper: !!autoLaborScraper
         }
     });
 });
 
-// ========================================
-// PARTS PRICING ENDPOINTS
-// ========================================
+// ==================== SHOP SETTINGS ====================
 
-/**
- * GET /api/parts/search
- * Search for parts using Nexpart scraper
- */
-app.get('/api/parts/search', async (req, res) => {
-    try {
-        const { partNumber, make, model, year } = req.query;
-        
-        if (!partNumber) {
-            return res.status(400).json({ error: 'Part number is required' });
-        }
-        
-        console.log(`\ud83d\udd0d Searching for part: ${partNumber} (${make} ${model} ${year})`);
-        
-        // Use Nexpart scraper
-        const partsData = await nexpartScraper.searchParts({
-            partNumber,
-            make,
-            model,
-            year
-        });
-        
-        res.json({
-            success: true,
-            data: partsData,
-            timestamp: new Date().toISOString()
-        });
-        
-    } catch (error) {
-        console.error('Error searching parts:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message,
-            fallback: 'Database lookup available'
-        });
-    }
-});
-
-/**
- * POST /api/parts/check-availability
- * Check parts availability from multiple sources
- */
-app.post('/api/parts/check-availability', async (req, res) => {
-    try {
-        const { parts, vehicleInfo } = req.body;
-        
-        if (!parts || !Array.isArray(parts) || parts.length === 0) {
-            return res.status(400).json({ error: 'Parts array is required' });
-        }
-        
-        console.log(`\ud83d\udce6 Checking availability for ${parts.length} parts`);
-        
-        const results = [];
-        
-        for (const part of parts) {
-            try {
-                // Try Nexpart scraper first
-                const nexpartResult = await nexpartScraper.getPartAvailability({
-                    partNumber: part.partNumber,
-                    make: vehicleInfo?.make,
-                    model: vehicleInfo?.model,
-                    year: vehicleInfo?.year
-                });
-                
-                results.push({
-                    part: part,
-                    availability: nexpartResult,
-                    source: 'Nexpart'
-                });
-                
-            } catch (error) {
-                console.error(`Error checking part ${part.partNumber}:`, error);
-                results.push({
-                    part: part,
-                    availability: null,
-                    source: 'Error',
-                    error: error.message
-                });
-            }
-        }
-        
-        res.json({
-            success: true,
-            results: results,
-            timestamp: new Date().toISOString()
-        });
-        
-    } catch (error) {
-        console.error('Error checking parts availability:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-// ========================================
-// LABOR TIME ENDPOINTS
-// ========================================
-
-/**
- * GET /api/labor/operations
- * Get all labor operations
- */
-app.get('/api/labor/operations', async (req, res) => {
-    try {
-        const operations = await laborService.getAllOperations();
-        res.json({
-            success: true,
-            data: operations,
-            count: operations.length
-        });
-    } catch (error) {
-        console.error('Error getting labor operations:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-/**
- * GET /api/labor/search
- * Search labor operations
- */
-app.get('/api/labor/search', async (req, res) => {
-    try {
-        const { q, category } = req.query;
-        const results = await laborService.searchOperations(q, category);
-        res.json({
-            success: true,
-            data: results,
-            count: results.length
-        });
-    } catch (error) {
-        console.error('Error searching labor operations:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-/**
- * GET /api/labor/estimate/:operationId
- * Get labor estimate for operation
- */
-app.get('/api/labor/estimate/:operationId', async (req, res) => {
-    try {
-        const { operationId } = req.params;
-        const estimate = await laborService.getEstimate(operationId);
-        
-        if (!estimate) {
-            return res.status(404).json({
-                success: false,
-                error: 'Operation not found'
-            });
-        }
-        
-        res.json({
-            success: true,
-            data: estimate
-        });
-    } catch (error) {
-        console.error('Error getting labor estimate:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-/**
- * POST /api/labor/quick-estimate
- * Quick estimate from description (uses Auto Labor Experts scraper)
- */
-app.post('/api/labor/quick-estimate', async (req, res) => {
-    try {
-        const { description, make, model, year } = req.body;
-        
-        if (!description) {
-            return res.status(400).json({ error: 'Description is required' });
-        }
-        
-        console.log(`\ud83d\udd27 Quick estimate for: ${description} (${make} ${model} ${year})`);
-        
-        // Try Auto Labor Experts scraper first
-        try {
-            const laborTime = await autoLaborScraper.getLaborTime({
-                description,
-                make,
-                model,
-                year
-            });
-            
-            const estimate = await laborService.calculateEstimate(laborTime.hours);
-            
-            res.json({
-                success: true,
-                data: {
-                    description,
-                    laborTime: laborTime,
-                    estimate: estimate,
-                    source: 'Auto Labor Experts'
-                }
-            });
-            
-        } catch (scraperError) {
-            console.error('Scraper error, falling back to database:', scraperError);
-            
-            // Fallback to database search
-            const dbResults = await laborService.searchOperations(description);
-            
-            if (dbResults.length > 0) {
-                const estimate = await laborService.getEstimate(dbResults[0].id);
-                
-                res.json({
-                    success: true,
-                    data: {
-                        description,
-                        laborTime: { hours: dbResults[0].laborTime },
-                        estimate: estimate,
-                        source: 'Database (fallback)'
-                    }
-                });
-            } else {
-                throw new Error('No labor time found');
-            }
-        }
-        
-    } catch (error) {
-        console.error('Error getting quick estimate:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-// ========================================
-// SHOP SETTINGS ENDPOINTS
-// ========================================
-
-/**
- * GET /api/shop/settings
- * Get shop settings
- */
 app.get('/api/shop/settings', async (req, res) => {
     try {
         const settings = await shopSettingsService.getSettings();
-        res.json({
-            success: true,
-            data: settings
-        });
+        res.json(settings);
     } catch (error) {
-        console.error('Error getting shop settings:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
+        res.status(500).json({ error: error.message });
     }
 });
 
-/**
- * POST /api/shop/settings
- * Update shop settings
- */
 app.post('/api/shop/settings', async (req, res) => {
     try {
-        const updates = req.body;
-        const settings = await shopSettingsService.updateSettings(updates);
+        const settings = await shopSettingsService.updateSettings(req.body);
         
-        // Reinitialize services if critical settings changed
-        if (updates.laborRate || updates.laborMultiplier) {
-            laborService = new LaborService({
-                shopId: 'default',
-                laborRate: settings.laborRate || 100,
-                laborMultiplier: settings.laborMultiplier || 1.0
-            });
+        // Update ALEX configuration
+        if (settings.alex) {
+            alexConfig.servicesWeDontDo = settings.alex.servicesWeDontDo || [];
+            alexConfig.autoCallEnabled = settings.alex.autoCallEnabled !== false;
+            alexConfig.autoOrderEnabled = settings.alex.autoOrderEnabled !== false;
         }
         
-        res.json({
-            success: true,
-            data: settings
-        });
+        res.json(settings);
     } catch (error) {
-        console.error('Error updating shop settings:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// ========================================
-// EMAIL ENDPOINTS
-// ========================================
+// ==================== ALEX CONFIGURATION ====================
 
-/**
- * POST /api/email/send
- * Send email
- */
-app.post('/api/email/send', async (req, res) => {
-    try {
-        const { to, subject, html, text } = req.body;
-        
-        if (!to || !subject) {
-            return res.status(400).json({ error: 'To and subject are required' });
-        }
-        
-        const result = await emailService.sendEmail({
-            to,
-            subject,
-            html,
-            text
-        });
-        
-        res.json({
-            success: true,
-            data: result
-        });
-    } catch (error) {
-        console.error('Error sending email:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-/**
- * POST /api/email/work-order
- * Send work order email
- */
-app.post('/api/email/work-order', async (req, res) => {
-    try {
-        const { workOrder } = req.body;
-        
-        if (!workOrder) {
-            return res.status(400).json({ error: 'Work order data is required' });
-        }
-        
-        const result = await emailService.sendWorkOrder(workOrder);
-        
-        res.json({
-            success: true,
-            data: result
-        });
-    } catch (error) {
-        console.error('Error sending work order email:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-// ========================================
-// CAR INTAKE ENDPOINTS
-// ========================================
-
-/**
- * POST /api/intake/start
- * Start car intake process
- */
-app.post('/api/intake/start', async (req, res) => {
-    try {
-        const { vehicleInfo, customerInfo, intakeType } = req.body;
-        
-        if (!vehicleInfo || !customerInfo) {
-            return res.status(400).json({ error: 'Vehicle and customer info are required' });
-        }
-        
-        console.log(`\ud83d\ude97 Starting car intake: ${intakeType} for ${vehicleInfo.make} ${vehicleInfo.model}`);
-        
-        // Generate work order
-        const workOrder = {
-            id: `WO-${Date.now()}`,
-            vehicleInfo,
-            customerInfo,
-            intakeType,
-            status: 'pending',
-            createdAt: new Date().toISOString()
-        };
-        
-        res.json({
-            success: true,
-            data: workOrder
-        });
-    } catch (error) {
-        console.error('Error starting car intake:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-/**
- * POST /api/intake/complete
- * Complete car intake and generate work order
- */
-app.post('/api/intake/complete', async (req, res) => {
-    try {
-        const { workOrderId, parts, labor } = req.body;
-        
-        console.log(`\u2705 Completing car intake for work order: ${workOrderId}`);
-        
-        // Calculate totals
-        const partsTotal = parts.reduce((sum, p) => sum + (p.price || 0), 0);
-        const laborTotal = labor.reduce((sum, l) => sum + (l.cost || 0), 0);
-        
-        const workOrder = {
-            id: workOrderId,
-            parts,
-            labor,
-            partsTotal,
-            laborTotal,
-            subtotal: partsTotal + laborTotal,
-            tax: (partsTotal + laborTotal) * 0.08,
-            total: (partsTotal + laborTotal) * 1.08,
-            status: 'completed',
-            completedAt: new Date().toISOString()
-        };
-        
-        // Send confirmation email
-        try {
-            await emailService.sendWorkOrder(workOrder);
-        } catch (emailError) {
-            console.error('Error sending work order email:', emailError);
-        }
-        
-        res.json({
-            success: true,
-            data: workOrder
-        });
-    } catch (error) {
-        console.error('Error completing car intake:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-// ========================================
-// SCRAPER STATUS ENDPOINTS
-// ========================================
-
-/**
- * GET /api/scrapers/status
- * Check scraper status
- */
-app.get('/api/scrapers/status', async (req, res) => {
-    try {
-        const status = {
-            nexpart: {
-                initialized: !!nexpartScraper,
-                configured: !!(process.env.NEXPART_USERNAME && process.env.NEXPART_PASSWORD),
-                lastCheck: new Date().toISOString()
-            },
-            autoLabor: {
-                initialized: !!autoLaborScraper,
-                configured: !!(process.env.AUTO_LABOR_USERNAME && process.env.AUTO_LABOR_PASSWORD),
-                lastCheck: new Date().toISOString()
-            }
-        };
-        
-        res.json({
-            success: true,
-            data: status
-        });
-    } catch (error) {
-        console.error('Error checking scraper status:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-/**
- * POST /api/scrapers/test
- * Test scrapers
- */
-app.post('/api/scrapers/test', async (req, res) => {
-    try {
-        const { scraper } = req.body;
-        
-        if (scraper === 'nexpart') {
-            const testResult = await nexpartScraper.testConnection();
-            res.json({
-                success: true,
-                scraper: 'nexpart',
-                data: testResult
-            });
-        } else if (scraper === 'autoLabor') {
-            const testResult = await autoLaborScraper.testConnection();
-            res.json({
-                success: true,
-                scraper: 'autoLabor',
-                data: testResult
-            });
-        } else {
-            res.status(400).json({ error: 'Invalid scraper name' });
-        }
-    } catch (error) {
-        console.error('Error testing scraper:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-// ========================================
-// FALLBACK ROUTE - SERVE FRONTEND
-// ========================================
-
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// ========================================
-// ERROR HANDLING
-// ========================================
-
-app.use((err, req, res, next) => {
-    console.error('Unhandled error:', err);
-    res.status(500).json({
-        success: false,
-        error: err.message,
-        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+app.get('/api/alex/config', (req, res) => {
+    res.json({
+        servicesWeDontDo: alexConfig.servicesWeDontDo,
+        autoCallEnabled: alexConfig.autoCallEnabled,
+        autoOrderEnabled: alexConfig.autoOrderEnabled,
+        appointmentConfirmationEnabled: alexConfig.appointmentConfirmationEnabled
     });
 });
 
-// ========================================
-// START SERVER
-// ========================================
-
-async function startServer() {
+app.post('/api/alex/services-we-dont-do', (req, res) => {
     try {
-        // Initialize services
-        await initializeServices();
+        const { services } = req.body;
+        alexConfig.servicesWeDontDo = services || [];
         
-        // Start server
-        app.listen(PORT, () => {
-            console.log('');
-            console.log('\ud83d\ude80 VHICL Pro Backend Server');
-            console.log('='.repeat(50));
-            console.log(`\u2705 Server running on port ${PORT}`);
-            console.log(`\ud83c\udf10 Health check: http://localhost:${PORT}/health`);
-            console.log(`\ud83d\udcca API endpoints: http://localhost:${PORT}/api/*`);
-            console.log(`\ud83c\udfa8 Frontend: http://localhost:${PORT}/`);
-            console.log('');
-            console.log('\ud83d\udce6 Services:');
-            console.log(`   - Nexpart Scraper: ${nexpartScraper ? '\u2705' : '\u274c'}`);
-            console.log(`   - Auto Labor Scraper: ${autoLaborScraper ? '\u2705' : '\u274c'}`);
-            console.log(`   - Labor Service: ${laborService ? '\u2705' : '\u274c'}`);
-            console.log(`   - Email Service: ${emailService ? '\u2705' : '\u274c'}`);
-            console.log(`   - Shop Settings: ${shopSettingsService ? '\u2705' : '\u274c'}`);
-            console.log('');
-            console.log('\ud83d\udd17 Ready for requests!');
-            console.log('');
+        // Save to shop settings
+        shopSettingsService.updateSettings({
+            alex: alexConfig
         });
         
+        res.json({ success: true, servicesWeDontDo: alexConfig.servicesWeDontDo });
     } catch (error) {
-        console.error('\u274c Failed to start server:', error);
-        process.exit(1);
+        res.status(500).json({ error: error.message });
     }
+});
+
+app.post('/api/alex/check-service', (req, res) => {
+    const { service } = req.body;
+    const isNotAllowed = alexConfig.servicesWeDontDo.some(
+        s => s.toLowerCase().includes(service.toLowerCase())
+    );
+    res.json({ allowed: !isNotAllowed, reason: isNotAllowed ? 'Service not offered' : null });
+});
+
+// ==================== LABOR SERVICE ====================
+
+app.get('/api/labor/operations', (req, res) => {
+    try {
+        const operations = laborService.getAllOperations();
+        res.json(operations);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/labor/operations/:id', (req, res) => {
+    try {
+        const operation = laborService.getOperationById(req.params.id);
+        if (!operation) {
+            return res.status(404).json({ error: 'Operation not found' });
+        }
+        res.json(operation);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/labor/categories', (req, res) => {
+    try {
+        const categories = laborService.getCategories();
+        res.json(categories);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/labor/search', (req, res) => {
+    try {
+        const results = laborService.searchOperations(req.query.q);
+        res.json(results);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/labor/estimate/:operationId', async (req, res) => {
+    try {
+        const estimate = await laborService.getLaborEstimate(req.params.operationId);
+        res.json(estimate);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/labor/quick-estimate', async (req, res) => {
+    try {
+        const { description } = req.body;
+        
+        // Try scraper first if enabled
+        let laborTime = null;
+        if (autoLaborScraper) {
+            try {
+                laborTime = await autoLaborScraper.scrapeLaborTime(description);
+            } catch (scraperError) {
+                console.log('Scraper failed, using database:', scraperError.message);
+            }
+        }
+        
+        // Fallback to database
+        if (!laborTime) {
+            laborTime = await laborService.quickEstimate(description);
+        }
+        
+        const settings = await shopSettingsService.getSettings();
+        const laborRate = settings.labor?.laborRate || 100;
+        const multiplier = settings.labor?.laborMultiplier || 1.0;
+        
+        const estimate = {
+            description,
+            hours: laborTime.hours,
+            laborRate,
+            multiplier,
+            laborCost: laborTime.hours * laborRate * multiplier
+        };
+        
+        res.json(estimate);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ==================== PARTS PRICING ====================
+
+app.get('/api/parts/search', async (req, res) => {
+    try {
+        const { partNumber, description } = req.query;
+        
+        let prices = [];
+        
+        // Try Nexpart scraper if enabled
+        if (nexpartScraper) {
+            try {
+                const nexpartResult = await nexpartScraper.searchParts({
+                    partNumber,
+                    description
+                });
+                prices = prices.concat(nexpartResult);
+            } catch (error) {
+                console.log('Nexpart scraper error:', error.message);
+            }
+        }
+        
+        // Apply markup from settings
+        const settings = await shopSettingsService.getSettings();
+        const partsPricing = settings.partsPricing || {};
+        
+        prices = prices.map(price => {
+            let markup = partsPricing.defaultPartsMarkup || 40;
+            
+            // Use matrix if enabled
+            if (partsPricing.partsMarkupStrategy === 'matrix') {
+                const category = categorizePart(price.description);
+                markup = partsPricing.markupMatrix?.[category] || markup;
+            }
+            
+            // Use tiers if enabled
+            if (partsPricing.partsMarkupStrategy === 'tiers') {
+                markup = getMarkupForPriceRange(price.cost, partsPricing.pricingTiers);
+            }
+            
+            return {
+                ...price,
+                markup: markup,
+                sellingPrice: price.cost * (1 + markup / 100)
+            };
+        });
+        
+        res.json(prices);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/parts/check-availability', async (req, res) => {
+    try {
+        const { parts } = req.body;
+        const availability = [];
+        
+        for (const part of parts) {
+            // Try Nexpart scraper
+            if (nexpartScraper) {
+                try {
+                    const result = await nexpartScraper.checkAvailability(part);
+                    availability.push(result);
+                } catch (error) {
+                    availability.push({ part, available: false, error: error.message });
+                }
+            } else {
+                availability.push({ part, available: false, message: 'Nexpart not configured' });
+            }
+        }
+        
+        res.json(availability);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Helper function to categorize parts
+function categorizePart(description) {
+    const desc = description.toLowerCase();
+    
+    if (desc.includes('alternator')) return 'alternators';
+    if (desc.includes('starter')) return 'starters';
+    if (desc.includes('battery')) return 'batteries';
+    if (desc.includes('spark plug')) return 'sparkPlugs';
+    if (desc.includes('ignition coil')) return 'ignitionCoils';
+    if (desc.includes('brake pad')) return 'brakePads';
+    if (desc.includes('rotor')) return 'rotors';
+    if (desc.includes('caliper')) return 'calipers';
+    if (desc.includes('brake shoe')) return 'brakeShoes';
+    if (desc.includes('oil filter')) return 'oilFilter';
+    if (desc.includes('air filter')) return 'airFilter';
+    if (desc.includes('fuel filter')) return 'fuelFilter';
+    if (desc.includes('cabin')) return 'cabinAirFilter';
+    if (desc.includes('motor oil')) return 'motorOil';
+    if (desc.includes('transmission fluid')) return 'transmissionFluid';
+    if (desc.includes('brake fluid')) return 'brakeFluid';
+    if (desc.includes('coolant')) return 'coolant';
+    if (desc.includes('power steering')) return 'powerSteering';
+    if (desc.includes('shock')) return 'shocks';
+    if (desc.includes('strut')) return 'struts';
+    if (desc.includes('ball joint')) return 'ballJoints';
+    if (desc.includes('control arm')) return 'controlArms';
+    if (desc.includes('tie rod')) return 'tieRodEnds';
+    if (desc.includes('tire')) return 'tires';
+    if (desc.includes('wheel')) return 'wheels';
+    
+    return 'default';
 }
 
-// Handle graceful shutdown
-process.on('SIGTERM', () => {
-    console.log('\ud83d\uded1 SIGTERM received, shutting down gracefully...');
-    process.exit(0);
+// Helper function to get markup for price range
+function getMarkupForPriceRange(cost, tiers) {
+    if (!tiers) return 40;
+    
+    if (cost < 25) return tiers.under25 || 50;
+    if (cost < 50) return tiers['25to50'] || 45;
+    if (cost < 100) return tiers['50to100'] || 40;
+    if (cost < 250) return tiers['100to250'] || 35;
+    if (cost < 500) return tiers['250to500'] || 30;
+    return tiers.over500 || 25;
+}
+
+// ==================== PARTS STORES ====================
+
+app.get('/api/parts/stores', (req, res) => {
+    try {
+        const stores = partsStoreDirectory.getAllStores();
+        res.json(stores);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-process.on('SIGINT', () => {
-    console.log('\ud83d\uded1 SIGINT received, shutting down gracefully...');
-    process.exit(0);
+app.get('/api/parts/stores/:storeId', (req, res) => {
+    try {
+        const store = partsStoreDirectory.getStoreById(req.params.storeId);
+        if (!store) {
+            return res.status(404).json({ error: 'Store not found' });
+        }
+        res.json(store);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-// Start the server
+app.post('/api/parts/stores', (req, res) => {
+    try {
+        const store = partsStoreDirectory.addStore(req.body);
+        res.json(store);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put('/api/parts/stores/:storeId', (req, res) => {
+    try {
+        const store = partsStoreDirectory.updateStore(req.params.storeId, req.body);
+        if (!store) {
+            return res.status(404).json({ error: 'Store not found' });
+        }
+        res.json(store);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/api/parts/stores/:storeId', (req, res) => {
+    try {
+        const success = partsStoreDirectory.deleteStore(req.params.storeId);
+        if (!success) {
+            return res.status(404).json({ error: 'Store not found' });
+        }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ==================== ALEX VOICE CALLING ====================
+
+app.post('/api/alex/call-stores', async (req, res) => {
+    try {
+        if (!alexConfig.autoCallEnabled) {
+            return res.status(400).json({ error: 'ALEX auto-calling is disabled' });
+        }
+        
+        const { parts } = req.body;
+        const vapi = new VapiPartsCalling({
+            apiKey: (await shopSettingsService.getSettings()).voice?.vapiApiKey
+        });
+        
+        const results = await vapi.callMultipleStores(parts);
+        res.json(results);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/alex/order-parts', async (req, res) => {
+    try {
+        if (!alexConfig.autoOrderEnabled) {
+            return res.status(400).json({ error: 'ALEX auto-ordering is disabled' });
+        }
+        
+        const { storeId, parts } = req.body;
+        const vapi = new VapiPartsOrdering({
+            apiKey: (await shopSettingsService.getSettings()).voice?.vapiApiKey
+        });
+        
+        const result = await vapi.orderParts(storeId, parts);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ==================== CAR INTAKE ====================
+
+app.post('/api/intake/start', async (req, res) => {
+    try {
+        const vapi = new VapiCarIntake({
+            apiKey: (await shopSettingsService.getSettings()).voice?.vapiApiKey,
+            servicesWeDontDo: alexConfig.servicesWeDontDo
+        });
+        
+        const intake = await vapi.startIntake(req.body);
+        res.json(intake);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/intake/complete', async (req, res) => {
+    try {
+        const intake = new IntakeEndpoints();
+        const result = await intake.completeIntake(req.body);
+        
+        // Send confirmation email if enabled
+        if (alexConfig.appointmentConfirmationEnabled && emailService) {
+            await emailService.sendAppointmentConfirmation(req.body);
+        }
+        
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ==================== EMAIL SERVICE ====================
+
+app.post('/api/email/send', async (req, res) => {
+    try {
+        const { to, subject, html } = req.body;
+        const result = await emailService.sendEmail(to, subject, html);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/email/work-order', async (req, res) => {
+    try {
+        const result = await emailService.sendWorkOrder(req.body);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/email/appointment-confirmation', async (req, res) => {
+    try {
+        const result = await emailService.sendAppointmentConfirmation(req.body);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ==================== ANALYTICS ====================
+
+app.get('/api/analytics/overview', async (req, res) => {
+    try {
+        const settings = await shopSettingsService.getSettings();
+        
+        // In production, this would query a database
+        // For now, return placeholder data structure
+        res.json({
+            today: {
+                revenue: 0,
+                jobs: 0,
+                appointments: 0,
+                walkIns: 0
+            },
+            thisWeek: {
+                revenue: 0,
+                jobs: 0,
+                appointments: 0,
+                walkIns: 0
+            },
+            thisMonth: {
+                revenue: 0,
+                jobs: 0,
+                appointments: 0,
+                walkIns: 0
+            },
+            thisYear: {
+                revenue: 0,
+                jobs: 0,
+                appointments: 0,
+                walkIns: 0
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/analytics/labor', async (req, res) => {
+    try {
+        const operations = laborService.getAllOperations();
+        res.json({
+            totalOperations: operations.length,
+            categories: laborService.getCategories(),
+            averageLaborTime: operations.reduce((sum, op) => sum + op.hours, 0) / operations.length
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/analytics/parts', async (req, res) => {
+    try {
+        const stores = partsStoreDirectory.getAllStores();
+        res.json({
+            totalStores: stores.length,
+            activeStores: stores.filter(s => s.active).length,
+            averageDiscount: stores.reduce((sum, s) => sum + (s.discountRate || 0), 0) / stores.length
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ==================== START SERVER ====================
+
+async function startServer() {
+    await initializeServices();
+    
+    app.listen(PORT, () => {
+        console.log('🚀 VHICL Pro Production Backend running on port', PORT);
+        console.log('📊 Health check: http://localhost:' + PORT + '/health');
+        console.log('📞 ALEX voice assistant: ' + (alexConfig.autoCallEnabled ? 'ENABLED' : 'DISABLED'));
+        console.log('⚙️ Nexpart scraper: ' + (nexpartScraper ? 'ENABLED' : 'DISABLED'));
+        console.log('⏱️  Auto Labor scraper: ' + (autoLaborScraper ? 'ENABLED' : 'DISABLED'));
+    });
+}
+
 startServer();
