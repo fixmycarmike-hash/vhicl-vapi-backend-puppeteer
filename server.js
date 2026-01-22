@@ -24,7 +24,7 @@ const NexpartScraper = require('./nexpart-scraper.js');
 const AutoLaborScraper = require('./auto-labor-scraper.js');
 const LaborService = require('./labor-service.js');
 const EmailService = require('./email-service-updated.js');
-const ShopSettingsService = require('./shop-settings-service.js');
+const shopSettingsService = require('./shop-settings-service.js'); // FIXED: Use instance directly
 
 // Initialize Express app
 const app = express();
@@ -41,16 +41,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Initialize services
 let laborService;
 let emailService;
-let shopSettingsService;
 let nexpartScraper;
 let autoLaborScraper;
 
 async function initializeServices() {
     try {
-        console.log('🔧 Initializing services...');
+        console.log('\ud83d\udd27 Initializing services...');
         
-        // Load shop settings
-        shopSettingsService = new ShopSettingsService();
+        // Load shop settings - FIXED: Use instance directly, don't use 'new'
         const shopSettings = await shopSettingsService.getSettings();
         
         // Initialize labor service
@@ -80,12 +78,12 @@ async function initializeServices() {
             headless: process.env.SCRAPER_HEADLESS !== 'false'
         });
         
-        console.log('✅ All services initialized successfully');
-        console.log(`📊 Labor rate: $${shopSettings.laborRate}/hour`);
-        console.log(`🌐 Scrapers: ${process.env.SCRAPER_HEADLESS !== 'false' ? 'Headless' : 'Headed'}`);
+        console.log('\u2705 All services initialized successfully');
+        console.log(`\ud83d\udcca Labor rate: $${shopSettings.laborRate}/hour`);
+        console.log(`\ud83c\udf10 Scrapers: ${process.env.SCRAPER_HEADLESS !== 'false' ? 'Headless' : 'Headed'}`);
         
     } catch (error) {
-        console.error('❌ Error initializing services:', error);
+        console.error('\u274c Error initializing services:', error);
         throw error;
     }
 }
@@ -125,7 +123,7 @@ app.get('/api/parts/search', async (req, res) => {
             return res.status(400).json({ error: 'Part number is required' });
         }
         
-        console.log(`🔍 Searching for part: ${partNumber} (${make} ${model} ${year})`);
+        console.log(`\ud83d\udd0d Searching for part: ${partNumber} (${make} ${model} ${year})`);
         
         // Use Nexpart scraper
         const partsData = await nexpartScraper.searchParts({
@@ -163,7 +161,7 @@ app.post('/api/parts/check-availability', async (req, res) => {
             return res.status(400).json({ error: 'Parts array is required' });
         }
         
-        console.log(`📦 Checking availability for ${parts.length} parts`);
+        console.log(`\ud83d\udce6 Checking availability for ${parts.length} parts`);
         
         const results = [];
         
@@ -297,7 +295,7 @@ app.post('/api/labor/quick-estimate', async (req, res) => {
             return res.status(400).json({ error: 'Description is required' });
         }
         
-        console.log(`🔧 Quick estimate for: ${description} (${make} ${model} ${year})`);
+        console.log(`\ud83d\udd27 Quick estimate for: ${description} (${make} ${model} ${year})`);
         
         // Try Auto Labor Experts scraper first
         try {
@@ -486,7 +484,7 @@ app.post('/api/intake/start', async (req, res) => {
             return res.status(400).json({ error: 'Vehicle and customer info are required' });
         }
         
-        console.log(`🚗 Starting car intake: ${intakeType} for ${vehicleInfo.make} ${vehicleInfo.model}`);
+        console.log(`\ud83d\ude97 Starting car intake: ${intakeType} for ${vehicleInfo.make} ${vehicleInfo.model}`);
         
         // Generate work order
         const workOrder = {
@@ -519,7 +517,7 @@ app.post('/api/intake/complete', async (req, res) => {
     try {
         const { workOrderId, parts, labor } = req.body;
         
-        console.log(`✅ Completing car intake for work order: ${workOrderId}`);
+        console.log(`\u2705 Completing car intake for work order: ${workOrderId}`);
         
         // Calculate totals
         const partsTotal = parts.reduce((sum, p) => sum + (p.price || 0), 0);
@@ -661,38 +659,38 @@ async function startServer() {
         // Start server
         app.listen(PORT, () => {
             console.log('');
-            console.log('🚀 VHICL Pro Backend Server');
-            console.log('=' .repeat(50));
-            console.log(`✅ Server running on port ${PORT}`);
-            console.log(`🌐 Health check: http://localhost:${PORT}/health`);
-            console.log(`📊 API endpoints: http://localhost:${PORT}/api/*`);
-            console.log(`🎨 Frontend: http://localhost:${PORT}/`);
+            console.log('\ud83d\ude80 VHICL Pro Backend Server');
+            console.log('='.repeat(50));
+            console.log(`\u2705 Server running on port ${PORT}`);
+            console.log(`\ud83c\udf10 Health check: http://localhost:${PORT}/health`);
+            console.log(`\ud83d\udcca API endpoints: http://localhost:${PORT}/api/*`);
+            console.log(`\ud83c\udfa8 Frontend: http://localhost:${PORT}/`);
             console.log('');
-            console.log('📦 Services:');
-            console.log(`   - Nexpart Scraper: ${nexpartScraper ? '✅' : '❌'}`);
-            console.log(`   - Auto Labor Scraper: ${autoLaborScraper ? '✅' : '❌'}`);
-            console.log(`   - Labor Service: ${laborService ? '✅' : '❌'}`);
-            console.log(`   - Email Service: ${emailService ? '✅' : '❌'}`);
-            console.log(`   - Shop Settings: ${shopSettingsService ? '✅' : '❌'}`);
+            console.log('\ud83d\udce6 Services:');
+            console.log(`   - Nexpart Scraper: ${nexpartScraper ? '\u2705' : '\u274c'}`);
+            console.log(`   - Auto Labor Scraper: ${autoLaborScraper ? '\u2705' : '\u274c'}`);
+            console.log(`   - Labor Service: ${laborService ? '\u2705' : '\u274c'}`);
+            console.log(`   - Email Service: ${emailService ? '\u2705' : '\u274c'}`);
+            console.log(`   - Shop Settings: ${shopSettingsService ? '\u2705' : '\u274c'}`);
             console.log('');
-            console.log('🔗 Ready for requests!');
+            console.log('\ud83d\udd17 Ready for requests!');
             console.log('');
         });
         
     } catch (error) {
-        console.error('❌ Failed to start server:', error);
+        console.error('\u274c Failed to start server:', error);
         process.exit(1);
     }
 }
 
 // Handle graceful shutdown
 process.on('SIGTERM', () => {
-    console.log('🛑 SIGTERM received, shutting down gracefully...');
+    console.log('\ud83d\uded1 SIGTERM received, shutting down gracefully...');
     process.exit(0);
 });
 
 process.on('SIGINT', () => {
-    console.log('🛑 SIGINT received, shutting down gracefully...');
+    console.log('\ud83d\uded1 SIGINT received, shutting down gracefully...');
     process.exit(0);
 });
 
