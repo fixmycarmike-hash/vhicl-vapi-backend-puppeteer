@@ -1,14 +1,11 @@
-[phases.setup]
-nixPkgs = ["nodejs_22", "npm", "chromium", "libnss3", "libatk1.0-0", "libatk-bridge2.0-0", "libcups2", "libgbm1", "libasound2t64", "libpangocairo-1.0-0", "libxss1", "libgtk-3-0", "libxshmfence1", "libglu1"]
-
 [phases.build]
 cmds = ["npm install --production --no-audit --no-fund"]
 
 [phases.start]
-cmds = ["node server.js"]
+cmds = ["node server-nexpart-with-shop-settings.js"]
 
 [start]
-cmd = "node server.js"
+cmd = "node server-nexpart-with-shop-settings.js"
 
 [healthcheck]
 path = "/health"
