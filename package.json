@@ -3,8 +3,10 @@
   "version": "3.0.1",
   "description": "VHICL Pro Backend - API-Based (No Puppeteer) - Fast & Reliable",
   "main": "server-nexpart-with-shop-settings.js",
-  "scripts": {
-    "start": "node server-nexpart-with-shop-settings.js",
+ "scripts": {
+  "start": "node server-nexpart-with-shop-settings.js"
+}
+ ",
     "dev": "nodemon server-nexpart-with-shop-settings.js"
   },
   "keywords": [
