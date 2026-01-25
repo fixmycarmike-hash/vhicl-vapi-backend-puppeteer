@@ -1,24 +1,23 @@
 {
-  "name": "vhicl-pro-backend-nexpart-api",
-  "version": "4.0.0",
-  "description": "VHICL Pro Backend with Official Nexpart API Integration - No Puppeteer",
-  "main": "server-with-nexpart-api.js",
+  "name": "vhicl-pro-backend",
+  "version": "3.0.1",
+  "description": "VHICL Pro Backend - API-Based (No Puppeteer) - Fast & Reliable",
+  "main": "server-nexpart-with-shop-settings.js",
   "scripts": {
-    "start": "node server-with-nexpart-api.js",
-    "dev": "nodemon server-with-nexpart-api.js"
+    "start": "node server-nexpart-with-shop-settings.js",
+    "dev": "nodemon server-nexpart-with-shop-settings.js"
   },
   "keywords": [
     "vhicl",
     "auto",
     "shop",
-    "management",
+    "service",
+    "advisor",
     "nexpart",
     "api",
     "soap",
-    "parts",
-    "pricing",
-    "orderlink",
-    "catlink"
+    "fast",
+    "reliable"
   ],
   "author": "VHICL Pro",
   "license": "MIT",
@@ -26,11 +25,11 @@
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "body-parser": "^1.20.2",
-    "soap": "^1.0.0",
     "axios": "^1.6.2",
     "dotenv": "^16.3.1",
     "nodemailer": "^6.9.7",
-    "nodemailer-sendgrid-transport": "^0.2.0"
+    "nodemailer-sendgrid-transport": "^0.2.0",
+    "soap": "^0.45.0"
   },
   "engines": {
     "node": ">=18.0.0"
