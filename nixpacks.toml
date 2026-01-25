@@ -1,7 +1,7 @@
 
-### File: nixpacks.toml
+ File: nixpacks.toml
 
-```toml
+toml
 # Force Railway rebuild - Jan 25, 2026
 [phases.build]
 cmds = ["npm install --production --no-audit --no-fund"]
@@ -14,4 +14,4 @@ path = "/health"
 interval = "30s"
 timeout = "10s"
 retries = 3
-```
+
