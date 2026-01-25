@@ -1,24 +1,11 @@
-stage-0
-RUN  node server-nexpart-with-shop-settings.js
-248ms
-node:internal/modules/cjs/loader:1252
-  throw err;
-  ^
-Error: Cannot find module 'express'
+[phases.build]
+cmds = ["npm install --production --no-audit --no-fund"]
 
-Require stack:
-- /app/server-nexpart-with-shop-settings.js
-    at Function._resolveFilename (node:internal/modules/cjs/loader:1249:15)
-    at Function._load (node:internal/modules/cjs/loader:1075:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:218:24)
-    at Module.require (node:internal/modules/cjs/loader:1340:12)
-    at require (node:internal/modules/helpers:141:16)
-    at Object.<anonymous> (/app/server-nexpart-with-shop-settings.js:1:17)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Object..js (node:internal/modules/cjs/loader:1689:10)
-    at Module.load (node:internal/modules/cjs/loader:1318:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [ '/app/server-nexpart-with-shop-settings.js' ]
-}
-Node.js v22.11.0
+[start]
+cmd = "node server-nexpart-with-shop-settings.js"
+
+[healthcheck]
+path = "/health"
+interval = "30s"
+timeout = "10s"
+retries = 3
