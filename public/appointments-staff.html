@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Calendar - VHICL Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            background: #f3f4f6;
+            border-radius: 8px;
+        }
+
+        .user-info span {
+            font-size: 14px;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* Rest of the calendar styles (same as public version) */
+        .calendar-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .calendar-header h2 {
+            color: white;
+            font-size: 24px;
+        }
+
+        .calendar-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .calendar-controls .btn {
+            background: white;
+            color: #667eea;
+        }
+
+        .calendar-controls .btn:hover {
+            background: #f3f4f6;
+        }
+
+        .calendar-body {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e5e7eb;
+        }
+
+        .calendar-day-header {
+            background: #f9fafb;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .calendar-day {
+            background: white;
+            min-height: 120px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: #f9fafb;
+        }
+
+        .calendar-day.other-month {
+            background: #f9fafb;
+            color: #9ca3af;
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .calendar-day.today .day-number {
+            color: white;
+        }
+
+        .calendar-day.selected {
+            background: #dbeafe;
+            border: 2px solid #667eea;
+        }
+
+        .day-number {
+            font-weight: 600;
+            font-size: 16px;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .day-appointments {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .day-appointment {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .day-appointment:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .appointment-oil-change {
+            background: #3b82f6;
+        }
+
+        .appointment-brake-service {
+            background: #ef4444;
+        }
+
+        .appointment-tire-service {
+            background: #10b981;
+        }
+
+        .appointment-consultation {
+            background: #f59e0b;
+        }
+
+        .appointment-inspection {
+            background: #8b5cf6;
+        }
+
+        .appointment-default {
+            background: #6b7280;
+        }
+
+        /* Appointment list and modal styles */
+        .appointments-list {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .list-header h3 {
+            color: #374151;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-box {
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 300px;
+        }
+
+        .appointment-item {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .appointment-item:hover {
+            background: #f9fafb;
+        }
+
+        .appointment-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .appointment-time {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            min-width: 100px;
+        }
+
+        .appointment-details {
+            flex: 1;
+        }
+
+        .appointment-details h4 {
+            color: #374151;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .appointment-details p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .appointment-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-confirmed {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        .status-pending {
+            background: #fed7aa;
+            color: #f59e0b;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .appointment-actions .btn {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #374151;
+            font-size: 24px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #374151;
+        }
+
+        .view-details {
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .view-details h4 {
+            color: #374151;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 8px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #6b7280;
+            min-width: 120px;
+        }
+
+        .detail-value {
+            color: #374151;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .calendar-day {
+                min-height: 80px;
+            }
+
+            .day-appointment {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+
+            .appointment-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .appointment-info {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-calendar-alt"></i>
+                Staff Calendar
+            </h1>
+            <div class="header-actions">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="userName">Loading...</span>
+                </div>
+                <button class="btn btn-secondary" onclick="goToDashboard()">
+                    <i class="fas fa-arrow-left"></i>
+                    Dashboard
+                </button>
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i>
+                    New Appointment
+                </button>
+                <button class="btn btn-danger" onclick="auth.logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Calendar -->
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h2 id="calendarMonthYear">January 2026</h2>
+                <div class="calendar-controls">
+                    <button class="btn" onclick="previousMonth()">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="btn" onclick="goToToday()">Today</button>
+                    <button class="btn" onclick="nextMonth()">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="calendar-body">
+                <div class="calendar-day-header">Sun</div>
+                <div class="calendar-day-header">Mon</div>
+                <div class="calendar-day-header">Tue</div>
+                <div class="calendar-day-header">Wed</div>
+                <div class="calendar-day-header">Thu</div>
+                <div class="calendar-day-header">Fri</div>
+                <div class="calendar-day-header">Sat</div>
+            </div>
+            <div id="calendarDays" class="calendar-body" style="border-top: 1px solid #e5e7eb;">
+                <!-- Calendar days will be generated here -->
+            </div>
+        </div>
+
+        <!-- Appointments List -->
+        <div class="appointments-list">
+            <div class="list-header">
+                <h3>
+                    <i class="fas fa-list"></i>
+                    Appointments for <span id="selectedDate">Today</span>
+                </h3>
+                <input type="text" class="search-box" id="searchInput" placeholder="Search appointments..." oninput="filterAppointments()">
+            </div>
+            <div id="appointmentsList">
+                <!-- Appointments will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- View Details Modal -->
+    <div class="modal" id="viewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Appointment Details</h2>
+                <button class="close-btn" onclick="closeModal('viewModal')">&times;</button>
+            </div>
+            <div id="appointmentDetails">
+                <!-- Details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('viewModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        // Require authentication
+        if (!auth.requireAuth()) {
+            // User is redirected to login
+        }
+
+        // Display user info
+        const user = auth.getCurrentUser();
+        if (user) {
+            document.getElementById('userName').textContent = user.name;
+        }
+
+        // Global variables
+        let currentDate = new Date();
+        let selectedDate = new Date();
+        let appointments = [];
+        let selectedAppointmentId = null;
+
+        // API Base URL
+        const API_BASE = window.location.origin + '/api';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAppointments();
+            renderCalendar();
+            filterAppointments();
+        });
+
+        // Load appointments from API (with authentication)
+        async function loadAppointments() {
+            try {
+                const response = await auth.authenticatedFetch(`${API_BASE}/appointments`);
+                if (response.ok) {
+                    appointments = await response.json();
+                    renderCalendar();
+                    filterAppointments();
+                }
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                // Use sample data if API fails
+                appointments = getSampleAppointments();
+                renderCalendar();
+                filterAppointments();
+            }
+        }
+
+        // Sample appointments for testing
+        function getSampleAppointments() {
+            const today = new Date();
+            return [
+                {
+                    id: 1,
+                    customerName: 'John Smith',
+                    customerPhone: '555-0101',
+                    customerEmail: 'john@example.com',
+                    vehicle: 'Toyota Camry 2020',
+                    date: formatDate(today),
+                    time: '09:00',
+                    serviceType: 'Oil Change',
+                    status: 'confirmed',
+                    notes: 'Regular oil change'
+                },
+                {
+                    id: 2,
+                    customerName: 'Sarah Johnson',
+                    customerPhone: '555-0102',
+                    customerEmail: 'sarah@example.com',
+                    vehicle: 'Honda Civic 2019',
+                    date: formatDate(today),
+                    time: '11:00',
+                    serviceType: 'Brake Service',
+                    status: 'pending',
+                    notes: 'Brake pads replacement'
+                },
+                {
+                    id: 3,
+                    customerName: 'Mike Wilson',
+                    customerPhone: '555-0103',
+                    customerEmail: 'mike@example.com',
+                    vehicle: 'Ford F-150 2021',
+                    date: formatDate(addDays(today, 2)),
+                    time: '14:00',
+                    serviceType: 'Tire Service',
+                    status: 'confirmed',
+                    notes: 'Tire rotation and balancing'
+                }
+            ];
+        }
+
+        // Render calendar - STAFF VIEW (shows customer names)
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            // Update header
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('calendarMonthYear').textContent = `${monthNames[month]} ${year}`;
+
+            // Get first day of month and total days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const totalDays = lastDay.getDate();
+            const startingDay = firstDay.getDay();
+
+            // Get previous month's last day for padding
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+            const calendarDays = document.getElementById('calendarDays');
+            calendarDays.innerHTML = '';
+
+            // Previous month days
+            for (let i = startingDay - 1; i >= 0; i--) {
+                const dayDiv = createDayElement(prevMonthLastDay - i, true);
+                calendarDays.appendChild(dayDiv);
+            }
+
+            // Current month days
+            for (let day = 1; day <= totalDays; day++) {
+                const dayDiv = createDayElement(day, false);
+                calendarDays.appendChild(dayDiv);
+            }
+
+            // Next month days to fill grid
+            const totalCells = calendarDays.children.length;
+            const remainingCells = 42 - totalCells; // 6 rows x 7 days = 42
+            for (let i = 1; i <= remainingCells; i++) {
+                const dayDiv = createDayElement(i, true);
+                calendarDays.appendChild(dayDiv);
+            }
+        }
+
+        // Create day element - STAFF VIEW (shows customer names)
+        function createDayElement(day, isOtherMonth) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = `calendar-day ${isOtherMonth ? 'other-month' : ''}`;
+
+            const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+            const dateStr = formatDate(date);
+            const today = new Date();
+            const todayStr = formatDate(today);
+
+            if (!isOtherMonth && dateStr === todayStr) {
+                dayDiv.classList.add('today');
+            }
+
+            if (!isOtherMonth && dateStr === formatDate(selectedDate)) {
+                dayDiv.classList.add('selected');
+            }
+
+            dayDiv.innerHTML = `<div class="day-number">${day}</div>`;
+
+            // Add appointments for this day - STAFF VIEW (shows customer names)
+            const dayAppointments = appointments.filter(apt => apt.date === dateStr);
+            if (dayAppointments.length > 0) {
+                const appointmentsDiv = document.createElement('div');
+                appointmentsDiv.className = 'day-appointments';
+
+                dayAppointments.slice(0, 3).forEach(apt => {
+                    const aptDiv = document.createElement('div');
+                    const serviceClass = getServiceClass(apt.serviceType);
+                    aptDiv.className = `day-appointment ${serviceClass}`;
+                    // STAFF VIEW: Show customer name
+                    aptDiv.textContent = `${apt.time} ${apt.customerName}`;
+                    aptDiv.onclick = (e) => {
+                        e.stopPropagation();
+                        viewAppointment(apt.id);
+                    };
+                    appointmentsDiv.appendChild(aptDiv);
+                });
+
+                if (dayAppointments.length > 3) {
+                    const moreDiv = document.createElement('div');
+                    moreDiv.className = 'day-appointment appointment-default';
+                    moreDiv.textContent = `+${dayAppointments.length - 3} more`;
+                    appointmentsDiv.appendChild(moreDiv);
+                }
+
+                dayDiv.appendChild(appointmentsDiv);
+            }
+
+            dayDiv.onclick = () => selectDay(date);
+
+            return dayDiv;
+        }
+
+        // Get service CSS class
+        function getServiceClass(serviceType) {
+            const classes = {
+                'Oil Change': 'appointment-oil-change',
+                'Brake Service': 'appointment-brake-service',
+                'Tire Service': 'appointment-tire-service',
+                'Consultation': 'appointment-consultation',
+                'Inspection': 'appointment-inspection'
+            };
+            return classes[serviceType] || 'appointment-default';
+        }
+
+        // Select day
+        function selectDay(date) {
+            selectedDate = date;
+            document.getElementById('selectedDate').textContent = formatDateReadable(date);
+            renderCalendar();
+            filterAppointments();
+        }
+
+        // Navigation
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function goToToday() {
+            currentDate = new Date();
+            selectedDate = new Date();
+            renderCalendar();
+            filterAppointments();
+        }
+
+        // Filter and display appointments
+        function filterAppointments() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const selectedDateStr = formatDate(selectedDate);
+
+            const filtered = appointments.filter(apt => {
+                const matchesDate = apt.date === selectedDateStr;
+                const matchesSearch = apt.customerName.toLowerCase().includes(searchTerm) ||
+                    apt.vehicle?.toLowerCase().includes(searchTerm) ||
+                    apt.serviceType?.toLowerCase().includes(searchTerm);
+                return matchesDate && matchesSearch;
+            });
+
+            displayAppointments(filtered);
+        }
+
+        // Display appointments - STAFF VIEW (shows full details)
+        function displayAppointments(appointmentsList) {
+            const container = document.getElementById('appointmentsList');
+
+            if (appointmentsList.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #9ca3af;">
+                        <i class="fas fa-calendar-alt" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <p>No appointments for this date</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort by time
+            const sorted = [...appointmentsList].sort((a, b) => a.time.localeCompare(b.time));
+
+            container.innerHTML = sorted.map(apt => `
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <div class="appointment-time">${formatTime(apt.time)}</div>
+                        <div class="appointment-details">
+                            <h4>${apt.customerName} - ${apt.serviceType}</h4>
+                            <p>${apt.vehicle || 'No vehicle info'} | ${apt.customerPhone}</p>
+                        </div>
+                    </div>
+                    <div class="appointment-status status-${apt.status}">${apt.status}</div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-secondary" onclick="viewAppointment(${apt.id})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // View appointment - STAFF VIEW (shows all details)
+        function viewAppointment(id) {
+            selectedAppointmentId = id;
+            const apt = appointments.find(a => a.id === id);
+
+            if (!apt) return;
+
+            document.getElementById('appointmentDetails').innerHTML = `
+                <div class="view-details">
+                    <h4>Customer Information</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Name:</span>
+                        <span class="detail-value">${apt.customerName}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Phone:</span>
+                        <span class="detail-value">${apt.customerPhone}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Email:</span>
+                        <span class="detail-value">${apt.customerEmail || 'N/A'}</span>
+                    </div>
+                </div>
+                <div class="view-details">
+                    <h4>Appointment Details</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Date:</span>
+                        <span class="detail-value">${formatDateReadable(new Date(apt.date))}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Time:</span>
+                        <span class="detail-value">${formatTime(apt.time)}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Vehicle:</span>
+                        <span class="detail-value">${apt.vehicle || 'N/A'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Service:</span>
+                        <span class="detail-value">${apt.serviceType}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value status-${apt.status}">${apt.status}</span>
+                    </div>
+                </div>
+                <div class="view-details">
+                    <h4>Notes</h4>
+                    <p>${apt.notes || 'No notes'}</p>
+                </div>
+            `;
+
+            document.getElementById('viewModal').classList.add('active');
+        }
+
+        // Modal functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Navigation
+        function goToDashboard() {
+            window.location.href = '/index.html';
+        }
+
+        function openAddModal() {
+            alert('Add appointment modal would open here. For now, use the main dashboard.');
+        }
+
+        // Helper functions
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDateReadable(date) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function formatTime(time) {
+            const [hours, minutes] = time.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = hour % 12 || 12;
+            return `${hour12}:${minutes} ${ampm}`;
+        }
+
+        function addDays(date, days) {
+            const result = new Date(date);
+            result.setDate(result.getDate() + days);
+            return result;
+        }
+
+        // Close modals on outside click
+        window.onclick = (event) => {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        };
+    </script>
+</body>
+</html>
