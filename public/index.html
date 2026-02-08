@@ -416,19 +416,8 @@
         }
 
         /* Modal Styles */
-        .modal {
-            display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            overflow-y: auto;
-        }
-
-        .modal-content {
+        /* Modal Styles for ALEX Nexpart modals */
+        .modal-content.alex-modal {
             background: white;
             margin: 20px auto;
             max-width: 600px;
@@ -932,7 +921,7 @@
 
     <!-- Estimate Modal -->
     <div id="estimateModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content alex-modal">
             <div class="modal-header">
                 <h2><i class="fas fa-file-invoice-dollar"></i> New Estimate</h2>
                 <button class="close-btn" onclick="closeEstimateModal()">&times;</button>
@@ -1015,7 +1004,7 @@
 
     <!-- Invoice Modal -->
     <div id="invoiceModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content alex-modal">
             <div class="modal-header">
                 <h2><i class="fas fa-file-invoice"></i> New Invoice</h2>
                 <button class="close-btn" onclick="closeInvoiceModal()">&times;</button>
@@ -1129,7 +1118,7 @@
 
     <!-- Appointment Modal -->
     <div id="appointmentModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content alex-modal">
             <div class="modal-header">
                 <h2><i class="fas fa-calendar-plus"></i> New Appointment</h2>
                 <button class="close-btn" onclick="closeAppointmentModal()">&times;</button>
@@ -1695,8 +1684,11 @@
         }
 
         function closeAppointmentModal() {
-            document.getElementById('appointmentModal').classList.remove('active');
-            document.getElementById('appointmentForm').reset();
+            const modal = document.getElementById('appointmentModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.getElementById('appointmentForm').reset();
+            }
         }
 
         // Save Appointment
@@ -1882,6 +1874,13 @@
             loadEstimates();
             loadInvoices();
             loadALEXConfig();
+
+            // Close modals when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    e.target.classList.remove('active');
+                }
+            });
         });
 
         // ==================== ALEX / NEXPART FUNCTIONS ====================
@@ -1972,7 +1971,7 @@
             const modal = document.createElement('div');
             modal.className = 'modal';
             modal.innerHTML = `
-                <div class="modal-content">
+                <div class="modal-content alex-modal">
                     <div class="modal-header">
                         <h3>🔧 Parts Lookup - Nexpart</h3>
                         <button class="close-btn" onclick="this.closest('.modal').remove()">✕</button>
@@ -2135,7 +2134,7 @@
             const modal = document.createElement('div');
             modal.className = 'modal';
             modal.innerHTML = `
-                <div class="modal-content">
+                <div class="modal-content alex-modal">
                     <div class="modal-header">
                         <h3>⏱️ Labor Lookup - Nexpart</h3>
                         <button class="close-btn" onclick="this.closest('.modal').remove()">✕</button>
@@ -2257,7 +2256,7 @@
             const modal = document.createElement('div');
             modal.className = 'modal';
             modal.innerHTML = `
-                <div class="modal-content">
+                <div class="modal-content alex-modal">
                     <div class="modal-header">
                         <h3>🚗 VIN Decoder - Nexpart ACES</h3>
                         <button class="close-btn" onclick="this.closest('.modal').remove()">✕</button>
@@ -2337,7 +2336,7 @@
             const modal = document.createElement('div');
             modal.className = 'modal';
             modal.innerHTML = `
-                <div class="modal-content">
+                <div class="modal-content alex-modal">
                     <div class="modal-header">
                         <h3>🪪 License Plate → VIN - Nexpart</h3>
                         <button class="close-btn" onclick="this.closest('.modal').remove()">✕</button>
@@ -2491,7 +2490,7 @@
             const modal = document.createElement('div');
             modal.className = 'modal';
             modal.innerHTML = `
-                <div class="modal-content">
+                <div class="modal-content alex-modal">
                     <div class="modal-header">
                         <h3>📋 Vehicle Parts - Nexpart</h3>
                         <button class="close-btn" onclick="this.closest('.modal').remove()">✕</button>
