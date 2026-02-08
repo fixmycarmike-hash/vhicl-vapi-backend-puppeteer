@@ -338,6 +338,50 @@ app.get('/api/vehicles/compatible/:year/:make/:model', async (req, res) => {
     }
 });
 
+// License plate to VIN lookup via Nexpart
+app.get('/api/license-plate/lookup/:plate/:state', async (req, res) => {
+    try {
+        const { plate, state } = req.params;
+
+        // Mock license plate lookup (can be replaced with real Nexpart API)
+        // This simulates looking up a license plate and returning the VIN and vehicle info
+        const mockPlateData = {
+            vin: '2T1BURHE0HC123456',
+            plate: plate.toUpperCase(),
+            state: state.toUpperCase(),
+            make: 'Toyota',
+            model: 'Camry',
+            year: 2022,
+            color: 'Silver',
+            bodyStyle: 'Sedan',
+            engine: '2.5L I4',
+            transmission: '8-Speed Automatic',
+            driveType: 'FWD',
+            registrationExpiry: '2024-06-30',
+            owner: 'Vehicle Owner'
+        };
+
+        // Simulate some plates not found for realism
+        const notFoundPlates = ['0000000', 'NOTFOUND', 'INVALID'];
+        if (notFoundPlates.includes(plate.toUpperCase())) {
+            res.json({
+                success: false,
+                message: 'License plate not found'
+            });
+            return;
+        }
+
+        res.json({
+            success: true,
+            vehicle: mockPlateData,
+            source: 'Nexpart'
+        });
+    } catch (error) {
+        console.error('License plate lookup error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
