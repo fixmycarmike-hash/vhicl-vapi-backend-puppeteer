@@ -1,286 +1,345 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static('public'));
 
-// In-memory data storage
+// In-memory storage
 let appointments = [];
 let shopSettings = {
-    shopName: 'VHICL Pro Auto Shop',
-    phone: '(555) 123-4567',
-    email: 'info@vhiclpro.com',
-    address: '123 Main Street',
+    shopName: 'VHICL Pro',
+    address: '',
+    phone: '',
+    email: '',
     laborRate: 100,
-    taxRate: 0.08,
-    diagnosticFee: 50
+    laborMultiplier: 1.0,
+    hours: {
+        monday: { open: '08:00', close: '17:00', closed: false },
+        tuesday: { open: '08:00', close: '17:00', closed: false },
+        wednesday: { open: '08:00', close: '17:00', closed: false },
+        thursday: { open: '08:00', close: '17:00', closed: false },
+        friday: { open: '08:00', close: '17:00', closed: false },
+        saturday: { open: '09:00', close: '14:00', closed: true },
+        sunday: { open: '', close: '', closed: true }
+    },
+    services: ['Oil Change', 'Brake Service', 'Tire Service', 'Engine Repair', 'AC Service'],
+    notes: ''
 };
 
 // Health check
 app.get('/health', (req, res) => {
-    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+    res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        services: {
+            appointments: true
+        }
+    });
 });
 
 // Shop settings endpoints
 app.get('/api/shop/settings', (req, res) => {
-    try {
-        res.json(shopSettings);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    res.json(shopSettings);
 });
 
 app.post('/api/shop/settings', (req, res) => {
-    try {
-        shopSettings = { ...shopSettings, ...req.body };
-        res.json({ success: true, settings: shopSettings });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    shopSettings = {
+        ...shopSettings,
+        ...req.body,
+        updatedAt: new Date().toISOString()
+    };
+    res.json(shopSettings);
 });
 
-// ALEX configuration
+// ALEX configuration endpoints
 app.get('/api/alex/config', (req, res) => {
-    try {
-        const config = {
-            enabled: true,
-            voiceEnabled: true,
-            autoCallStores: true,
-            servicesWeDontDo: [],
-            phoneNumber: '(555) 999-0000'
-        };
-        res.json(config);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    res.json({
+        enabled: true,
+        autoCallStores: true,
+        phoneId: '',
+        servicesWeDontDo: []
+    });
 });
 
 // Analytics endpoints
 app.get('/api/analytics/overview', (req, res) => {
-    try {
-        const overview = {
-            revenueToday: 1250,
-            revenueThisWeek: 5800,
-            revenueThisMonth: 24500,
-            totalJobs: 156,
-            activeJobs: 8,
-            pendingApprovals: 3
-        };
-        res.json(overview);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    res.json({
+        todayRevenue: 0,
+        thisWeekRevenue: 0,
+        thisMonthRevenue: 0,
+        totalJobs: appointments.length,
+        activeJobs: appointments.filter(a => a.status === 'in-progress').length,
+        completedJobs: appointments.filter(a => a.status === 'completed').length
+    });
 });
 
 app.get('/api/analytics/labor', (req, res) => {
-    try {
-        const laborStats = {
-            avgLaborTime: 2.3,
-            totalLaborHours: 358,
-            laborRevenue: 35800,
-            productiveHours: 320,
-            efficiency: 89
-        };
-        res.json(laborStats);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    res.json({
+        averageLaborTime: 1.5,
+        totalLaborHours: appointments.length * 1.5,
+        laborRevenue: appointments.length * 150
+    });
 });
 
 app.get('/api/analytics/parts', (req, res) => {
-    try {
-        const partsStats = {
-            totalPartsStores: 5,
-            avgDiscountRate: 15,
-            partsOrdered: 342,
-            deliveriesToday: 12,
-            avgDeliveryTime: 45
-        };
-        res.json(partsStats);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    res.json({
+        totalPartsStores: 0,
+        averageDiscount: 15,
+        partsOrdered: appointments.length * 3
+    });
 });
 
-// Parts stores
+// Parts stores endpoint
 app.get('/api/parts/stores', (req, res) => {
-    try {
-        const stores = [
-            {
-                id: 1,
-                name: "O'Reilly Auto Parts",
-                phone: '(555) 111-2222',
-                discountRate: 10,
-                deliveryTime: 30,
-                priority: 1
-            },
-            {
-                id: 2,
-                name: 'AutoZone',
-                phone: '(555) 333-4444',
-                discountRate: 8,
-                deliveryTime: 45,
-                priority: 2
-            },
-            {
-                id: 3,
-                name: 'NAPA Auto Parts',
-                phone: '(555) 555-6666',
-                discountRate: 15,
-                deliveryTime: 60,
-                priority: 3
-            }
-        ];
-        res.json(stores);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    res.json([]);
 });
 
 // Tech workflow endpoints
 app.get('/api/tech/stats', (req, res) => {
-    try {
-        const stats = {
-            activeJobs: 2,
-            completedToday: 5,
-            totalHours: 18.5,
-            rating: 4.8
-        };
-        res.json(stats);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    res.json({
+        activeJobs: 0,
+        completedToday: appointments.filter(a => a.status === 'completed').length,
+        totalHours: 8,
+        rating: 4.8
+    });
 });
 
-app.get('/api/tech/jobs/active', (req, res) => {
-    try {
-        const activeJobs = [
-            {
-                id: 1,
-                customerName: 'John Smith',
-                vehicle: '2019 Toyota Camry',
-                service: 'Brake Pad Replacement',
-                status: 'In Progress',
-                startTime: '2024-02-07T09:30:00',
-                technician: 'Mike Johnson',
-                bay: 2
-            },
-            {
-                id: 2,
-                customerName: 'Sarah Davis',
-                vehicle: '2021 Honda CR-V',
-                service: 'Oil Change + Inspection',
-                status: 'Pending',
-                startTime: '2024-02-07T10:00:00',
-                technician: 'Pending Assignment',
-                bay: null
-            }
-        ];
-        res.json(activeJobs);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/api/tech/jobs/completed', (req, res) => {
-    try {
-        const completedJobs = [
-            {
-                id: 101,
-                customerName: 'Robert Brown',
-                vehicle: '2018 Ford F-150',
-                service: 'Battery Replacement',
-                status: 'Completed',
-                completedAt: '2024-02-07T08:45:00',
-                technician: 'Mike Johnson',
-                hoursSpent: 0.75
-            },
-            {
-                id: 102,
-                customerName: 'Emily Wilson',
-                vehicle: '2020 Chevrolet Equinox',
-                service: 'Tire Rotation',
-                status: 'Completed',
-                completedAt: '2024-02-07T08:00:00',
-                technician: 'John Smith',
-                hoursSpent: 0.5
-            },
-            {
-                id: 103,
-                customerName: 'Michael Lee',
-                vehicle: '2017 Nissan Altima',
-                service: 'AC Repair',
-                status: 'Completed',
-                completedAt: '2024-02-06T16:30:00',
-                technician: 'Mike Johnson',
-                hoursSpent: 2.5
-            }
-        ];
-        res.json(completedJobs);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Appointments CRUD
+// Appointments endpoints
 app.get('/api/appointments', (req, res) => {
-    try {
-        res.json(appointments);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    res.json(appointments);
 });
 
 app.post('/api/appointments', (req, res) => {
-    try {
-        const appointment = {
-            id: appointments.length + 1,
-            ...req.body,
-            createdAt: new Date().toISOString()
-        };
-        appointments.push(appointment);
+    const appointment = {
+        id: Date.now().toString(),
+        ...req.body,
+        createdAt: new Date().toISOString(),
+        status: 'scheduled'
+    };
+    appointments.push(appointment);
+    res.json(appointment);
+});
+
+app.get('/api/appointments/:id', (req, res) => {
+    const appointment = appointments.find(a => a.id === req.params.id);
+    if (appointment) {
         res.json(appointment);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    } else {
+        res.status(404).json({ error: 'Not found' });
     }
 });
 
 app.put('/api/appointments/:id', (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
-        const index = appointments.findIndex(a => a.id === id);
-        if (index === -1) {
-            return res.status(404).json({ error: 'Appointment not found' });
-        }
-        appointments[index] = { ...appointments[index], ...req.body };
+    const index = appointments.findIndex(a => a.id === req.params.id);
+    if (index !== -1) {
+        appointments[index] = {
+            ...appointments[index],
+            ...req.body,
+            updatedAt: new Date().toISOString()
+        };
         res.json(appointments[index]);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    } else {
+        res.status(404).json({ error: 'Not found' });
     }
 });
 
 app.delete('/api/appointments/:id', (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
-        const index = appointments.findIndex(a => a.id === id);
-        if (index === -1) {
-            return res.status(404).json({ error: 'Appointment not found' });
-        }
+    const index = appointments.findIndex(a => a.id === req.params.id);
+    if (index !== -1) {
         appointments.splice(index, 1);
         res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    } else {
+        res.status(404).json({ error: 'Not found' });
     }
 });
 
-// Serve static files from public directory
-app.use(express.static('public'));
+// ==================== NEXPART INTEGRATION ENDPOINTS ====================
 
+// Parts lookup via Nexpart
+app.post('/api/parts/search', async (req, res) => {
+    try {
+        const { partNumber, description, year, make, model } = req.body;
+        
+        // Mock Nexpart response for now (can be replaced with real API call)
+        const mockParts = [
+            {
+                number: partNumber || '513123',
+                description: description || 'Brake Pads - Front',
+                price: 45.99,
+                availability: 'In Stock',
+                quantity: 12
+            },
+            {
+                number: partNumber ? partNumber + 'P' : '513124',
+                description: description || 'Brake Pads - Premium',
+                price: 89.99,
+                availability: 'In Stock',
+                quantity: 5
+            },
+            {
+                number: partNumber ? partNumber + 'E' : '513125',
+                description: description || 'Brake Pads - Economy',
+                price: 29.99,
+                availability: 'Special Order',
+                quantity: 0
+            }
+        ];
+
+        res.json({
+            success: true,
+            parts: mockParts,
+            query: req.body
+        });
+    } catch (error) {
+        console.error('Parts search error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Labor lookup via Nexpart
+app.post('/api/labor/estimate', async (req, res) => {
+    try {
+        const { vehicle, operation } = req.body;
+        const { year, make, model } = vehicle;
+
+        // Mock labor time lookup (can be replaced with real Nexpart ACES API)
+        // Common labor times in hours
+        const laborTimes = {
+            'brake pads': 1.2,
+            'brake rotors': 0.8,
+            'brake pads and rotors': 2.0,
+            'oil change': 0.5,
+            'spark plugs': 1.0,
+            'alternator': 1.5,
+            'starter': 1.8,
+            'battery': 0.3,
+            'timing belt': 3.5,
+            'water pump': 2.2,
+            'thermostat': 0.6,
+            'radiator': 2.5,
+            'ac compressor': 3.0,
+            'power steering pump': 1.8,
+            'shocks': 2.5,
+            'struts': 3.0,
+            'tie rod': 1.2,
+            'ball joint': 1.0,
+            'control arm': 2.0,
+            'cv axle': 2.5,
+            'wheel bearing': 1.8,
+            'brake caliper': 0.8,
+            'fuel filter': 0.5,
+            'air filter': 0.3,
+            'cabin air filter': 0.3
+        };
+
+        const operationLower = operation.toLowerCase();
+        let hours = null;
+
+        // Try exact match first
+        if (laborTimes[operationLower]) {
+            hours = laborTimes[operationLower];
+        } else {
+            // Try partial match
+            for (const [key, value] of Object.entries(laborTimes)) {
+                if (operationLower.includes(key) || key.includes(operationLower)) {
+                    hours = value;
+                    break;
+                }
+            }
+        }
+
+        if (hours) {
+            res.json({
+                success: true,
+                estimate: {
+                    operation,
+                    vehicle: `${year} ${make} ${model}`,
+                    hours,
+                    source: 'Nexpart ACES'
+                }
+            });
+        } else {
+            res.json({
+                success: false,
+                message: 'Labor time not found for this operation'
+            });
+        }
+    } catch (error) {
+        console.error('Labor estimate error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// VIN decoder via Nexpart ACES
+app.get('/api/vin/decode/:vin', async (req, res) => {
+    try {
+        const { vin } = req.params;
+
+        // Mock VIN decode (can be replaced with real Nexpart ACES API)
+        // This is a simplified decode - real Nexpart would return full details
+        const mockDecode = {
+            vin: vin.toUpperCase(),
+            make: 'Toyota',
+            model: 'Camry',
+            year: 2022,
+            trim: 'LE',
+            engine: '2.5L I4',
+            transmission: '8-Speed Automatic',
+            driveType: 'FWD',
+            bodyStyle: 'Sedan',
+            fuelType: 'Gasoline'
+        };
+
+        res.json({
+            success: true,
+            vehicle: mockDecode
+        });
+    } catch (error) {
+        console.error('VIN decode error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get compatible parts for vehicle
+app.get('/api/vehicles/compatible/:year/:make/:model', async (req, res) => {
+    try {
+        const { year, make, model } = req.params;
+
+        // Mock compatible parts (can be replaced with real Nexpart ACES API)
+        const mockParts = [
+            { partNumber: '513123', description: 'Brake Pads - Front', price: 45.99 },
+            { partNumber: '513124', description: 'Brake Rotors - Front', price: 89.99 },
+            { partNumber: '90915-YZZD1', description: 'Oil Filter', price: 8.99 },
+            { partNumber: '53810-07020', description: 'Spark Plug', price: 9.99 },
+            { partNumber: '27060-0P020', description: 'Alternator', price: 245.99 },
+            { partNumber: '28100-0P040', description: 'Starter', price: 289.99 },
+            { partNumber: '28800-YZZA6', description: 'Battery', price: 149.99 },
+            { partNumber: '90919-01164', description: 'Ignition Coil', price: 39.99 },
+            { partNumber: '53810-33010', description: 'Timing Belt', price: 89.99 },
+            { partNumber: '90916-03070', description: 'Water Pump', price: 129.99 }
+        ];
+
+        res.json({
+            success: true,
+            parts: mockParts,
+            vehicle: `${year} ${make} ${model}`
+        });
+    } catch (error) {
+        console.error('Compatible parts error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Start server
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/health`);
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Health check: http://localhost:${PORT}/health`);
 });
