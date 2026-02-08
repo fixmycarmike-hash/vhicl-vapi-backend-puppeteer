@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -130,6 +131,10 @@
             color: #e74c3c;
         }
 
+        .card.info .stat {
+            color: #3498db;
+        }
+
         .section {
             background: white;
             border-radius: 10px;
@@ -193,6 +198,15 @@
 
         .btn-warning:hover {
             background: #e67e22;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
         }
 
         table {
@@ -293,6 +307,11 @@
             color: #0c5460;
         }
 
+        .status-badge.primary {
+            background: #cce5ff;
+            color: #004085;
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -315,7 +334,7 @@
             background: white;
             border-radius: 10px;
             padding: 30px;
-            max-width: 600px;
+            max-width: 800px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
@@ -347,6 +366,56 @@
             color: #e74c3c;
         }
 
+        /* Invoice Line Items */
+        .line-items {
+            margin-top: 20px;
+        }
+
+        .line-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .line-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .line-item-total {
+            text-align: right;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-top: 10px;
+        }
+
+        .invoice-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .summary-row.total {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+            border-top: 2px solid #2c3e50;
+            margin-top: 10px;
+            padding-top: 10px;
+        }
+
         @media (max-width: 768px) {
             .navbar {
                 flex-direction: column;
@@ -372,11 +441,10 @@
             }
         }
     </style>
-<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
 <body>
     <div class="navbar">
-        <h1>🚗 VHICL Pro</h1>
+        <h1>\ud83d\ude97 VHICL Pro</h1>
         <div class="nav-buttons">
             <button class="nav-btn active" onclick="showScreen('homeScreen')">
                 <i class="fas fa-home"></i> Dashboard
@@ -386,6 +454,12 @@
             </button>
             <button class="nav-btn" onclick="showScreen('appointmentsScreen')">
                 <i class="fas fa-calendar"></i> Appointments
+            </button>
+            <button class="nav-btn" onclick="showScreen('estimatesScreen')">
+                <i class="fas fa-file-invoice-dollar"></i> Estimates
+            </button>
+            <button class="nav-btn" onclick="showScreen('invoicesScreen')">
+                <i class="fas fa-file-invoice"></i> Invoices
             </button>
             <button class="nav-btn" onclick="showScreen('partsStoresScreen')">
                 <i class="fas fa-store"></i> Parts Stores
@@ -406,139 +480,122 @@
         <!-- Dashboard Screen -->
         <div id="homeScreen" class="screen active">
             <div class="section">
-                <h2>📊 Today's Overview</h2>
+                <h2>\ud83d\udcca Today's Overview</h2>
                 <div class="dashboard-grid">
                     <div class="card success">
                         <h3><i class="fas fa-dollar-sign"></i> Revenue</h3>
                         <div class="stat" id="todayRevenue">$0.00</div>
                         <div class="label">Total revenue today</div>
                     </div>
+                    <div class="card info">
+                        <h3><i class="fas fa-file-invoice"></i> Invoices</h3>
+                        <div class="stat" id="todayInvoices">0</div>
+                        <div class="label">Invoices generated today</div>
+                    </div>
+                    <div class="card warning">
+                        <h3><i class="fas fa-file-invoice-dollar"></i> Estimates</h3>
+                        <div class="stat" id="todayEstimates">0</div>
+                        <div class="label">Estimates created today</div>
+                    </div>
                     <div class="card">
                         <h3><i class="fas fa-wrench"></i> Jobs</h3>
                         <div class="stat" id="todayJobs">0</div>
                         <div class="label">Jobs completed today</div>
                     </div>
-                    <div class="card">
-                        <h3><i class="fas fa-calendar-check"></i> Appointments</h3>
-                        <div class="stat" id="todayAppointments">0</div>
-                        <div class="label">Appointments today</div>
-                    </div>
-                    <div class="card warning">
-                        <h3><i class="fas fa-users"></i> Walk-ins</h3>
-                        <div class="stat" id="todayWalkIns">0</div>
-                        <div class="label">Walk-in customers today</div>
-                    </div>
                 </div>
             </div>
 
             <div class="section">
-                <h2>⚡ Quick Actions</h2>
+                <h2>\u26a1 Quick Actions</h2>
                 <div class="row">
                     <button class="btn btn-primary" onclick="openAppointmentModal()">
                         <i class="fas fa-plus"></i> New Appointment
                     </button>
-                    <button class="btn btn-success" onclick="showScreen('alexScreen')">
+                    <button class="btn btn-info" onclick="openEstimateModal()">
+                        <i class="fas fa-file-invoice-dollar"></i> Create Estimate
+                    </button>
+                    <button class="btn btn-success" onclick="openInvoiceModal()">
+                        <i class="fas fa-file-invoice"></i> Create Invoice
+                    </button>
+                    <button class="btn btn-warning" onclick="showScreen('alexScreen')">
                         <i class="fas fa-phone"></i> Call Parts Store
-                    </button>
-                    <button class="btn btn-warning" onclick="showScreen('partsStoresScreen')">
-                        <i class="fas fa-box"></i> Check Parts Availability
-                    </button>
-                    <button class="btn btn-danger" onclick="showScreen('settingsScreen')">
-                        <i class="fas fa-cog"></i> Configure Shop
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- ALEX Screen -->
-        <div id="alexScreen" class="screen">
+        <!-- Estimates Screen -->
+        <div id="estimatesScreen" class="screen">
             <div class="section">
-                <h2>🤖 ALEX - Voice Assistant Configuration</h2>
-                
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <h3><i class="fas fa-phone"></i> Voice Calling</h3>
-                        <div class="stat">
-                            <span class="status-badge success">ENABLED</span>
-                        </div>
-                        <div class="label">ALEX can call parts stores automatically</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-shopping-cart"></i> Parts Ordering</h3>
-                        <div class="stat">
-                            <span class="status-badge success">ENABLED</span>
-                        </div>
-                        <div class="label">ALEX can order parts after approval</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-envelope"></i> Confirmations</h3>
-                        <div class="stat">
-                            <span class="status-badge success">ENABLED</span>
-                        </div>
-                        <div class="label">ALEX sends email confirmations</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-calendar-alt"></i> Appointments</h3>
-                        <div class="stat">
-                            <span class="status-badge success">ENABLED</span>
-                        </div>
-                        <div class="label">ALEX can book appointments</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>🚫 Services We Don't Do</h2>
-                <p style="color: #7f8c8d; margin-bottom: 15px;">
-                    Configure services that ALEX should NOT book appointments for. ALEX will politely decline if a customer requests these services.
-                </p>
+                <h2>\ud83d\udccb Estimates</h2>
                 
                 <div class="form-group">
-                    <label>Add Service We Don't Do</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="serviceNotOffered" placeholder="e.g., Transmission Rebuild, Body Work, Glass Repair">
-                        <button class="btn btn-danger" onclick="addServiceNotOffered()">
-                            <i class="fas fa-plus"></i> Add
-                        </button>
+                    <div class="row">
+                        <div class="half">
+                            <input type="text" id="searchEstimates" placeholder="Search estimates..." onkeyup="searchEstimates()">
+                        </div>
+                        <div class="half">
+                            <button class="btn btn-info" style="width: 100%;" onclick="openEstimateModal()">
+                                <i class="fas fa-plus"></i> New Estimate
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Services We Don't Do</label>
-                    <div id="servicesWeDontDoList" style="display: flex; flex-wrap: wrap; gap: 10px;">
-                        <!-- Services will be added here -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>📞 ALEX Actions</h2>
-                <div class="row">
-                    <button class="btn btn-primary" onclick="alexCallStores()">
-                        <i class="fas fa-phone"></i> Call Parts Stores for Pricing
-                    </button>
-                    <button class="btn btn-success" onclick="alexOrderParts()">
-                        <i class="fas fa-shopping-cart"></i> Order Parts
-                    </button>
-                    <button class="btn btn-warning" onclick="alexCheckAvailability()">
-                        <i class="fas fa-box"></i> Check Parts Availability
-                    </button>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>📊 ALEX Activity</h2>
                 <table>
                     <thead>
                         <tr>
-                            <th>Time</th>
-                            <th>Action</th>
+                            <th>Estimate #</th>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Total</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="alexActivityLog">
+                    <tbody id="estimatesTable">
                         <tr>
-                            <td colspan="3" style="text-align: center; color: #7f8c8d;">No recent activity</td>
+                            <td colspan="7" style="text-align: center; color: #7f8c8d;">No estimates found</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Invoices Screen -->
+        <div id="invoicesScreen" class="screen">
+            <div class="section">
+                <h2>\ud83d\udcc4 Invoices</h2>
+                
+                <div class="form-group">
+                    <div class="row">
+                        <div class="half">
+                            <input type="text" id="searchInvoices" placeholder="Search invoices..." onkeyup="searchInvoices()">
+                        </div>
+                        <div class="half">
+                            <button class="btn btn-success" style="width: 100%;" onclick="openInvoiceModal()">
+                                <i class="fas fa-plus"></i> New Invoice
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoicesTable">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #7f8c8d;">No invoices found</td>
                         </tr>
                     </tbody>
                 </table>
@@ -548,7 +605,7 @@
         <!-- Appointments Screen -->
         <div id="appointmentsScreen" class="screen">
             <div class="section">
-                <h2>📅 Appointments</h2>
+                <h2>\ud83d\udcc5 Appointments</h2>
                 
                 <div class="form-group">
                     <div class="row">
@@ -591,132 +648,10 @@
             </div>
         </div>
 
-        <!-- Parts Stores Screen -->
-        <div id="partsStoresScreen" class="screen">
-            <div class="section">
-                <h2>🏪 Parts Stores</h2>
-                
-                <div class="form-group">
-                    <div class="row">
-                        <div class="half">
-                            <input type="text" id="searchPartsStores" placeholder="Search stores..." onkeyup="searchPartsStores()">
-                        </div>
-                        <div class="half">
-                            <button class="btn btn-primary" style="width: 100%;" onclick="addNewPartsStore()">
-                                <i class="fas fa-plus"></i> Add Parts Store
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Store Name</th>
-                            <th>Phone</th>
-                            <th>Discount</th>
-                            <th>Delivery</th>
-                            <th>Priority</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="partsStoresTable">
-                        <tr>
-                            <td colspan="6" style="text-align: center; color: #7f8c8d;">No parts stores found</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Analytics Screen -->
-        <div id="analyticsScreen" class="screen">
-            <div class="section">
-                <h2>📊 Revenue Analytics</h2>
-                
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <h3><i class="fas fa-calendar-day"></i> Today</h3>
-                        <div class="stat" id="analyticsTodayRevenue">$0.00</div>
-                        <div class="label">Revenue today</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-calendar-week"></i> This Week</h3>
-                        <div class="stat" id="analyticsWeekRevenue">$0.00</div>
-                        <div class="label">Revenue this week</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-calendar-month"></i> This Month</h3>
-                        <div class="stat" id="analyticsMonthRevenue">$0.00</div>
-                        <div class="label">Revenue this month</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-calendar-alt"></i> This Year</h3>
-                        <div class="stat" id="analyticsYearRevenue">$0.00</div>
-                        <div class="label">Revenue this year</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>📈 Job Analytics</h2>
-                
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <h3><i class="fas fa-wrench"></i> Total Jobs</h3>
-                        <div class="stat" id="analyticsTotalJobs">0</div>
-                        <div class="label">Jobs completed</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-clock"></i> Avg. Labor Time</h3>
-                        <div class="stat" id="analyticsAvgLaborTime">0.0 hrs</div>
-                        <div class="label">Average job duration</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-users"></i> Customers</h3>
-                        <div class="stat" id="analyticsCustomers">0</div>
-                        <div class="label">Unique customers</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-dollar-sign"></i> Avg. Job Value</h3>
-                        <div class="stat" id="analyticsAvgJobValue">$0.00</div>
-                        <div class="label">Average ticket</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>🔧 Parts Analytics</h2>
-                
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <h3><i class="fas fa-store"></i> Parts Stores</h3>
-                        <div class="stat" id="analyticsPartsStores">0</div>
-                        <div class="label">Active parts stores</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-percent"></i> Avg. Discount</h3>
-                        <div class="stat" id="analyticsAvgDiscount">0%</div>
-                        <div class="label">Average discount rate</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-box"></i> Parts Ordered</h3>
-                        <div class="stat" id="analyticsPartsOrdered">0</div>
-                        <div class="label">Parts ordered this month</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-truck"></i>Deliveries</h3>
-                        <div class="stat" id="analyticsDeliveries">0</div>
-                        <div class="label">Successful deliveries</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Tech Flow Screen -->
         <div id="techFlowScreen" class="screen">
             <div class="section">
-                <h2>👷 Technician Dashboard</h2>
+                <h2>\ud83d\udc77 Technician Dashboard</h2>
                 
                 <div class="dashboard-grid">
                     <div class="card">
@@ -743,7 +678,7 @@
             </div>
 
             <div class="section">
-                <h2>🔧 Active Jobs</h2>
+                <h2>\ud83d\udd27 Active Jobs</h2>
                 <table>
                     <thead>
                         <tr>
@@ -765,7 +700,7 @@
             </div>
 
             <div class="section">
-                <h2>✅ Recent Completed Jobs</h2>
+                <h2>\u2705 Recent Completed Jobs</h2>
                 <table>
                     <thead>
                         <tr>
@@ -784,33 +719,12 @@
                     </tbody>
                 </table>
             </div>
-
-            <div class="section">
-                <h2>⚡ Quick Actions</h2>
-                <div class="row">
-                    <button class="btn btn-primary" onclick="techStartJob()">
-                        <i class="fas fa-play"></i> Start Job
-                    </button>
-                    <button class="btn btn-success" onclick="techCompleteJob()">
-                        <i class="fas fa-check"></i> Complete Job
-                    </button>
-                    <button class="btn btn-warning" onclick="techRequestParts()">
-                        <i class="fas fa-box"></i> Request Parts
-                    </button>
-                    <button class="btn btn-primary" onclick="techAddNote()">
-                        <i class="fas fa-sticky-note"></i> Add Note
-                    </button>
-                    <button class="btn btn-danger" onclick="techViewSchedule()">
-                        <i class="fas fa-calendar"></i> View Schedule
-                    </button>
-                </div>
-            </div>
         </div>
 
         <!-- Settings Screen -->
         <div id="settingsScreen" class="screen">
             <div class="section">
-                <h2>⚙️ Shop Settings</h2>
+                <h2>\u2699\ufe0f Shop Settings</h2>
                 <p style="color: #7f8c8d; margin-bottom: 20px;">
                     Configure your shop's settings, credentials, and preferences.
                 </p>
@@ -859,6 +773,225 @@
                     <i class="fas fa-save"></i> Save Settings
                 </button>
             </div>
+        </div>
+
+        <!-- Other screens (ALEX, Parts Stores, Analytics) would go here -->
+        <div id="alexScreen" class="screen">
+            <div class="section">
+                <h2>\ud83e\udd16 ALEX - Voice Assistant</h2>
+                <p style="color: #7f8c8d;">ALEX configuration and features coming soon.</p>
+            </div>
+        </div>
+
+        <div id="partsStoresScreen" class="screen">
+            <div class="section">
+                <h2>\ud83c\udfea Parts Stores</h2>
+                <p style="color: #7f8c8d;">Parts stores management coming soon.</p>
+            </div>
+        </div>
+
+        <div id="analyticsScreen" class="screen">
+            <div class="section">
+                <h2>\ud83d\udcca Analytics</h2>
+                <p style="color: #7f8c8d;">Analytics dashboard coming soon.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estimate Modal -->
+    <div id="estimateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-invoice-dollar"></i> New Estimate</h2>
+                <button class="close-btn" onclick="closeEstimateModal()">&times;</button>
+            </div>
+            
+            <form id="estimateForm" onsubmit="saveEstimate(event)">
+                <div class="row">
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Customer Name *</label>
+                            <input type="text" id="estCustomerName" required>
+                        </div>
+                    </div>
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Customer Phone *</label>
+                            <input type="tel" id="estCustomerPhone" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Customer Email</label>
+                            <input type="email" id="estCustomerEmail">
+                        </div>
+                    </div>
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Vehicle *</label>
+                            <input type="text" id="estVehicle" placeholder="e.g., 2019 Toyota Camry" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Estimate Date *</label>
+                    <input type="date" id="estDate" required>
+                </div>
+
+                <div class="line-items" id="estimateLineItems">
+                    <h3>Line Items</h3>
+                    <div class="line-item">
+                        <div class="row">
+                            <div class="half">
+                                <input type="text" placeholder="Description" class="line-item-desc" value="Labor">
+                            </div>
+                            <div class="third">
+                                <input type="number" placeholder="Hours" class="line-item-qty" value="1" step="0.5">
+                            </div>
+                            <div class="third">
+                                <input type="number" placeholder="Rate" class="line-item-rate" value="100">
+                            </div>
+                        </div>
+                        <div class="line-item-total">$100.00</div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary" onclick="addEstimateLineItem()" style="margin-top: 10px;">
+                    <i class="fas fa-plus"></i> Add Line Item
+                </button>
+
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="estNotes" rows="3" placeholder="Additional notes..."></textarea>
+                </div>
+
+                <div class="row" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-danger" onclick="closeEstimateModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-info" style="margin-left: 10px;">
+                        <i class="fas fa-check"></i> Save Estimate
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Invoice Modal -->
+    <div id="invoiceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-invoice"></i> New Invoice</h2>
+                <button class="close-btn" onclick="closeInvoiceModal()">&times;</button>
+            </div>
+            
+            <form id="invoiceForm" onsubmit="saveInvoice(event)">
+                <div class="row">
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Customer Name *</label>
+                            <input type="text" id="invCustomerName" required>
+                        </div>
+                    </div>
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Customer Phone *</label>
+                            <input type="tel" id="invCustomerPhone" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Customer Email</label>
+                            <input type="email" id="invCustomerEmail">
+                        </div>
+                    </div>
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Vehicle *</label>
+                            <input type="text" id="invVehicle" placeholder="e.g., 2019 Toyota Camry" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Invoice Date *</label>
+                    <input type="date" id="invDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Due Date</label>
+                    <input type="date" id="invDueDate">
+                </div>
+
+                <div class="line-items" id="invoiceLineItems">
+                    <h3>Line Items</h3>
+                    <div class="line-item">
+                        <div class="row">
+                            <div class="half">
+                                <input type="text" placeholder="Description" class="line-item-desc" value="Labor">
+                            </div>
+                            <div class="third">
+                                <input type="number" placeholder="Hours" class="line-item-qty" value="1" step="0.5">
+                            </div>
+                            <div class="third">
+                                <input type="number" placeholder="Rate" class="line-item-rate" value="100">
+                            </div>
+                        </div>
+                        <div class="line-item-total">$100.00</div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary" onclick="addInvoiceLineItem()" style="margin-top: 10px;">
+                    <i class="fas fa-plus"></i> Add Line Item
+                </button>
+
+                <div class="invoice-summary">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="invSubtotal">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tax (8%):</span>
+                        <span id="invTax">$0.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="invTotal">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Payment Method</label>
+                    <select id="invPaymentMethod">
+                        <option value="">Select payment method...</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Check">Check</option>
+                        <option value="Finance">Finance</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="invNotes" rows="3" placeholder="Additional notes..."></textarea>
+                </div>
+
+                <div class="row" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-danger" onclick="closeInvoiceModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-success" style="margin-left: 10px;">
+                        <i class="fas fa-check"></i> Save Invoice
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -927,16 +1060,11 @@
                     <textarea id="apptNotes" rows="3" placeholder="Describe the issue or service needed..."></textarea>
                 </div>
 
-                <div class="form-group">
-                    <label>Estimated Duration (hours)</label>
-                    <input type="number" id="apptDuration" step="0.5" value="1">
-                </div>
-
                 <div class="row" style="margin-top: 20px;">
                     <button type="button" class="btn btn-danger" onclick="closeAppointmentModal()">
                         <i class="fas fa-times"></i> Cancel
                     </button>
-                    <button type="submit" class="btn btn-success" style="margin-left: 10px;">
+                    <button type="submit" class="btn btn-primary" style="margin-left: 10px;">
                         <i class="fas fa-check"></i> Save Appointment
                     </button>
                 </div>
@@ -945,87 +1073,6 @@
     </div>
 
     <script>
-        // Services We Don't Do
-        let servicesWeDontDo = [];
-
-        // Load services we don't do from backend
-        async function loadServicesWeDontDo() {
-            try {
-                const response = await fetch('/api/alex/config');
-                const config = await response.json();
-                servicesWeDontDo = config.servicesWeDontDo || [];
-                renderServicesWeDontDo();
-            } catch (error) {
-                console.error('Error loading services:', error);
-            }
-        }
-
-        // Add service we don't do
-        async function addServiceNotOffered() {
-            const input = document.getElementById('serviceNotOffered');
-            const service = input.value.trim();
-            
-            if (!service) {
-                alert('Please enter a service name');
-                return;
-            }
-            
-            if (servicesWeDontDo.includes(service)) {
-                alert('This service is already in the list');
-                return;
-            }
-            
-            servicesWeDontDo.push(service);
-            input.value = '';
-            
-            // Save to backend
-            try {
-                await fetch('/api/alex/services-we-dont-do', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ services: servicesWeDontDo })
-                });
-                
-                renderServicesWeDontDo();
-            } catch (error) {
-                console.error('Error saving service:', error);
-            }
-        }
-
-        // Remove service we don't do
-        async function removeServiceNotOffered(service) {
-            servicesWeDontDo = servicesWeDontDo.filter(s => s !== service);
-            
-            // Save to backend
-            try {
-                await fetch('/api/alex/services-we-dont-do', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ services: servicesWeDontDo })
-                });
-                
-                renderServicesWeDontDo();
-            } catch (error) {
-                console.error('Error saving service:', error);
-            }
-        }
-
-        // Render services we don't do
-        function renderServicesWeDontDo() {
-            const container = document.getElementById('servicesWeDontDoList');
-            
-            if (servicesWeDontDo.length === 0) {
-                container.innerHTML = '<span style="color: #7f8c8d;">No services configured - ALEX will book all service types</span>';
-                return;
-            }
-            
-            container.innerHTML = servicesWeDontDo.map(service => `
-                <span class="status-badge danger" style="cursor: pointer;" onclick="removeServiceNotOffered('${service}')">
-                    ${service} <i class="fas fa-times"></i>
-                </span>
-            `).join('');
-        }
-
         // Screen navigation
         function showScreen(screenId) {
             // Hide all screens
@@ -1047,14 +1094,11 @@
             }
             
             // Load data for specific screens
-            if (screenId === 'analyticsScreen') {
-                loadAnalytics();
+            if (screenId === 'estimatesScreen') {
+                loadEstimates();
             }
-            if (screenId === 'partsStoresScreen') {
-                loadPartsStores();
-            }
-            if (screenId === 'alexScreen') {
-                loadServicesWeDontDo();
+            if (screenId === 'invoicesScreen') {
+                loadInvoices();
             }
             if (screenId === 'appointmentsScreen') {
                 loadAppointments();
@@ -1064,158 +1108,456 @@
             }
         }
 
-        // ALEX Actions
-        async function alexCallStores() {
-            alert('ALEX will call parts stores for pricing. This feature requires VAPI configuration.');
-        }
-
-        async function alexOrderParts() {
-            alert('ALEX will order parts. This feature requires VAPI configuration.');
-        }
-
-        async function alexCheckAvailability() {
-            alert('ALEX will check parts availability. This feature requires Nexpart configuration.');
-        }
-
-        // Load Analytics
-        async function loadAnalytics() {
-            try {
-                const response = await fetch('/api/analytics/overview');
-                const data = await response.json();
-                
-                document.getElementById('analyticsTodayRevenue').textContent = '$' + (data.revenueToday || 0).toFixed(2);
-                document.getElementById('analyticsWeekRevenue').textContent = '$' + (data.revenueThisWeek || 0).toFixed(2);
-                document.getElementById('analyticsMonthRevenue').textContent = '$' + (data.revenueThisMonth || 0).toFixed(2);
-                document.getElementById('analyticsYearRevenue').textContent = '$' + (data.revenueThisYear || 0).toFixed(2);
-                
-                document.getElementById('todayRevenue').textContent = '$' + (data.revenueToday || 0).toFixed(2);
-                document.getElementById('todayJobs').textContent = data.totalJobs || 0;
-                document.getElementById('todayAppointments').textContent = data.activeJobs || 0;
-                document.getElementById('todayWalkIns').textContent = data.pendingApprovals || 0;
-            } catch (error) {
-                console.error('Error loading analytics:', error);
-            }
+        // Estimate Modal Functions
+        function openEstimateModal() {
+            document.getElementById('estimateModal').classList.add('active');
             
-            // Load labor analytics
-            try {
-                const laborResponse = await fetch('/api/analytics/labor');
-                const laborData = await laborResponse.json();
-                
-                document.getElementById('analyticsTotalJobs').textContent = laborData.totalLaborHours || 0;
-                document.getElementById('analyticsAvgLaborTime').textContent = (laborData.avgLaborTime || 0).toFixed(1) + ' hrs';
-            } catch (error) {
-                console.error('Error loading labor analytics:', error);
-            }
-            
-            // Load parts analytics
-            try {
-                const partsResponse = await fetch('/api/analytics/parts');
-                const partsData = await partsResponse.json();
-                
-                document.getElementById('analyticsPartsStores').textContent = partsData.totalPartsStores || 0;
-                document.getElementById('analyticsAvgDiscount').textContent = (partsData.avgDiscountRate || 0).toFixed(1) + '%';
-            } catch (error) {
-                console.error('Error loading parts analytics:', error);
-            }
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('estDate').value = today;
         }
 
-        // Load Parts Stores
-        async function loadPartsStores() {
-            try {
-                const response = await fetch('/api/parts/stores');
-                const stores = await response.json();
-                
-                const tbody = document.getElementById('partsStoresTable');
-                
-                if (!stores || stores.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">No parts stores found</td></tr>';
-                    return;
+        function closeEstimateModal() {
+            document.getElementById('estimateModal').classList.remove('active');
+            document.getElementById('estimateForm').reset();
+            
+            // Reset line items to one empty item
+            document.getElementById('estimateLineItems').innerHTML = `
+                <h3>Line Items</h3>
+                <div class="line-item">
+                    <div class="row">
+                        <div class="half">
+                            <input type="text" placeholder="Description" class="line-item-desc" value="Labor">
+                        </div>
+                        <div class="third">
+                            <input type="number" placeholder="Hours" class="line-item-qty" value="1" step="0.5">
+                        </div>
+                        <div class="third">
+                            <input type="number" placeholder="Rate" class="line-item-rate" value="100">
+                        </div>
+                    </div>
+                    <div class="line-item-total">$100.00</div>
+                </div>
+            `;
+        }
+
+        function addEstimateLineItem() {
+            const container = document.getElementById('estimateLineItems');
+            const newItem = document.createElement('div');
+            newItem.className = 'line-item';
+            newItem.innerHTML = `
+                <div class="row">
+                    <div class="half">
+                        <input type="text" placeholder="Description" class="line-item-desc">
+                    </div>
+                    <div class="third">
+                        <input type="number" placeholder="Hours" class="line-item-qty" step="0.5">
+                    </div>
+                    <div class="third">
+                        <input type="number" placeholder="Rate" class="line-item-rate">
+                    </div>
+                </div>
+                <div class="line-item-total">$0.00</div>
+                <button type="button" class="btn btn-danger" onclick="this.closest('.line-item').remove()" style="margin-top: 5px; padding: 5px 10px; font-size: 12px;">
+                    <i class="fas fa-trash"></i> Remove
+                </button>
+            `;
+            container.appendChild(newItem);
+        }
+
+        // Invoice Modal Functions
+        function openInvoiceModal() {
+            document.getElementById('invoiceModal').classList.add('active');
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('invDate').value = today;
+        }
+
+        function closeInvoiceModal() {
+            document.getElementById('invoiceModal').classList.remove('active');
+            document.getElementById('invoiceForm').reset();
+            
+            // Reset line items
+            document.getElementById('invoiceLineItems').innerHTML = `
+                <h3>Line Items</h3>
+                <div class="line-item">
+                    <div class="row">
+                        <div class="half">
+                            <input type="text" placeholder="Description" class="line-item-desc" value="Labor">
+                        </div>
+                        <div class="third">
+                            <input type="number" placeholder="Hours" class="line-item-qty" value="1" step="0.5">
+                        </div>
+                        <div class="third">
+                            <input type="number" placeholder="Rate" class="line-item-rate" value="100">
+                        </div>
+                    </div>
+                    <div class="line-item-total">$100.00</div>
+                </div>
+            `;
+            
+            calculateInvoiceTotal();
+        }
+
+        function addInvoiceLineItem() {
+            const container = document.getElementById('invoiceLineItems');
+            const newItem = document.createElement('div');
+            newItem.className = 'line-item';
+            newItem.innerHTML = `
+                <div class="row">
+                    <div class="half">
+                        <input type="text" placeholder="Description" class="line-item-desc">
+                    </div>
+                    <div class="third">
+                        <input type="number" placeholder="Hours" class="line-item-qty" step="0.5">
+                    </div>
+                    <div class="third">
+                        <input type="number" placeholder="Rate" class="line-item-rate">
+                    </div>
+                </div>
+                <div class="line-item-total">$0.00</div>
+                <button type="button" class="btn btn-danger" onclick="this.closest('.line-item').remove()" style="margin-top: 5px; padding: 5px 10px; font-size: 12px;">
+                    <i class="fas fa-trash"></i> Remove
+                </button>
+            `;
+            container.appendChild(newItem);
+        }
+
+        function calculateInvoiceTotal() {
+            let subtotal = 0;
+            const lineItems = document.querySelectorAll('#invoiceLineItems .line-item');
+            
+            lineItems.forEach(item => {
+                const qty = parseFloat(item.querySelector('.line-item-qty').value) || 0;
+                const rate = parseFloat(item.querySelector('.line-item-rate').value) || 0;
+                const total = qty * rate;
+                subtotal += total;
+                item.querySelector('.line-item-total').textContent = '$' + total.toFixed(2);
+            });
+            
+            const taxRate = 0.08;
+            const tax = subtotal * taxRate;
+            const total = subtotal + tax;
+            
+            document.getElementById('invSubtotal').textContent = '$' + subtotal.toFixed(2);
+            document.getElementById('invTax').textContent = '$' + tax.toFixed(2);
+            document.getElementById('invTotal').textContent = '$' + total.toFixed(2);
+        }
+
+        // Add event listeners for real-time calculation
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('input', function(e) {
+                if (e.target.closest('#invoiceLineItems')) {
+                    calculateInvoiceTotal();
                 }
-                
-                tbody.innerHTML = stores.map(store => `
-                    <tr>
-                        <td><strong>${store.name}</strong></td>
-                        <td>${store.phone}</td>
-                        <td><span class="status-badge success">${store.discountRate || 0}%</span></td>
-                        <td>${store.deliveryTime || 'Same day'}</td>
-                        <td><span class="status-badge ${store.priority === 1 ? 'success' : 'warning'}">${store.priority || 'normal'}</span></td>
-                        <td>
-                            <button class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;" onclick="editPartsStore('${store.id}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="deletePartsStore('${store.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading parts stores:', error);
-                document.getElementById('partsStoresTable').innerHTML = 
-                    '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">Error loading parts stores</td></tr>';
+            });
+        });
+
+        // Save Estimate
+        async function saveEstimate(event) {
+            event.preventDefault();
+            
+            const lineItems = [];
+            document.querySelectorAll('#estimateLineItems .line-item').forEach(item => {
+                const desc = item.querySelector('.line-item-desc').value;
+                const qty = parseFloat(item.querySelector('.line-item-qty').value) || 0;
+                const rate = parseFloat(item.querySelector('.line-item-rate').value) || 0;
+                if (desc) {
+                    lineItems.push({ description: desc, quantity: qty, rate: rate, total: qty * rate });
+                }
+            });
+            
+            const total = lineItems.reduce((sum, item) => sum + item.total, 0);
+            
+            const estimate = {
+                customerName: document.getElementById('estCustomerName').value,
+                customerPhone: document.getElementById('estCustomerPhone').value,
+                customerEmail: document.getElementById('estCustomerEmail').value,
+                vehicle: document.getElementById('estVehicle').value,
+                date: document.getElementById('estDate').value,
+                lineItems: lineItems,
+                total: total,
+                notes: document.getElementById('estNotes').value,
+                status: 'Pending'
+            };
+            
+            // Save to localStorage for now
+            let estimates = JSON.parse(localStorage.getItem('estimates') || '[]');
+            estimate.id = 'EST-' + (estimates.length + 1).toString().padStart(4, '0');
+            estimates.push(estimate);
+            localStorage.setItem('estimates', JSON.stringify(estimates));
+            
+            alert('\u2705 Estimate saved successfully!');
+            closeEstimateModal();
+            loadEstimates();
+        }
+
+        // Save Invoice
+        async function saveInvoice(event) {
+            event.preventDefault();
+            
+            const lineItems = [];
+            document.querySelectorAll('#invoiceLineItems .line-item').forEach(item => {
+                const desc = item.querySelector('.line-item-desc').value;
+                const qty = parseFloat(item.querySelector('.line-item-qty').value) || 0;
+                const rate = parseFloat(item.querySelector('.line-item-rate').value) || 0;
+                if (desc) {
+                    lineItems.push({ description: desc, quantity: qty, rate: rate, total: qty * rate });
+                }
+            });
+            
+            const subtotal = lineItems.reduce((sum, item) => sum + item.total, 0);
+            const taxRate = 0.08;
+            const tax = subtotal * taxRate;
+            const total = subtotal + tax;
+            
+            const invoice = {
+                customerName: document.getElementById('invCustomerName').value,
+                customerPhone: document.getElementById('invCustomerPhone').value,
+                customerEmail: document.getElementById('invCustomerEmail').value,
+                vehicle: document.getElementById('invVehicle').value,
+                date: document.getElementById('invDate').value,
+                dueDate: document.getElementById('invDueDate').value,
+                lineItems: lineItems,
+                subtotal: subtotal,
+                tax: tax,
+                total: total,
+                paymentMethod: document.getElementById('invPaymentMethod').value,
+                notes: document.getElementById('invNotes').value,
+                status: 'Unpaid'
+            };
+            
+            // Save to localStorage for now
+            let invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+            invoice.id = 'INV-' + (invoices.length + 1).toString().padStart(4, '0');
+            invoices.push(invoice);
+            localStorage.setItem('invoices', JSON.stringify(invoices));
+            
+            alert('\u2705 Invoice saved successfully!');
+            closeInvoiceModal();
+            loadInvoices();
+        }
+
+        // Load Estimates
+        function loadEstimates() {
+            const estimates = JSON.parse(localStorage.getItem('estimates') || '[]');
+            const tbody = document.getElementById('estimatesTable');
+            
+            if (estimates.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #7f8c8d;">No estimates found</td></tr>';
+                return;
             }
+            
+            tbody.innerHTML = estimates.map(est => `
+                <tr>
+                    <td><strong>${est.id}</strong></td>
+                    <td>${new Date(est.date).toLocaleDateString()}</td>
+                    <td>${est.customerName}</td>
+                    <td>${est.vehicle}</td>
+                    <td>$${est.total.toFixed(2)}</td>
+                    <td><span class="status-badge ${est.status === 'Approved' ? 'success' : 'warning'}">${est.status}</span></td>
+                    <td>
+                        <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="convertToInvoice('${est.id}')">
+                            <i class="fas fa-file-invoice"></i>
+                        </button>
+                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteEstimate('${est.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
         }
 
-        // Add new parts store
-        function addNewPartsStore() {
-            const name = prompt('Enter store name:');
-            if (!name) return;
+        // Load Invoices
+        function loadInvoices() {
+            const invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+            const tbody = document.getElementById('invoicesTable');
             
-            const phone = prompt('Enter phone number:');
-            if (!phone) return;
+            if (invoices.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #7f8c8d;">No invoices found</td></tr>';
+                return;
+            }
             
-            const discount = prompt('Enter discount rate (%):', '0');
-            const delivery = prompt('Enter delivery time:', 'Same day');
-            const priority = prompt('Enter priority (1-3, lower is higher priority):', '2');
+            tbody.innerHTML = invoices.map(inv => `
+                <tr>
+                    <td><strong>${inv.id}</strong></td>
+                    <td>${new Date(inv.date).toLocaleDateString()}</td>
+                    <td>${inv.customerName}</td>
+                    <td>${inv.vehicle}</td>
+                    <td>$${inv.total.toFixed(2)}</td>
+                    <td><span class="status-badge ${inv.status === 'Paid' ? 'success' : 'warning'}">${inv.status}</span></td>
+                    <td>
+                        <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="printInvoice('${inv.id}')">
+                            <i class="fas fa-print"></i>
+                        </button>
+                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteInvoice('${inv.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Convert Estimate to Invoice
+        function convertToInvoice(estimateId) {
+            const estimates = JSON.parse(localStorage.getItem('estimates') || '[]');
+            const estimate = estimates.find(e => e.id === estimateId);
             
-            fetch('/api/parts/stores', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name,
-                    phone,
-                    discountRate: parseFloat(discount) || 0,
-                    deliveryTime: delivery || 'Same day',
-                    priority: parseInt(priority) || 2,
-                    active: true
-                })
-            }).then(() => {
-                loadPartsStores();
-                alert('Parts store added successfully!');
-            }).catch(error => {
-                alert('Error adding parts store: ' + error.message);
+            if (!estimate) {
+                alert('Estimate not found');
+                return;
+            }
+            
+            // Open invoice modal with estimate data
+            openInvoiceModal();
+            document.getElementById('invCustomerName').value = estimate.customerName;
+            document.getElementById('invCustomerPhone').value = estimate.customerPhone;
+            document.getElementById('invCustomerEmail').value = estimate.customerEmail || '';
+            document.getElementById('invVehicle').value = estimate.vehicle;
+            
+            // Populate line items
+            const container = document.getElementById('invoiceLineItems');
+            container.innerHTML = '<h3>Line Items</h3>';
+            
+            estimate.lineItems.forEach(item => {
+                const newItem = document.createElement('div');
+                newItem.className = 'line-item';
+                newItem.innerHTML = `
+                    <div class="row">
+                        <div class="half">
+                            <input type="text" placeholder="Description" class="line-item-desc" value="${item.description}">
+                        </div>
+                        <div class="third">
+                            <input type="number" placeholder="Hours" class="line-item-qty" value="${item.quantity}" step="0.5">
+                        </div>
+                        <div class="third">
+                            <input type="number" placeholder="Rate" class="line-item-rate" value="${item.rate}">
+                        </div>
+                    </div>
+                    <div class="line-item-total">$${item.total.toFixed(2)}</div>
+                    <button type="button" class="btn btn-danger" onclick="this.closest('.line-item').remove()" style="margin-top: 5px; padding: 5px 10px; font-size: 12px;">
+                        <i class="fas fa-trash"></i> Remove
+                    </button>
+                `;
+                container.appendChild(newItem);
+            });
+            
+            calculateInvoiceTotal();
+        }
+
+        // Delete Estimate
+        function deleteEstimate(estimateId) {
+            if (!confirm('Are you sure you want to delete this estimate?')) return;
+            
+            let estimates = JSON.parse(localStorage.getItem('estimates') || '[]');
+            estimates = estimates.filter(e => e.id !== estimateId);
+            localStorage.setItem('estimates', JSON.stringify(estimates));
+            
+            alert('\u2705 Estimate deleted successfully!');
+            loadEstimates();
+        }
+
+        // Delete Invoice
+        function deleteInvoice(invoiceId) {
+            if (!confirm('Are you sure you want to delete this invoice?')) return;
+            
+            let invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+            invoices = invoices.filter(i => i.id !== invoiceId);
+            localStorage.setItem('invoices', JSON.stringify(invoices));
+            
+            alert('\u2705 Invoice deleted successfully!');
+            loadInvoices();
+        }
+
+        // Print Invoice
+        function printInvoice(invoiceId) {
+            const invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+            const invoice = invoices.find(i => i.id === invoiceId);
+            
+            if (!invoice) {
+                alert('Invoice not found');
+                return;
+            }
+            
+            // Create a simple print window
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Invoice ${invoice.id}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .header h1 { color: #2c3e50; }
+                        .info { margin-bottom: 20px; }
+                        .info p { margin: 5px 0; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+                        th { background: #f8f9fa; }
+                        .total { text-align: right; font-size: 18px; font-weight: bold; margin-top: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>\ud83d\ude97 VHICL Pro Auto Shop</h1>
+                        <p>Invoice #${invoice.id}</p>
+                    </div>
+                    <div class="info">
+                        <p><strong>Customer:</strong> ${invoice.customerName}</p>
+                        <p><strong>Phone:</strong> ${invoice.customerPhone}</p>
+                        <p><strong>Vehicle:</strong> ${invoice.vehicle}</p>
+                        <p><strong>Date:</strong> ${new Date(invoice.date).toLocaleDateString()}</p>
+                        ${invoice.dueDate ? `<p><strong>Due Date:</strong> ${new Date(invoice.dueDate).toLocaleDateString()}</p>` : ''}
+                    </div>
+                    <table>
+                        <tr><th>Description</th><th>Hours</th><th>Rate</th><th>Total</th></tr>
+                        ${invoice.lineItems.map(item => `
+                            <tr>
+                                <td>${item.description}</td>
+                                <td>${item.quantity}</td>
+                                <td>$${item.rate.toFixed(2)}</td>
+                                <td>$${item.total.toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                    <div class="total">
+                        <p>Subtotal: $${invoice.subtotal.toFixed(2)}</p>
+                        <p>Tax: $${invoice.tax.toFixed(2)}</p>
+                        <p>Total: $${invoice.total.toFixed(2)}</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Search functions
+        function searchEstimates() {
+            const searchTerm = document.getElementById('searchEstimates').value.toLowerCase();
+            const rows = document.querySelectorAll('#estimatesTable tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
             });
         }
 
-        // Edit parts store
-        function editPartsStore(storeId) {
-            alert('Edit functionality coming soon');
-        }
-
-        // Delete parts store
-        function deletePartsStore(storeId) {
-            if (!confirm('Are you sure you want to delete this parts store?')) return;
+        function searchInvoices() {
+            const searchTerm = document.getElementById('searchInvoices').value.toLowerCase();
+            const rows = document.querySelectorAll('#invoicesTable tr');
             
-            fetch(`/api/parts/stores/${storeId}`, {
-                method: 'DELETE'
-            }).then(() => {
-                loadPartsStores();
-                alert('Parts store deleted successfully!');
-            }).catch(error => {
-                alert('Error deleting parts store: ' + error.message);
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
             });
-        }
-
-        // Search parts stores
-        function searchPartsStores() {
-            console.log('Searching parts stores...');
         }
 
         // Appointment Modal Functions
         function openAppointmentModal() {
             document.getElementById('appointmentModal').classList.add('active');
             
-            // Set default date to today
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('apptDate').value = today;
         }
@@ -1238,97 +1580,59 @@
                 time: document.getElementById('apptTime').value,
                 service: document.getElementById('apptService').value,
                 notes: document.getElementById('apptNotes').value,
-                duration: parseFloat(document.getElementById('apptDuration').value) || 1,
                 status: 'Scheduled'
             };
             
-            try {
-                const response = await fetch('/api/appointments', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(appointment)
-                });
-                
-                if (response.ok) {
-                    alert('✅ Appointment saved successfully!');
-                    closeAppointmentModal();
-                    loadAppointments();
-                } else {
-                    alert('❌ Failed to save appointment');
-                }
-            } catch (error) {
-                console.error('Error saving appointment:', error);
-                alert('❌ Error saving appointment: ' + error.message);
-            }
+            let appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+            appointment.id = appointments.length + 1;
+            appointments.push(appointment);
+            localStorage.setItem('appointments', JSON.stringify(appointments));
+            
+            alert('\u2705 Appointment saved successfully!');
+            closeAppointmentModal();
+            loadAppointments();
         }
 
         // Load Appointments
-        async function loadAppointments() {
-            try {
-                const response = await fetch('/api/appointments');
-                const appointments = await response.json();
-                
-                const tbody = document.getElementById('appointmentsTable');
-                
-                if (!appointments || appointments.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">No appointments found</td></tr>';
-                    return;
-                }
-                
-                tbody.innerHTML = appointments.map(apt => `
-                    <tr>
-                        <td>
-                            <strong>${new Date(apt.date).toLocaleDateString()}</strong><br>
-                            <small>${apt.time}</small>
-                        </td>
-                        <td>${apt.customerName}</td>
-                        <td>${apt.vehicle}</td>
-                        <td>${apt.service}</td>
-                        <td><span class="status-badge ${apt.status === 'Scheduled' ? 'success' : 'warning'}">${apt.status}</span></td>
-                        <td>
-                            <button class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;" onclick="editAppointment('${apt.id}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteAppointment('${apt.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading appointments:', error);
-                document.getElementById('appointmentsTable').innerHTML = 
-                    '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">Error loading appointments</td></tr>';
+        function loadAppointments() {
+            const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+            const tbody = document.getElementById('appointmentsTable');
+            
+            if (appointments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">No appointments found</td></tr>';
+                return;
             }
+            
+            tbody.innerHTML = appointments.map(apt => `
+                <tr>
+                    <td>
+                        <strong>${new Date(apt.date).toLocaleDateString()}</strong><br>
+                        <small>${apt.time}</small>
+                    </td>
+                    <td>${apt.customerName}</td>
+                    <td>${apt.vehicle}</td>
+                    <td>${apt.service}</td>
+                    <td><span class="status-badge ${apt.status === 'Scheduled' ? 'success' : 'warning'}">${apt.status}</span></td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteAppointment('${apt.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
         }
 
-        // Delete Appointment
-        async function deleteAppointment(id) {
+        function deleteAppointment(id) {
             if (!confirm('Are you sure you want to delete this appointment?')) return;
             
-            try {
-                const response = await fetch(`/api/appointments/${id}`, {
-                    method: 'DELETE'
-                });
-                
-                if (response.ok) {
-                    alert('✅ Appointment deleted successfully!');
-                    loadAppointments();
-                } else {
-                    alert('❌ Failed to delete appointment');
-                }
-            } catch (error) {
-                console.error('Error deleting appointment:', error);
-                alert('❌ Error deleting appointment: ' + error.message);
-            }
+            let appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+            appointments = appointments.filter(a => a.id !== id);
+            localStorage.setItem('appointments', JSON.stringify(appointments));
+            
+            alert('\u2705 Appointment deleted successfully!');
+            loadAppointments();
         }
 
-        // Edit Appointment (placeholder)
-        function editAppointment(id) {
-            alert('Edit functionality coming soon');
-        }
-
-        // Search Appointments
         function searchAppointments() {
             const searchTerm = document.getElementById('searchAppointments').value.toLowerCase();
             const rows = document.querySelectorAll('#appointmentsTable tr');
@@ -1339,7 +1643,6 @@
             });
         }
 
-        // Filter Appointments
         function filterAppointments() {
             const filter = document.getElementById('filterAppointments').value;
             alert('Filter by ' + filter + ' - coming soon');
@@ -1384,14 +1687,8 @@
                         <td><span class="status-badge warning">Bay ${job.bay || 'TBD'}</span></td>
                         <td>${job.status === 'In Progress' ? '50%' : '0%'}</td>
                         <td>
-                            <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="completeTechJob('${job.id}')">
+                            <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;">
                                 <i class="fas fa-check"></i>
-                            </button>
-                            <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="addTechNote('${job.id}')">
-                                <i class="fas fa-sticky-note"></i>
-                            </button>
-                            <button class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;" onclick="requestTechParts('${job.id}')">
-                                <i class="fas fa-box"></i>
                             </button>
                         </td>
                     </tr>
@@ -1428,39 +1725,6 @@
             }
         }
 
-        // Technician Functions
-        async function techStartJob() {
-            alert('Start job functionality coming soon');
-        }
-
-        async function completeTechJob(jobId) {
-            alert('Complete job functionality coming soon');
-        }
-
-        async function requestTechParts(jobId) {
-            alert('Request parts functionality coming soon');
-        }
-
-        async function addTechNote(jobId) {
-            alert('Add note functionality coming soon');
-        }
-
-        async function techAddNote() {
-            alert('Add note functionality coming soon');
-        }
-
-        async function techViewSchedule() {
-            alert('View schedule functionality coming soon');
-        }
-
-        async function techCompleteJob() {
-            alert('Complete job functionality coming soon');
-        }
-
-        async function techRequestParts() {
-            alert('Request parts functionality coming soon');
-        }
-
         // Settings
         function saveSettings() {
             const settings = {
@@ -1474,28 +1738,17 @@
                 vapiServerUrl: document.getElementById('settingServerUrl').value
             };
             
-            // Save to localStorage
             localStorage.setItem('shopSettings', JSON.stringify(settings));
             
-            // Save to backend
-            fetch('/api/shop/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings)
-            }).then(() => {
-                alert('✅ Settings saved successfully!');
-            }).catch(error => {
-                console.error('Error saving settings:', error);
-            });
+            alert('\u2705 Settings saved successfully!');
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            loadServicesWeDontDo();
-            loadAnalytics();
-            loadPartsStores();
             loadAppointments();
             loadTechWorkflow();
+            loadEstimates();
+            loadInvoices();
         });
     </script>
 </body>
