@@ -2128,20 +2128,30 @@
                     </div>
                     <div class="modal-body">
                         <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Search By:</label>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Vehicle Description / Tag Number:</label>
+                            <input type="text" id="vehicleTagInput" placeholder="e.g., Red Toyota Camry - ABC123" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Part to Look Up:</label>
+                            <input type="text" id="partToLookupInput" placeholder="e.g., Brake Pads, Oil Filter, Alternator" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Search By (Optional):</label>
                             <select id="partsSearchType" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" onchange="togglePartsSearchFields()">
-                                <option value="partNumber">Part Number</option>
                                 <option value="description">Part Description</option>
+                                <option value="partNumber">Part Number</option>
                                 <option value="vehicle">Vehicle (Make/Model/Year)</option>
                             </select>
                         </div>
 
-                        <div id="partNumberField" style="margin-bottom: 15px;">
+                        <div id="partNumberField" style="margin-bottom: 15px; display: none;">
                             <label style="display: block; margin-bottom: 5px; font-weight: bold;">Part Number:</label>
                             <input type="text" id="partNumberInput" placeholder="e.g., 513123" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
                         </div>
 
-                        <div id="descriptionField" style="margin-bottom: 15px; display: none;">
+                        <div id="descriptionField" style="margin-bottom: 15px;">
                             <label style="display: block; margin-bottom: 5px; font-weight: bold;">Part Description:</label>
                             <input type="text" id="partDescriptionInput" placeholder="e.g., Brake Pads" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
                         </div>
@@ -2181,7 +2191,14 @@
         async function searchNexpartParts() {
             const searchType = document.getElementById('partsSearchType').value;
             const resultsContainer = document.getElementById('partsResults');
+            const vehicleTag = document.getElementById('vehicleTagInput').value.trim();
+            const partToLookup = document.getElementById('partToLookupInput').value.trim();
             
+            if (!partToLookup) {
+                alert('Please enter a part to look up');
+                return;
+            }
+
             resultsContainer.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Searching Nexpart...</div>';
 
             let searchParams = {};
@@ -2195,24 +2212,11 @@
                 }
                 searchParams = { partNumber };
                 queryStr = `Part #${partNumber}`;
-            } else if (searchType === 'description') {
-                const description = document.getElementById('partDescriptionInput').value.trim();
-                if (!description) {
-                    alert('Please enter a part description');
-                    return;
-                }
+            } else {
+                // Use the "Part to Look Up" field for description search
+                const description = partToLookup;
                 searchParams = { description };
                 queryStr = description;
-            } else if (searchType === 'vehicle') {
-                const year = document.getElementById('vehicleYearInput').value.trim();
-                const make = document.getElementById('vehicleMakeInput').value.trim();
-                const model = document.getElementById('vehicleModelInput').value.trim();
-                if (!year || !make || !model) {
-                    alert('Please enter vehicle year, make, and model');
-                    return;
-                }
-                searchParams = { year, make, model };
-                queryStr = `${year} ${make} ${model}`;
             }
 
             try {
@@ -2225,9 +2229,12 @@
                 const data = await response.json();
 
                 if (data.success && data.parts && data.parts.length > 0) {
+                    const vehicleTagDisplay = vehicleTag ? `<div style="background: #f0f0f0; padding: 10px; margin-bottom: 15px; border-radius: 5px;"><strong>🚗 Vehicle:</strong> ${vehicleTag}</div>` : '';
+                    
                     resultsContainer.innerHTML = `
                         <div style="padding: 20px;">
-                            <h4>📦 Found ${data.parts.length} parts</h4>
+                            ${vehicleTagDisplay}
+                            <h4>📦 Found ${data.parts.length} parts for "${queryStr}"</h4>
                             ${data.parts.map(part => `
                                 <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
                                     <div style="font-weight: bold; margin-bottom: 5px;">${part.number || 'N/A'} - ${part.description}</div>
@@ -2242,7 +2249,8 @@
                 } else {
                     resultsContainer.innerHTML = `
                         <div style="padding: 20px; text-align: center; color: #f44336;">
-                            ❌ No parts found
+                            ${vehicleTag ? `<div style="background: #f0f0f0; padding: 10px; margin-bottom: 15px; border-radius: 5px;"><strong>🚗 Vehicle:</strong> ${vehicleTag}</div>` : ''}
+                            ❌ No parts found for "${queryStr}"
                         </div>
                     `;
                     addALEXActivity('Parts Lookup', queryStr, 'No results');
