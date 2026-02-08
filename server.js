@@ -59,6 +59,59 @@ app.post('/api/shop/settings', (req, res) => {
     res.json(shopSettings);
 });
 
+// ALEX configuration endpoints
+app.get('/api/alex/config', (req, res) => {
+    res.json({
+        enabled: true,
+        autoCallStores: true,
+        phoneId: '',
+        servicesWeDontDo: []
+    });
+});
+
+// Analytics endpoints
+app.get('/api/analytics/overview', (req, res) => {
+    res.json({
+        todayRevenue: 0,
+        thisWeekRevenue: 0,
+        thisMonthRevenue: 0,
+        totalJobs: appointments.length,
+        activeJobs: appointments.filter(a => a.status === 'in-progress').length,
+        completedJobs: appointments.filter(a => a.status === 'completed').length
+    });
+});
+
+app.get('/api/analytics/labor', (req, res) => {
+    res.json({
+        averageLaborTime: 1.5,
+        totalLaborHours: appointments.length * 1.5,
+        laborRevenue: appointments.length * 150
+    });
+});
+
+app.get('/api/analytics/parts', (req, res) => {
+    res.json({
+        totalPartsStores: 0,
+        averageDiscount: 15,
+        partsOrdered: appointments.length * 3
+    });
+});
+
+// Parts stores endpoint
+app.get('/api/parts/stores', (req, res) => {
+    res.json([]);
+});
+
+// Tech workflow endpoints
+app.get('/api/tech/stats', (req, res) => {
+    res.json({
+        activeJobs: 0,
+        completedToday: appointments.filter(a => a.status === 'completed').length,
+        totalHours: 8,
+        rating: 4.8
+    });
+});
+
 // Appointments endpoints
 app.get('/api/appointments', (req, res) => {
     res.json(appointments);
