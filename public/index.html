@@ -901,15 +901,15 @@
                 const response = await fetch('/api/analytics/overview');
                 const data = await response.json();
                 
-                document.getElementById('analyticsTodayRevenue').textContent = '$' + (data.today?.revenue || 0).toFixed(2);
-                document.getElementById('analyticsWeekRevenue').textContent = '$' + (data.thisWeek?.revenue || 0).toFixed(2);
-                document.getElementById('analyticsMonthRevenue').textContent = '$' + (data.thisMonth?.revenue || 0).toFixed(2);
-                document.getElementById('analyticsYearRevenue').textContent = '$' + (data.thisYear?.revenue || 0).toFixed(2);
+                document.getElementById('analyticsTodayRevenue').textContent = '$' + (data.revenueToday || 0).toFixed(2);
+                document.getElementById('analyticsWeekRevenue').textContent = '$' + (data.revenueThisWeek || 0).toFixed(2);
+                document.getElementById('analyticsMonthRevenue').textContent = '$' + (data.revenueThisMonth || 0).toFixed(2);
+                document.getElementById('analyticsYearRevenue').textContent = '$' + (data.revenueThisYear || 0).toFixed(2);
                 
-                document.getElementById('todayRevenue').textContent = '$' + (data.today?.revenue || 0).toFixed(2);
-                document.getElementById('todayJobs').textContent = data.today?.jobs || 0;
-                document.getElementById('todayAppointments').textContent = data.today?.appointments || 0;
-                document.getElementById('todayWalkIns').textContent = data.today?.walkIns || 0;
+                document.getElementById('todayRevenue').textContent = '$' + (data.revenueToday || 0).toFixed(2);
+                document.getElementById('todayJobs').textContent = data.totalJobs || 0;
+                document.getElementById('todayAppointments').textContent = data.activeJobs || 0;
+                document.getElementById('todayWalkIns').textContent = data.pendingApprovals || 0;
             } catch (error) {
                 console.error('Error loading analytics:', error);
             }
@@ -919,8 +919,8 @@
                 const laborResponse = await fetch('/api/analytics/labor');
                 const laborData = await laborResponse.json();
                 
-                document.getElementById('analyticsTotalJobs').textContent = laborData.totalOperations || 0;
-                document.getElementById('analyticsAvgLaborTime').textContent = (laborData.averageLaborTime || 0).toFixed(1) + ' hrs';
+                document.getElementById('analyticsTotalJobs').textContent = laborData.totalLaborHours || 0;
+                document.getElementById('analyticsAvgLaborTime').textContent = (laborData.avgLaborTime || 0).toFixed(1) + ' hrs';
             } catch (error) {
                 console.error('Error loading labor analytics:', error);
             }
@@ -930,8 +930,8 @@
                 const partsResponse = await fetch('/api/analytics/parts');
                 const partsData = await partsResponse.json();
                 
-                document.getElementById('analyticsPartsStores').textContent = partsData.totalStores || 0;
-                document.getElementById('analyticsAvgDiscount').textContent = (partsData.averageDiscount || 0).toFixed(1) + '%';
+                document.getElementById('analyticsPartsStores').textContent = partsData.totalPartsStores || 0;
+                document.getElementById('analyticsAvgDiscount').textContent = (partsData.avgDiscountRate || 0).toFixed(1) + '%';
             } catch (error) {
                 console.error('Error loading parts analytics:', error);
             }
@@ -1026,7 +1026,6 @@
 
         // Search parts stores
         function searchPartsStores() {
-            // Implement search functionality
             console.log('Searching parts stores...');
         }
 
@@ -1062,7 +1061,7 @@
             }
         }
 
-        // Load Active Jobs
+        // Load Active Jobs - FIXED
         async function loadTechActiveJobs() {
             try {
                 const response = await fetch('/api/tech/jobs/active');
@@ -1070,19 +1069,19 @@
                 
                 const tbody = document.getElementById('techActiveJobsTable');
                 
-                if (data.jobs.length === 0) {
+                if (!data || data.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #7f8c8d;">No active jobs</td></tr>';
                     return;
                 }
                 
-                tbody.innerHTML = data.jobs.map(job => `
+                tbody.innerHTML = data.map(job => `
                     <tr>
                         <td><strong>${job.id}</strong></td>
                         <td>${job.customerName || 'N/A'}</td>
-                        <td>${job.vehicleInfo || 'N/A'}</td>
-                        <td>${job.serviceDescription || 'N/A'}</td>
+                        <td>${job.vehicle || 'N/A'}</td>
+                        <td>${job.service || 'N/A'}</td>
                         <td><span class="status-badge warning">Bay ${job.bay || 'TBD'}</span></td>
-                        <td>${job.progress}%</td>
+                        <td>${job.status === 'In Progress' ? '50%' : '0%'}</td>
                         <td>
                             <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="completeTechJob('${job.id}')">
                                 <i class="fas fa-check"></i>
@@ -1101,7 +1100,7 @@
             }
         }
 
-        // Load Completed Jobs
+        // Load Completed Jobs - FIXED
         async function loadTechCompletedJobs() {
             try {
                 const response = await fetch('/api/tech/jobs/completed');
@@ -1109,18 +1108,18 @@
                 
                 const tbody = document.getElementById('techCompletedJobsTable');
                 
-                if (data.jobs.length === 0) {
+                if (!data || data.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">No completed jobs today</td></tr>';
                     return;
                 }
                 
-                tbody.innerHTML = data.jobs.map(job => `
+                tbody.innerHTML = data.map(job => `
                     <tr>
                         <td><strong>${job.id}</strong></td>
                         <td>${job.customerName || 'N/A'}</td>
-                        <td>${job.vehicleInfo || 'N/A'}</td>
-                        <td>${job.serviceDescription || 'N/A'}</td>
-                        <td>${job.hours || 0} hrs</td>
+                        <td>${job.vehicle || 'N/A'}</td>
+                        <td>${job.service || 'N/A'}</td>
+                        <td>${job.hoursSpent || 0} hrs</td>
                         <td>${new Date(job.completedAt).toLocaleTimeString()}</td>
                     </tr>
                 `).join('');
