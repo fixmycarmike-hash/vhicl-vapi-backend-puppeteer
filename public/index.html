@@ -293,6 +293,60 @@
             color: #0c5460;
         }
 
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .close-btn:hover {
+            color: #e74c3c;
+        }
+
         @media (max-width: 768px) {
             .navbar {
                 flex-direction: column;
@@ -380,7 +434,7 @@
             <div class="section">
                 <h2>⚡ Quick Actions</h2>
                 <div class="row">
-                    <button class="btn btn-primary" onclick="showScreen('appointmentsScreen')">
+                    <button class="btn btn-primary" onclick="openAppointmentModal()">
                         <i class="fas fa-plus"></i> New Appointment
                     </button>
                     <button class="btn btn-success" onclick="showScreen('alexScreen')">
@@ -393,101 +447,6 @@
                         <i class="fas fa-cog"></i> Configure Shop
                     </button>
                 </div>
-            </div>
-        </div>
-
-        <!-- ALEX Screen -->
-        <div id="alexScreen" class="screen">
-            <div class="section">
-                <h2>🤖 ALEX - Voice Assistant Configuration</h2>
-                
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <h3><i class="fas fa-phone"></i> Voice Calling</h3>
-                        <div class="stat">
-                            <span class="status-badge success">ENABLED</span>
-                        </div>
-                        <div class="label">ALEX can call parts stores automatically</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-shopping-cart"></i> Parts Ordering</h3>
-                        <div class="stat">
-                            <span class="status-badge success">ENABLED</span>
-                        </div>
-                        <div class="label">ALEX can order parts after approval</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-envelope"></i> Confirmations</h3>
-                        <div class="stat">
-                            <span class="status-badge success">ENABLED</span>
-                        </div>
-                        <div class="label">ALEX sends email confirmations</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-calendar-alt"></i> Appointments</h3>
-                        <div class="stat">
-                            <span class="status-badge success">ENABLED</span>
-                        </div>
-                        <div class="label">ALEX can book appointments</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>🚫 Services We Don't Do</h2>
-                <p style="color: #7f8c8d; margin-bottom: 15px;">
-                    Configure services that ALEX should NOT book appointments for. ALEX will politely decline if a customer requests these services.
-                </p>
-                
-                <div class="form-group">
-                    <label>Add Service We Don't Do</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="serviceNotOffered" placeholder="e.g., Transmission Rebuild, Body Work, Glass Repair">
-                        <button class="btn btn-danger" onclick="addServiceNotOffered()">
-                            <i class="fas fa-plus"></i> Add
-                        </button>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Services We Don't Do</label>
-                    <div id="servicesWeDontDoList" style="display: flex; flex-wrap: wrap; gap: 10px;">
-                        <!-- Services will be added here -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>📞 ALEX Actions</h2>
-                <div class="row">
-                    <button class="btn btn-primary" onclick="alexCallStores()">
-                        <i class="fas fa-phone"></i> Call Parts Stores for Pricing
-                    </button>
-                    <button class="btn btn-success" onclick="alexOrderParts()">
-                        <i class="fas fa-shopping-cart"></i> Order Parts
-                    </button>
-                    <button class="btn btn-warning" onclick="alexCheckAvailability()">
-                        <i class="fas fa-box"></i> Check Parts Availability
-                    </button>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>📊 ALEX Activity</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Action</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="alexActivityLog">
-                        <tr>
-                            <td colspan="3" style="text-align: center; color: #7f8c8d;">No recent activity</td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
 
@@ -510,7 +469,7 @@
                             </select>
                         </div>
                         <div class="third">
-                            <button class="btn btn-primary" style="width: 100%;" onclick="createNewAppointment()">
+                            <button class="btn btn-primary" style="width: 100%;" onclick="openAppointmentModal()">
                                 <i class="fas fa-plus"></i> New Appointment
                             </button>
                         </div>
@@ -534,128 +493,6 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
-        </div>
-
-        <!-- Parts Stores Screen -->
-        <div id="partsStoresScreen" class="screen">
-            <div class="section">
-                <h2>🏪 Parts Stores</h2>
-                
-                <div class="form-group">
-                    <div class="row">
-                        <div class="half">
-                            <input type="text" id="searchPartsStores" placeholder="Search stores..." onkeyup="searchPartsStores()">
-                        </div>
-                        <div class="half">
-                            <button class="btn btn-primary" style="width: 100%;" onclick="addNewPartsStore()">
-                                <i class="fas fa-plus"></i> Add Parts Store
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Store Name</th>
-                            <th>Phone</th>
-                            <th>Discount</th>
-                            <th>Delivery</th>
-                            <th>Priority</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="partsStoresTable">
-                        <tr>
-                            <td colspan="6" style="text-align: center; color: #7f8c8d;">No parts stores found</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Analytics Screen -->
-        <div id="analyticsScreen" class="screen">
-            <div class="section">
-                <h2>📊 Revenue Analytics</h2>
-                
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <h3><i class="fas fa-calendar-day"></i> Today</h3>
-                        <div class="stat" id="analyticsTodayRevenue">$0.00</div>
-                        <div class="label">Revenue today</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-calendar-week"></i> This Week</h3>
-                        <div class="stat" id="analyticsWeekRevenue">$0.00</div>
-                        <div class="label">Revenue this week</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-calendar-month"></i> This Month</h3>
-                        <div class="stat" id="analyticsMonthRevenue">$0.00</div>
-                        <div class="label">Revenue this month</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-calendar-alt"></i> This Year</h3>
-                        <div class="stat" id="analyticsYearRevenue">$0.00</div>
-                        <div class="label">Revenue this year</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>📈 Job Analytics</h2>
-                
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <h3><i class="fas fa-wrench"></i> Total Jobs</h3>
-                        <div class="stat" id="analyticsTotalJobs">0</div>
-                        <div class="label">Jobs completed</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-clock"></i> Avg. Labor Time</h3>
-                        <div class="stat" id="analyticsAvgLaborTime">0.0 hrs</div>
-                        <div class="label">Average job duration</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-users"></i> Customers</h3>
-                        <div class="stat" id="analyticsCustomers">0</div>
-                        <div class="label">Unique customers</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-dollar-sign"></i> Avg. Job Value</h3>
-                        <div class="stat" id="analyticsAvgJobValue">$0.00</div>
-                        <div class="label">Average ticket</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>🔧 Parts Analytics</h2>
-                
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <h3><i class="fas fa-store"></i> Parts Stores</h3>
-                        <div class="stat" id="analyticsPartsStores">0</div>
-                        <div class="label">Active parts stores</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-percent"></i> Avg. Discount</h3>
-                        <div class="stat" id="analyticsAvgDiscount">0%</div>
-                        <div class="label">Average discount rate</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-box"></i> Parts Ordered</h3>
-                        <div class="stat" id="analyticsPartsOrdered">0</div>
-                        <div class="label">Parts ordered this month</div>
-                    </div>
-                    <div class="card">
-                        <h3><i class="fas fa-truck"></i>Deliveries</h3>
-                        <div class="stat" id="analyticsDeliveries">0</div>
-                        <div class="label">Successful deliveries</div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -730,27 +567,6 @@
                     </tbody>
                 </table>
             </div>
-
-            <div class="section">
-                <h2>⚡ Quick Actions</h2>
-                <div class="row">
-                    <button class="btn btn-primary" onclick="techStartJob()">
-                        <i class="fas fa-play"></i> Start Job
-                    </button>
-                    <button class="btn btn-success" onclick="techCompleteJob()">
-                        <i class="fas fa-check"></i> Complete Job
-                    </button>
-                    <button class="btn btn-warning" onclick="techRequestParts()">
-                        <i class="fas fa-box"></i> Request Parts
-                    </button>
-                    <button class="btn btn-primary" onclick="techAddNote()">
-                        <i class="fas fa-sticky-note"></i> Add Note
-                    </button>
-                    <button class="btn btn-danger" onclick="techViewSchedule()">
-                        <i class="fas fa-calendar"></i> View Schedule
-                    </button>
-                </div>
-            </div>
         </div>
 
         <!-- Settings Screen -->
@@ -758,97 +574,162 @@
             <div class="section">
                 <h2>⚙️ Shop Settings</h2>
                 <p style="color: #7f8c8d; margin-bottom: 20px;">
-                    Configure your shop's settings, credentials, and preferences. Click below to open the complete settings page.
+                    Configure your shop's settings, credentials, and preferences.
                 </p>
-                <button class="btn btn-primary" onclick="window.location.href='settings-complete-with-all-settings.html'">
-                    <i class="fas fa-cog"></i> Open Complete Settings
+                
+                <div class="form-group">
+                    <label>Shop Name</label>
+                    <input type="text" id="settingShopName" value="VHICL Pro Auto Shop">
+                </div>
+
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="settingPhone" value="(555) 123-4567">
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" id="settingEmail" value="info@vhiclpro.com">
+                </div>
+
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" id="settingAddress" value="123 Main Street">
+                </div>
+
+                <div class="form-group">
+                    <label>Labor Rate ($/hour)</label>
+                    <input type="number" id="settingLaborRate" value="100">
+                </div>
+
+                <div class="form-group">
+                    <label>Tax Rate (%)</label>
+                    <input type="number" id="settingTaxRate" value="8">
+                </div>
+
+                <div class="form-group">
+                    <label>Diagnostic Fee ($)</label>
+                    <input type="number" id="settingDiagnosticFee" value="50">
+                </div>
+
+                <div class="form-group">
+                    <label>Server URL</label>
+                    <input type="text" id="settingServerUrl" value="https://vhicl-vapi-backend-puppeteer-production.up.railway.app">
+                </div>
+
+                <button class="btn btn-primary" onclick="saveSettings()">
+                    <i class="fas fa-save"></i> Save Settings
                 </button>
+            </div>
+        </div>
+
+        <!-- Other screens (ALEX, Parts Stores, Analytics) would go here -->
+        <!-- For now, they're simplified -->
+        <div id="alexScreen" class="screen">
+            <div class="section">
+                <h2>🤖 ALEX - Voice Assistant</h2>
+                <p style="color: #7f8c8d;">ALEX configuration and features coming soon.</p>
+            </div>
+        </div>
+
+        <div id="partsStoresScreen" class="screen">
+            <div class="section">
+                <h2>🏪 Parts Stores</h2>
+                <p style="color: #7f8c8d;">Parts stores management coming soon.</p>
+            </div>
+        </div>
+
+        <div id="analyticsScreen" class="screen">
+            <div class="section">
+                <h2>📊 Analytics</h2>
+                <p style="color: #7f8c8d;">Analytics dashboard coming soon.</p>
             </div>
         </div>
     </div>
 
+    <!-- Appointment Modal -->
+    <div id="appointmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-calendar-plus"></i> New Appointment</h2>
+                <button class="close-btn" onclick="closeAppointmentModal()">&times;</button>
+            </div>
+            
+            <form id="appointmentForm" onsubmit="saveAppointment(event)">
+                <div class="form-group">
+                    <label>Customer Name *</label>
+                    <input type="text" id="apptCustomerName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Customer Phone *</label>
+                    <input type="tel" id="apptCustomerPhone" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Customer Email</label>
+                    <input type="email" id="apptCustomerEmail">
+                </div>
+
+                <div class="form-group">
+                    <label>Vehicle *</label>
+                    <input type="text" id="apptVehicle" placeholder="e.g., 2019 Toyota Camry" required>
+                </div>
+
+                <div class="row">
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Date *</label>
+                            <input type="date" id="apptDate" required>
+                        </div>
+                    </div>
+                    <div class="half">
+                        <div class="form-group">
+                            <label>Time *</label>
+                            <input type="time" id="apptTime" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Service Needed *</label>
+                    <select id="apptService" required>
+                        <option value="">Select a service...</option>
+                        <option value="Oil Change">Oil Change</option>
+                        <option value="Brake Service">Brake Service</option>
+                        <option value="Tire Rotation">Tire Rotation</option>
+                        <option value="Engine Diagnostic">Engine Diagnostic</option>
+                        <option value="AC Service">AC Service</option>
+                        <option value="Battery Replacement">Battery Replacement</option>
+                        <option value="Transmission Service">Transmission Service</option>
+                        <option value="General Inspection">General Inspection</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Service Details</label>
+                    <textarea id="apptNotes" rows="3" placeholder="Describe the issue or service needed..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Estimated Duration (hours)</label>
+                    <input type="number" id="apptDuration" step="0.5" value="1">
+                </div>
+
+                <div class="row" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-danger" onclick="closeAppointmentModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-success" style="margin-left: 10px;">
+                        <i class="fas fa-check"></i> Save Appointment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // Services We Don't Do
-        let servicesWeDontDo = [];
-
-        // Load services we don't do from backend
-        async function loadServicesWeDontDo() {
-            try {
-                const response = await fetch('/api/alex/config');
-                const config = await response.json();
-                servicesWeDontDo = config.servicesWeDontDo || [];
-                renderServicesWeDontDo();
-            } catch (error) {
-                console.error('Error loading services:', error);
-            }
-        }
-
-        // Add service we don't do
-        async function addServiceNotOffered() {
-            const input = document.getElementById('serviceNotOffered');
-            const service = input.value.trim();
-            
-            if (!service) {
-                alert('Please enter a service name');
-                return;
-            }
-            
-            if (servicesWeDontDo.includes(service)) {
-                alert('This service is already in the list');
-                return;
-            }
-            
-            servicesWeDontDo.push(service);
-            input.value = '';
-            
-            // Save to backend
-            try {
-                await fetch('/api/alex/services-we-dont-do', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ services: servicesWeDontDo })
-                });
-                
-                renderServicesWeDontDo();
-            } catch (error) {
-                console.error('Error saving service:', error);
-            }
-        }
-
-        // Remove service we don't do
-        async function removeServiceNotOffered(service) {
-            servicesWeDontDo = servicesWeDontDo.filter(s => s !== service);
-            
-            // Save to backend
-            try {
-                await fetch('/api/alex/services-we-dont-do', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ services: servicesWeDontDo })
-                });
-                
-                renderServicesWeDontDo();
-            } catch (error) {
-                console.error('Error saving service:', error);
-            }
-        }
-
-        // Render services we don't do
-        function renderServicesWeDontDo() {
-            const container = document.getElementById('servicesWeDontDoList');
-            
-            if (servicesWeDontDo.length === 0) {
-                container.innerHTML = '<span style="color: #7f8c8d;">No services configured - ALEX will book all service types</span>';
-                return;
-            }
-            
-            container.innerHTML = servicesWeDontDo.map(service => `
-                <span class="status-badge danger" style="cursor: pointer;" onclick="removeServiceNotOffered('${service}')">
-                    ${service} <i class="fas fa-times"></i>
-                </span>
-            `).join('');
-        }
-
         // Screen navigation
         function showScreen(screenId) {
             // Hide all screens
@@ -865,184 +746,154 @@
             document.getElementById(screenId).classList.add('active');
             
             // Add active class to clicked button
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.closest('.nav-btn').classList.add('active');
+            }
             
             // Load data for specific screens
-            if (screenId === 'analyticsScreen') {
-                loadAnalytics();
-            }
-            if (screenId === 'partsStoresScreen') {
-                loadPartsStores();
-            }
-            if (screenId === 'alexScreen') {
-                loadServicesWeDontDo();
+            if (screenId === 'appointmentsScreen') {
+                loadAppointments();
             }
             if (screenId === 'techFlowScreen') {
                 loadTechWorkflow();
             }
         }
 
-        // ALEX Actions
-        async function alexCallStores() {
-            alert('ALEX will call parts stores for pricing. This feature requires VAPI configuration.');
-        }
-
-        async function alexOrderParts() {
-            alert('ALEX will order parts. This feature requires VAPI configuration.');
-        }
-
-        async function alexCheckAvailability() {
-            alert('ALEX will check parts availability. This feature requires Nexpart configuration.');
-        }
-
-        // Load Analytics
-        async function loadAnalytics() {
-            try {
-                const response = await fetch('/api/analytics/overview');
-                const data = await response.json();
-                
-                document.getElementById('analyticsTodayRevenue').textContent = '$' + (data.revenueToday || 0).toFixed(2);
-                document.getElementById('analyticsWeekRevenue').textContent = '$' + (data.revenueThisWeek || 0).toFixed(2);
-                document.getElementById('analyticsMonthRevenue').textContent = '$' + (data.revenueThisMonth || 0).toFixed(2);
-                document.getElementById('analyticsYearRevenue').textContent = '$' + (data.revenueThisYear || 0).toFixed(2);
-                
-                document.getElementById('todayRevenue').textContent = '$' + (data.revenueToday || 0).toFixed(2);
-                document.getElementById('todayJobs').textContent = data.totalJobs || 0;
-                document.getElementById('todayAppointments').textContent = data.activeJobs || 0;
-                document.getElementById('todayWalkIns').textContent = data.pendingApprovals || 0;
-            } catch (error) {
-                console.error('Error loading analytics:', error);
-            }
+        // Appointment Modal Functions
+        function openAppointmentModal() {
+            document.getElementById('appointmentModal').classList.add('active');
             
-            // Load labor analytics
-            try {
-                const laborResponse = await fetch('/api/analytics/labor');
-                const laborData = await laborResponse.json();
-                
-                document.getElementById('analyticsTotalJobs').textContent = laborData.totalLaborHours || 0;
-                document.getElementById('analyticsAvgLaborTime').textContent = (laborData.avgLaborTime || 0).toFixed(1) + ' hrs';
-            } catch (error) {
-                console.error('Error loading labor analytics:', error);
-            }
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('apptDate').value = today;
+        }
+
+        function closeAppointmentModal() {
+            document.getElementById('appointmentModal').classList.remove('active');
+            document.getElementById('appointmentForm').reset();
+        }
+
+        // Save Appointment
+        async function saveAppointment(event) {
+            event.preventDefault();
             
-            // Load parts analytics
+            const appointment = {
+                customerName: document.getElementById('apptCustomerName').value,
+                customerPhone: document.getElementById('apptCustomerPhone').value,
+                customerEmail: document.getElementById('apptCustomerEmail').value,
+                vehicle: document.getElementById('apptVehicle').value,
+                date: document.getElementById('apptDate').value,
+                time: document.getElementById('apptTime').value,
+                service: document.getElementById('apptService').value,
+                notes: document.getElementById('apptNotes').value,
+                duration: parseFloat(document.getElementById('apptDuration').value) || 1,
+                status: 'Scheduled'
+            };
+            
             try {
-                const partsResponse = await fetch('/api/analytics/parts');
-                const partsData = await partsResponse.json();
+                const response = await fetch('/api/appointments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(appointment)
+                });
                 
-                document.getElementById('analyticsPartsStores').textContent = partsData.totalPartsStores || 0;
-                document.getElementById('analyticsAvgDiscount').textContent = (partsData.avgDiscountRate || 0).toFixed(1) + '%';
+                if (response.ok) {
+                    alert('✅ Appointment saved successfully!');
+                    closeAppointmentModal();
+                    loadAppointments();
+                } else {
+                    alert('❌ Failed to save appointment');
+                }
             } catch (error) {
-                console.error('Error loading parts analytics:', error);
+                console.error('Error saving appointment:', error);
+                alert('❌ Error saving appointment: ' + error.message);
             }
         }
 
-        // Load Parts Stores
-        async function loadPartsStores() {
+        // Load Appointments
+        async function loadAppointments() {
             try {
-                const response = await fetch('/api/parts/stores');
-                const stores = await response.json();
+                const response = await fetch('/api/appointments');
+                const appointments = await response.json();
                 
-                const tbody = document.getElementById('partsStoresTable');
+                const tbody = document.getElementById('appointmentsTable');
                 
-                if (!stores || stores.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">No parts stores found</td></tr>';
+                if (!appointments || appointments.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">No appointments found</td></tr>';
                     return;
                 }
                 
-                tbody.innerHTML = stores.map(store => `
+                tbody.innerHTML = appointments.map(apt => `
                     <tr>
-                        <td><strong>${store.name}</strong></td>
-                        <td>${store.phone}</td>
-                        <td><span class="status-badge success">${store.discountRate || 0}%</span></td>
-                        <td>${store.deliveryTime || 'Same day'}</td>
-                        <td><span class="status-badge ${store.priority === 1 ? 'success' : 'warning'}">${store.priority || 'normal'}</span></td>
                         <td>
-                            <button class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;" onclick="editPartsStore('${store.id}')">
+                            <strong>${new Date(apt.date).toLocaleDateString()}</strong><br>
+                            <small>${apt.time}</small>
+                        </td>
+                        <td>${apt.customerName}</td>
+                        <td>${apt.vehicle}</td>
+                        <td>${apt.service}</td>
+                        <td><span class="status-badge ${apt.status === 'Scheduled' ? 'success' : 'warning'}">${apt.status}</span></td>
+                        <td>
+                            <button class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;" onclick="editAppointment('${apt.id}')">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="deletePartsStore('${store.id}')">
+                            <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteAppointment('${apt.id}')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
                     </tr>
                 `).join('');
             } catch (error) {
-                console.error('Error loading parts stores:', error);
-                document.getElementById('partsStoresTable').innerHTML = 
-                    '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">Error loading parts stores</td></tr>';
+                console.error('Error loading appointments:', error);
+                document.getElementById('appointmentsTable').innerHTML = 
+                    '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">Error loading appointments</td></tr>';
             }
         }
 
-        // Add new parts store
-        function addNewPartsStore() {
-            const name = prompt('Enter store name:');
-            if (!name) return;
+        // Delete Appointment
+        async function deleteAppointment(id) {
+            if (!confirm('Are you sure you want to delete this appointment?')) return;
             
-            const phone = prompt('Enter phone number:');
-            if (!phone) return;
-            
-            const discount = prompt('Enter discount rate (%):', '0');
-            const delivery = prompt('Enter delivery time:', 'Same day');
-            const priority = prompt('Enter priority (1-3, lower is higher priority):', '2');
-            
-            fetch('/api/parts/stores', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name,
-                    phone,
-                    discountRate: parseFloat(discount) || 0,
-                    deliveryTime: delivery || 'Same day',
-                    priority: parseInt(priority) || 2,
-                    active: true
-                })
-            }).then(() => {
-                loadPartsStores();
-                alert('Parts store added successfully!');
-            }).catch(error => {
-                alert('Error adding parts store: ' + error.message);
-            });
+            try {
+                const response = await fetch(`/api/appointments/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    alert('✅ Appointment deleted successfully!');
+                    loadAppointments();
+                } else {
+                    alert('❌ Failed to delete appointment');
+                }
+            } catch (error) {
+                console.error('Error deleting appointment:', error);
+                alert('❌ Error deleting appointment: ' + error.message);
+            }
         }
 
-        // Edit parts store
-        function editPartsStore(storeId) {
+        // Edit Appointment (placeholder)
+        function editAppointment(id) {
             alert('Edit functionality coming soon');
         }
 
-        // Delete parts store
-        function deletePartsStore(storeId) {
-            if (!confirm('Are you sure you want to delete this parts store?')) return;
+        // Search Appointments
+        function searchAppointments() {
+            const searchTerm = document.getElementById('searchAppointments').value.toLowerCase();
+            const rows = document.querySelectorAll('#appointmentsTable tr');
             
-            fetch(`/api/parts/stores/${storeId}`, {
-                method: 'DELETE'
-            }).then(() => {
-                loadPartsStores();
-                alert('Parts store deleted successfully!');
-            }).catch(error => {
-                alert('Error deleting parts store: ' + error.message);
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
             });
         }
 
-        // Search parts stores
-        function searchPartsStores() {
-            console.log('Searching parts stores...');
-        }
-
-        // Appointments
-        function createNewAppointment() {
-            alert('Appointment creation form will open here');
-        }
-
-        function searchAppointments() {
-            console.log('Searching appointments...');
-        }
-
+        // Filter Appointments
         function filterAppointments() {
-            console.log('Filtering appointments...');
+            const filter = document.getElementById('filterAppointments').value;
+            alert('Filter by ' + filter + ' - coming soon');
         }
 
-        // Load Tech Workflow Data
+        // Tech Workflow
         async function loadTechWorkflow() {
             try {
                 const response = await fetch('/api/tech/stats');
@@ -1053,7 +904,6 @@
                 document.getElementById('techTotalHours').textContent = stats.totalHours.toFixed(1);
                 document.getElementById('techRating').textContent = stats.rating;
                 
-                // Load active jobs
                 loadTechActiveJobs();
                 loadTechCompletedJobs();
             } catch (error) {
@@ -1061,7 +911,6 @@
             }
         }
 
-        // Load Active Jobs - FIXED
         async function loadTechActiveJobs() {
             try {
                 const response = await fetch('/api/tech/jobs/active');
@@ -1083,14 +932,8 @@
                         <td><span class="status-badge warning">Bay ${job.bay || 'TBD'}</span></td>
                         <td>${job.status === 'In Progress' ? '50%' : '0%'}</td>
                         <td>
-                            <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="completeTechJob('${job.id}')">
+                            <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;">
                                 <i class="fas fa-check"></i>
-                            </button>
-                            <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="addTechNote('${job.id}')">
-                                <i class="fas fa-sticky-note"></i>
-                            </button>
-                            <button class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;" onclick="requestTechParts('${job.id}')">
-                                <i class="fas fa-box"></i>
                             </button>
                         </td>
                     </tr>
@@ -1100,7 +943,6 @@
             }
         }
 
-        // Load Completed Jobs - FIXED
         async function loadTechCompletedJobs() {
             try {
                 const response = await fetch('/api/tech/jobs/completed');
@@ -1128,125 +970,37 @@
             }
         }
 
-        // Technician Functions
-        async function techStartJob() {
-            const customerName = prompt('Customer name:');
-            const vehicleInfo = prompt('Vehicle info:');
-            const serviceDescription = prompt('Service description:');
-            const bay = prompt('Bay number:');
+        // Settings
+        function saveSettings() {
+            const settings = {
+                shopName: document.getElementById('settingShopName').value,
+                phone: document.getElementById('settingPhone').value,
+                email: document.getElementById('settingEmail').value,
+                address: document.getElementById('settingAddress').value,
+                laborRate: parseFloat(document.getElementById('settingLaborRate').value),
+                taxRate: parseFloat(document.getElementById('settingTaxRate').value) / 100,
+                diagnosticFee: parseFloat(document.getElementById('settingDiagnosticFee').value),
+                vapiServerUrl: document.getElementById('settingServerUrl').value
+            };
             
-            if (!customerName || !vehicleInfo || !serviceDescription) {
-                alert('Please fill in all fields');
-                return;
-            }
+            // Save to localStorage
+            localStorage.setItem('shopSettings', JSON.stringify(settings));
             
-            try {
-                const response = await fetch('/api/tech/jobs/start', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        customerName,
-                        vehicleInfo,
-                        serviceDescription,
-                        bay
-                    })
-                });
-                
-                const result = await response.json();
-                alert('Job started: ' + result.job.id);
-                loadTechActiveJobs();
-            } catch (error) {
-                alert('Error starting job: ' + error.message);
-            }
-        }
-
-        async function completeTechJob(jobId) {
-            if (!confirm('Complete this job?')) return;
-            
-            const rating = prompt('Customer rating (1-5):', '5');
-            
-            try {
-                const response = await fetch(`/api/tech/jobs/${jobId}/complete`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        rating: parseInt(rating) || 5
-                    })
-                });
-                
-                const result = await response.json();
-                alert('Job completed successfully!');
-                loadTechActiveJobs();
-                loadTechCompletedJobs();
-                loadTechWorkflow();
-            } catch (error) {
-                alert('Error completing job: ' + error.message);
-            }
-        }
-
-        async function requestTechParts(jobId) {
-            const parts = prompt('Enter parts needed:');
-            if (!parts) return;
-            
-            try {
-                const response = await fetch(`/api/tech/jobs/${jobId}/parts`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ parts })
-                });
-                
-                const result = await response.json();
-                alert('Parts requested: ' + parts);
-            } catch (error) {
-                alert('Error requesting parts: ' + error.message);
-            }
-        }
-
-        async function addTechNote(jobId) {
-            const note = prompt('Enter technician note:');
-            if (!note) return;
-            
-            try {
-                const response = await fetch(`/api/tech/jobs/${jobId}/notes`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ note })
-                });
-                
-                const result = await response.json();
-                alert('Note added successfully!');
-            } catch (error) {
-                alert('Error adding note: ' + error.message);
-            }
-        }
-
-        async function techViewSchedule() {
-            try {
-                const response = await fetch('/api/tech/schedule');
-                const schedule = await response.json();
-                
-                let scheduleText = 'TECHNICIAN SCHEDULE\n\n';
-                scheduleText += 'Today\'s Jobs:\n';
-                schedule.today.forEach(job => {
-                    scheduleText += `- ${job.id}: ${job.serviceDescription}\n`;
-                });
-                
-                scheduleText += '\nThis Week\'s Jobs:\n';
-                schedule.thisWeek.forEach(job => {
-                    scheduleText += `- ${job.id}: ${job.serviceDescription} (${new Date(job.scheduledDate).toLocaleDateString()})\n`;
-                });
-                
-                alert(scheduleText || 'No upcoming jobs');
-            } catch (error) {
-                alert('Error loading schedule: ' + error.message);
-            }
+            // Save to backend
+            fetch('/api/shop/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings)
+            }).then(() => {
+                alert('✅ Settings saved successfully!');
+            }).catch(error => {
+                console.error('Error saving settings:', error);
+            });
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            loadServicesWeDontDo();
-            loadAnalytics();
-            loadPartsStores();
+            loadAppointments();
             loadTechWorkflow();
         });
     </script>
