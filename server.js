@@ -161,6 +161,90 @@ app.delete('/api/appointments/:id', (req, res) => {
     }
 });
 
+// ==================== TECH WORKFLOW ENDPOINTS ====================
+
+// Mock data for tech workflow
+const activeJobs = [
+    {
+        id: '1',
+        customerName: 'John Smith',
+        vehicle: '2019 Toyota Camry',
+        service: 'Brake Replacement',
+        status: 'In Progress',
+        startTime: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
+        estimatedHours: 2,
+        hoursSpent: 1.5,
+        notes: 'Brake pads worn, rotors need resurfacing'
+    },
+    {
+        id: '2',
+        customerName: 'Sarah Johnson',
+        vehicle: '2021 Honda Civic',
+        service: 'Oil Change + Inspection',
+        status: 'Not Started',
+        startTime: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+        estimatedHours: 1,
+        hoursSpent: 0,
+        notes: 'Customer requested synthetic oil'
+    }
+];
+
+const completedJobs = [
+    {
+        id: '3',
+        customerName: 'Mike Wilson',
+        vehicle: '2018 Ford F-150',
+        service: 'Transmission Flush',
+        status: 'Completed',
+        completedTime: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+        estimatedHours: 1.5,
+        hoursSpent: 1.3,
+        rating: 5
+    }
+];
+
+app.get('/api/tech/stats', (req, res) => {
+    const stats = {
+        activeJobs: activeJobs.length,
+        completedToday: completedJobs.length,
+        totalHours: completedJobs.reduce((sum, job) => sum + job.hoursSpent, 0),
+        rating: 4.8
+    };
+    res.json(stats);
+});
+
+app.get('/api/tech/jobs/active', (req, res) => {
+    res.json(activeJobs);
+});
+
+app.get('/api/tech/jobs/completed', (req, res) => {
+    res.json(completedJobs);
+});
+
+app.post('/api/tech/jobs/:id/start', (req, res) => {
+    const job = activeJobs.find(j => j.id === req.params.id);
+    if (job) {
+        job.status = 'In Progress';
+        job.startTime = new Date().toISOString();
+        res.json({ success: true, job });
+    } else {
+        res.status(404).json({ success: false, message: 'Job not found' });
+    }
+});
+
+app.post('/api/tech/jobs/:id/complete', (req, res) => {
+    const index = activeJobs.findIndex(j => j.id === req.params.id);
+    if (index !== -1) {
+        const job = activeJobs.splice(index, 1)[0];
+        job.status = 'Completed';
+        job.completedTime = new Date().toISOString();
+        completedJobs.unshift(job);
+        res.json({ success: true, job });
+    } else {
+        res.status(404).json({ success: false, message: 'Job not found' });
+    }
+});
+
 // ==================== NEXPART INTEGRATION ENDPOINTS ====================
 
 // Parts lookup via Nexpart
