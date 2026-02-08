@@ -14,6 +14,25 @@ app.use(express.static('public'));
 
 // In-memory storage
 let appointments = [];
+let shopSettings = {
+    shopName: 'VHICL Pro',
+    address: '',
+    phone: '',
+    email: '',
+    laborRate: 100,
+    laborMultiplier: 1.0,
+    hours: {
+        monday: { open: '08:00', close: '17:00', closed: false },
+        tuesday: { open: '08:00', close: '17:00', closed: false },
+        wednesday: { open: '08:00', close: '17:00', closed: false },
+        thursday: { open: '08:00', close: '17:00', closed: false },
+        friday: { open: '08:00', close: '17:00', closed: false },
+        saturday: { open: '09:00', close: '14:00', closed: true },
+        sunday: { open: '', close: '', closed: true }
+    },
+    services: ['Oil Change', 'Brake Service', 'Tire Service', 'Engine Repair', 'AC Service'],
+    notes: ''
+};
 
 // Health check
 app.get('/health', (req, res) => {
@@ -24,6 +43,20 @@ app.get('/health', (req, res) => {
             appointments: true
         }
     });
+});
+
+// Shop settings endpoints
+app.get('/api/shop/settings', (req, res) => {
+    res.json(shopSettings);
+});
+
+app.post('/api/shop/settings', (req, res) => {
+    shopSettings = {
+        ...shopSettings,
+        ...req.body,
+        updatedAt: new Date().toISOString()
+    };
+    res.json(shopSettings);
 });
 
 // Appointments endpoints
