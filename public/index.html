@@ -490,6 +490,61 @@
                 flex: 1;
             }
         }
+
+        /* Stat Cards */
+        .stat-card {
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        /* Table improvements */
+        table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
     </style>
 <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
@@ -578,36 +633,70 @@
         <!-- Estimates Screen -->
         <div id="estimatesScreen" class="screen">
             <div class="section">
-                <h2>📋 Estimates</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>📋 Estimates</h2>
+                    <button class="btn btn-info" onclick="openEstimateModal()">
+                        <i class="fas fa-plus"></i> New Estimate
+                    </button>
+                </div>
                 
-                <div class="form-group">
-                    <div class="row">
-                        <div class="half">
-                            <input type="text" id="searchEstimates" placeholder="Search estimates..." onkeyup="searchEstimates()">
-                        </div>
-                        <div class="half">
-                            <button class="btn btn-info" style="width: 100%;" onclick="openEstimateModal()">
-                                <i class="fas fa-plus"></i> New Estimate
-                            </button>
-                        </div>
+                <!-- Quick Stats -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <div class="stat-label">Total Estimates</div>
+                        <div class="stat-value" id="estTotalCount">0</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                        <div class="stat-label">Pending</div>
+                        <div class="stat-value" id="estPendingCount">0</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                        <div class="stat-label">Approved</div>
+                        <div class="stat-value" id="estApprovedCount">0</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                        <div class="stat-label">Total Value</div>
+                        <div class="stat-value" id="estTotalValue">$0</div>
                     </div>
                 </div>
 
-                <table>
+                <!-- Filters -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="searchEstimates" placeholder="🔍 Search by customer, vehicle, or estimate #..." onkeyup="searchEstimates()" style="padding: 10px;">
+                    <select id="filterEstimatesByStatus" onchange="filterEstimatesByStatus()" style="padding: 10px;">
+                        <option value="all">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                    <select id="filterEstimatesByDate" onchange="filterEstimatesByDate()" style="padding: 10px;">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                    </select>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <thead>
-                        <tr>
-                            <th>Estimate #</th>
-                            <th>Date</th>
-                            <th>Customer</th>
-                            <th>Vehicle</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 12px; text-align: left;">Estimate #</th>
+                            <th style="padding: 12px; text-align: left;">Date</th>
+                            <th style="padding: 12px; text-align: left;">Customer</th>
+                            <th style="padding: 12px; text-align: left;">Vehicle</th>
+                            <th style="padding: 12px; text-align: right;">Total</th>
+                            <th style="padding: 12px; text-align: center;">Status</th>
+                            <th style="padding: 12px; text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="estimatesTable">
                         <tr>
-                            <td colspan="7" style="text-align: center; color: #7f8c8d;">No estimates found</td>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: #7f8c8d;">
+                                <i class="fas fa-file-invoice-dollar" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                                <p>No estimates found</p>
+                                <p style="font-size: 12px;">Click "New Estimate" to create your first estimate</p>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -617,36 +706,70 @@
         <!-- Invoices Screen -->
         <div id="invoicesScreen" class="screen">
             <div class="section">
-                <h2>📄 Invoices</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>📄 Invoices</h2>
+                    <button class="btn btn-success" onclick="openInvoiceModal()">
+                        <i class="fas fa-plus"></i> New Invoice
+                    </button>
+                </div>
                 
-                <div class="form-group">
-                    <div class="row">
-                        <div class="half">
-                            <input type="text" id="searchInvoices" placeholder="Search invoices..." onkeyup="searchInvoices()">
-                        </div>
-                        <div class="half">
-                            <button class="btn btn-success" style="width: 100%;" onclick="openInvoiceModal()">
-                                <i class="fas fa-plus"></i> New Invoice
-                            </button>
-                        </div>
+                <!-- Quick Stats -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <div class="stat-label">Total Invoices</div>
+                        <div class="stat-value" id="invTotalCount">0</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%); color: white;">
+                        <div class="stat-label">Unpaid</div>
+                        <div class="stat-value" id="invUnpaidCount">0</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #51cf66 0%, #40c057 100%); color: white;">
+                        <div class="stat-label">Paid</div>
+                        <div class="stat-value" id="invPaidCount">0</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%); color: white;">
+                        <div class="stat-label">Total Revenue</div>
+                        <div class="stat-value" id="invTotalRevenue">$0</div>
                     </div>
                 </div>
 
-                <table>
+                <!-- Filters -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="searchInvoices" placeholder="🔍 Search by customer, vehicle, or invoice #..." onkeyup="searchInvoices()" style="padding: 10px;">
+                    <select id="filterInvoicesByStatus" onchange="filterInvoicesByStatus()" style="padding: 10px;">
+                        <option value="all">All Statuses</option>
+                        <option value="Unpaid">Unpaid</option>
+                        <option value="Partial">Partial</option>
+                        <option value="Paid">Paid</option>
+                    </select>
+                    <select id="filterInvoicesByDate" onchange="filterInvoicesByDate()" style="padding: 10px;">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                    </select>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <thead>
-                        <tr>
-                            <th>Invoice #</th>
-                            <th>Date</th>
-                            <th>Customer</th>
-                            <th>Vehicle</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 12px; text-align: left;">Invoice #</th>
+                            <th style="padding: 12px; text-align: left;">Date</th>
+                            <th style="padding: 12px; text-align: left;">Customer</th>
+                            <th style="padding: 12px; text-align: left;">Vehicle</th>
+                            <th style="padding: 12px; text-align: right;">Total</th>
+                            <th style="padding: 12px; text-align: center;">Status</th>
+                            <th style="padding: 12px; text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="invoicesTable">
                         <tr>
-                            <td colspan="7" style="text-align: center; color: #7f8c8d;">No invoices found</td>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: #7f8c8d;">
+                                <i class="fas fa-file-invoice" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                                <p>No invoices found</p>
+                                <p style="font-size: 12px;">Click "New Invoice" to create your first invoice</p>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -806,8 +929,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Tax Rate (%)</label>
-                    <input type="number" id="settingTaxRate" value="8">
+                    <label>Sales Tax Rate (%)</label>
+                    <input type="number" id="settingTaxRate" value="7" min="0" step="0.1" placeholder="Enter 0 for no sales tax">
+                    <small style="color: #7f8c8d;">Set to 0 for states with no sales tax (e.g., Florida)</small>
                 </div>
 
                 <div class="form-group">
@@ -1069,80 +1193,113 @@
 
     <!-- Estimate Modal -->
     <div id="estimateModal" class="modal">
-        <div class="modal-content alex-modal">
+        <div class="modal-content alex-modal" style="max-width: 900px;">
             <div class="modal-header">
                 <h2><i class="fas fa-file-invoice-dollar"></i> New Estimate</h2>
                 <button class="close-btn" onclick="closeEstimateModal()">&times;</button>
             </div>
             
             <form id="estimateForm" onsubmit="saveEstimate(event)">
-                <div class="row">
-                    <div class="half">
-                        <div class="form-group">
-                            <label>Customer Name *</label>
-                            <input type="text" id="estCustomerName" required>
-                        </div>
-                    </div>
-                    <div class="half">
-                        <div class="form-group">
-                            <label>Customer Phone *</label>
-                            <input type="tel" id="estCustomerPhone" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="half">
-                        <div class="form-group">
-                            <label>Customer Email</label>
-                            <input type="email" id="estCustomerEmail">
-                        </div>
-                    </div>
-                    <div class="half">
-                        <div class="form-group">
-                            <label>Vehicle *</label>
-                            <input type="text" id="estVehicle" placeholder="e.g., 2019 Toyota Camry" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Estimate Date *</label>
-                    <input type="date" id="estDate" required>
-                </div>
-
-                <div class="line-items" id="estimateLineItems">
-                    <h3>Line Items</h3>
-                    <div class="line-item">
-                        <div class="row">
-                            <div class="half">
-                                <input type="text" placeholder="Description" class="line-item-desc" value="Labor">
-                            </div>
-                            <div class="third">
-                                <input type="number" placeholder="Hours" class="line-item-qty" value="1" step="0.5">
-                            </div>
-                            <div class="third">
-                                <input type="number" placeholder="Rate" class="line-item-rate" value="100">
+                <!-- Customer Information -->
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 15px 0; color: #667eea;">👤 Customer Information</h3>
+                    <div class="row">
+                        <div class="third">
+                            <div class="form-group">
+                                <label>Customer Name *</label>
+                                <input type="text" id="estCustomerName" required>
                             </div>
                         </div>
-                        <div class="line-item-total">$100.00</div>
+                        <div class="third">
+                            <div class="form-group">
+                                <label>Customer Phone *</label>
+                                <input type="tel" id="estCustomerPhone" required>
+                            </div>
+                        </div>
+                        <div class="third">
+                            <div class="form-group">
+                                <label>Customer Email</label>
+                                <input type="email" id="estCustomerEmail">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="half">
+                            <div class="form-group">
+                                <label>Vehicle *</label>
+                                <input type="text" id="estVehicle" placeholder="e.g., 2019 Toyota Camry" required>
+                            </div>
+                        </div>
+                        <div class="half">
+                            <div class="form-group">
+                                <label>Estimate Date *</label>
+                                <input type="date" id="estDate" required>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <button type="button" class="btn btn-primary" onclick="addEstimateLineItem()" style="margin-top: 10px;">
-                    <i class="fas fa-plus"></i> Add Line Item
-                </button>
+                <!-- Parts Section -->
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0; color: #667eea;">🔧 Parts</h3>
+                        <button type="button" class="btn btn-primary" onclick="addEstimatePart()">
+                            <i class="fas fa-plus"></i> Add Part
+                        </button>
+                    </div>
+                    <div id="estimateParts" style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 15px;">
+                        <p style="text-align: center; color: #7f8c8d; padding: 20px;">No parts added yet</p>
+                    </div>
+                </div>
 
-                <div class="form-group">
+                <!-- Labor Section -->
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0; color: #667eea;">⏱️ Labor</h3>
+                        <button type="button" class="btn btn-primary" onclick="addEstimateLabor()">
+                            <i class="fas fa-plus"></i> Add Labor
+                        </button>
+                    </div>
+                    <div id="estimateLabor" style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 15px;">
+                        <p style="text-align: center; color: #7f8c8d; padding: 20px;">No labor added yet</p>
+                    </div>
+                </div>
+
+                <!-- Running Total -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 15px 0; text-align: center;">💰 Estimate Total</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px;">
+                            <div style="font-size: 12px; opacity: 0.9;">Parts Subtotal</div>
+                            <div style="font-size: 18px; font-weight: bold;" id="estPartsSubtotal">$0.00</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px;">
+                            <div style="font-size: 12px; opacity: 0.9;">Labor Subtotal</div>
+                            <div style="font-size: 18px; font-weight: bold;" id="estLaborSubtotal">$0.00</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px;">
+                            <div style="font-size: 12px; opacity: 0.9;" id="estTaxLabel">Parts Tax (7%)</div>
+                            <div style="font-size: 18px; font-weight: bold;" id="estPartsTax">$0.00</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px;">
+                            <div style="font-size: 12px; opacity: 0.9;">Grand Total</div>
+                            <div style="font-size: 24px; font-weight: bold;" id="estGrandTotal">$0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-group" style="margin-bottom: 20px;">
                     <label>Notes</label>
-                    <textarea id="estNotes" rows="3" placeholder="Additional notes..."></textarea>
+                    <textarea id="estNotes" rows="3" placeholder="Additional notes..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
                 </div>
 
+                <!-- Buttons -->
                 <div class="row" style="margin-top: 20px;">
-                    <button type="button" class="btn btn-danger" onclick="closeEstimateModal()">
+                    <button type="button" class="btn btn-danger" style="flex: 1;" onclick="closeEstimateModal()">
                         <i class="fas fa-times"></i> Cancel
                     </button>
-                    <button type="submit" class="btn btn-info" style="margin-left: 10px;">
+                    <button type="submit" class="btn btn-info" style="flex: 1; margin-left: 10px;">
                         <i class="fas fa-check"></i> Save Estimate
                     </button>
                 </div>
@@ -1152,91 +1309,109 @@
 
     <!-- Invoice Modal -->
     <div id="invoiceModal" class="modal">
-        <div class="modal-content alex-modal">
+        <div class="modal-content alex-modal" style="max-width: 900px;">
             <div class="modal-header">
                 <h2><i class="fas fa-file-invoice"></i> New Invoice</h2>
                 <button class="close-btn" onclick="closeInvoiceModal()">&times;</button>
             </div>
             
             <form id="invoiceForm" onsubmit="saveInvoice(event)">
-                <div class="row">
-                    <div class="half">
-                        <div class="form-group">
-                            <label>Customer Name *</label>
-                            <input type="text" id="invCustomerName" required>
-                        </div>
-                    </div>
-                    <div class="half">
-                        <div class="form-group">
-                            <label>Customer Phone *</label>
-                            <input type="tel" id="invCustomerPhone" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="half">
-                        <div class="form-group">
-                            <label>Customer Email</label>
-                            <input type="email" id="invCustomerEmail">
-                        </div>
-                    </div>
-                    <div class="half">
-                        <div class="form-group">
-                            <label>Vehicle *</label>
-                            <input type="text" id="invVehicle" placeholder="e.g., 2019 Toyota Camry" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Invoice Date *</label>
-                    <input type="date" id="invDate" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Due Date</label>
-                    <input type="date" id="invDueDate">
-                </div>
-
-                <div class="line-items" id="invoiceLineItems">
-                    <h3>Line Items</h3>
-                    <div class="line-item">
-                        <div class="row">
-                            <div class="half">
-                                <input type="text" placeholder="Description" class="line-item-desc" value="Labor">
-                            </div>
-                            <div class="third">
-                                <input type="number" placeholder="Hours" class="line-item-qty" value="1" step="0.5">
-                            </div>
-                            <div class="third">
-                                <input type="number" placeholder="Rate" class="line-item-rate" value="100">
+                <!-- Customer Information -->
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 15px 0; color: #667eea;">👤 Customer Information</h3>
+                    <div class="row">
+                        <div class="third">
+                            <div class="form-group">
+                                <label>Customer Name *</label>
+                                <input type="text" id="invCustomerName" required>
                             </div>
                         </div>
-                        <div class="line-item-total">$100.00</div>
+                        <div class="third">
+                            <div class="form-group">
+                                <label>Customer Phone *</label>
+                                <input type="tel" id="invCustomerPhone" required>
+                            </div>
+                        </div>
+                        <div class="third">
+                            <div class="form-group">
+                                <label>Customer Email</label>
+                                <input type="email" id="invCustomerEmail">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="third">
+                            <div class="form-group">
+                                <label>Vehicle *</label>
+                                <input type="text" id="invVehicle" placeholder="e.g., 2019 Toyota Camry" required>
+                            </div>
+                        </div>
+                        <div class="third">
+                            <div class="form-group">
+                                <label>Invoice Date *</label>
+                                <input type="date" id="invDate" required>
+                            </div>
+                        </div>
+                        <div class="third">
+                            <div class="form-group">
+                                <label>Due Date</label>
+                                <input type="date" id="invDueDate">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <button type="button" class="btn btn-primary" onclick="addInvoiceLineItem()" style="margin-top: 10px;">
-                    <i class="fas fa-plus"></i> Add Line Item
-                </button>
-
-                <div class="invoice-summary">
-                    <div class="summary-row">
-                        <span>Subtotal:</span>
-                        <span id="invSubtotal">$0.00</span>
+                <!-- Parts Section -->
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0; color: #667eea;">🔧 Parts</h3>
+                        <button type="button" class="btn btn-primary" onclick="addInvoicePart()">
+                            <i class="fas fa-plus"></i> Add Part
+                        </button>
                     </div>
-                    <div class="summary-row">
-                        <span>Tax (8%):</span>
-                        <span id="invTax">$0.00</span>
-                    </div>
-                    <div class="summary-row total">
-                        <span>Total:</span>
-                        <span id="invTotal">$0.00</span>
+                    <div id="invoiceParts" style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 15px;">
+                        <p style="text-align: center; color: #7f8c8d; padding: 20px;">No parts added yet</p>
                     </div>
                 </div>
 
-                <div class="form-group" style="margin-top: 20px;">
+                <!-- Labor Section -->
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0; color: #667eea;">⏱️ Labor</h3>
+                        <button type="button" class="btn btn-primary" onclick="addInvoiceLabor()">
+                            <i class="fas fa-plus"></i> Add Labor
+                        </button>
+                    </div>
+                    <div id="invoiceLabor" style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 15px;">
+                        <p style="text-align: center; color: #7f8c8d; padding: 20px;">No labor added yet</p>
+                    </div>
+                </div>
+
+                <!-- Running Total -->
+                <div style="background: linear-gradient(135deg, #51cf66 0%, #40c057 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 15px 0; text-align: center;">💰 Invoice Total</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px;">
+                            <div style="font-size: 12px; opacity: 0.9;">Parts Subtotal</div>
+                            <div style="font-size: 18px; font-weight: bold;" id="invPartsSubtotal">$0.00</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px;">
+                            <div style="font-size: 12px; opacity: 0.9;">Labor Subtotal</div>
+                            <div style="font-size: 18px; font-weight: bold;" id="invLaborSubtotal">$0.00</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px;">
+                            <div style="font-size: 12px; opacity: 0.9;" id="invTaxLabel">Parts Tax (7%)</div>
+                            <div style="font-size: 18px; font-weight: bold;" id="invPartsTax">$0.00</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px;">
+                            <div style="font-size: 12px; opacity: 0.9;">Grand Total</div>
+                            <div style="font-size: 24px; font-weight: bold;" id="invGrandTotal">$0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="form-group" style="margin-bottom: 20px;">
                     <label>Payment Method</label>
                     <select id="invPaymentMethod">
                         <option value="">Select payment method...</option>
@@ -1247,16 +1422,18 @@
                     </select>
                 </div>
 
-                <div class="form-group">
+                <!-- Notes -->
+                <div class="form-group" style="margin-bottom: 20px;">
                     <label>Notes</label>
-                    <textarea id="invNotes" rows="3" placeholder="Additional notes..."></textarea>
+                    <textarea id="invNotes" rows="3" placeholder="Additional notes..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
                 </div>
 
+                <!-- Buttons -->
                 <div class="row" style="margin-top: 20px;">
-                    <button type="button" class="btn btn-danger" onclick="closeInvoiceModal()">
+                    <button type="button" class="btn btn-danger" style="flex: 1;" onclick="closeInvoiceModal()">
                         <i class="fas fa-times"></i> Cancel
                     </button>
-                    <button type="submit" class="btn btn-success" style="margin-left: 10px;">
+                    <button type="submit" class="btn btn-success" style="flex: 1; margin-left: 10px;">
                         <i class="fas fa-check"></i> Save Invoice
                     </button>
                 </div>
@@ -1384,54 +1561,148 @@
             // Set default date to today
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('estDate').value = today;
+            
+            // Initialize empty parts and labor sections
+            document.getElementById('estimateParts').innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 20px;">No parts added yet</p>';
+            document.getElementById('estimateLabor').innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 20px;">No labor added yet</p>';
+            calculateEstimateTotal();
         }
 
         function closeEstimateModal() {
             document.getElementById('estimateModal').classList.remove('active');
             document.getElementById('estimateForm').reset();
-            
-            // Reset line items to one empty item
-            document.getElementById('estimateLineItems').innerHTML = `
-                <h3>Line Items</h3>
-                <div class="line-item">
-                    <div class="row">
-                        <div class="half">
-                            <input type="text" placeholder="Description" class="line-item-desc" value="Labor">
-                        </div>
-                        <div class="third">
-                            <input type="number" placeholder="Hours" class="line-item-qty" value="1" step="0.5">
-                        </div>
-                        <div class="third">
-                            <input type="number" placeholder="Rate" class="line-item-rate" value="100">
-                        </div>
-                    </div>
-                    <div class="line-item-total">$100.00</div>
-                </div>
-            `;
         }
 
-        function addEstimateLineItem() {
-            const container = document.getElementById('estimateLineItems');
-            const newItem = document.createElement('div');
-            newItem.className = 'line-item';
-            newItem.innerHTML = `
-                <div class="row">
-                    <div class="half">
-                        <input type="text" placeholder="Description" class="line-item-desc">
-                    </div>
-                    <div class="third">
-                        <input type="number" placeholder="Hours" class="line-item-qty" step="0.5">
-                    </div>
-                    <div class="third">
-                        <input type="number" placeholder="Rate" class="line-item-rate">
-                    </div>
+        function addEstimatePart() {
+            const container = document.getElementById('estimateParts');
+            if (container.querySelector('p')) {
+                container.innerHTML = '';
+            }
+            
+            const partDiv = document.createElement('div');
+            partDiv.className = 'item-row';
+            partDiv.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: end; padding: 10px; border-bottom: 1px solid #eee;';
+            partDiv.innerHTML = `
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Description</label>
+                    <input type="text" class="part-desc" placeholder="Part name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateEstimateTotal()">
                 </div>
-                <div class="line-item-total">$0.00</div>
-                <button type="button" class="btn btn-danger" onclick="this.closest('.line-item').remove()" style="margin-top: 5px; padding: 5px 10px; font-size: 12px;">
-                    <i class="fas fa-trash"></i> Remove
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Quantity</label>
+                    <input type="number" class="part-qty" placeholder="1" value="1" min="1" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateEstimateTotal()">
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Price</label>
+                    <input type="number" class="part-price" placeholder="0.00" min="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateEstimateTotal()">
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Total</label>
+                    <div class="part-total" style="padding: 8px; background: #f0f0f0; border-radius: 4px; text-align: center; font-weight: bold;">$0.00</div>
+                </div>
+                <button type="button" class="btn btn-danger" onclick="removeEstimatePart(this)" style="padding: 8px 12px;">
+                    <i class="fas fa-trash"></i>
                 </button>
             `;
-            container.appendChild(newItem);
+            container.appendChild(partDiv);
+            calculateEstimateTotal();
+        }
+
+        function addEstimateLabor() {
+            const container = document.getElementById('estimateLabor');
+            if (container.querySelector('p')) {
+                container.innerHTML = '';
+            }
+            
+            const laborDiv = document.createElement('div');
+            laborDiv.className = 'item-row';
+            laborDiv.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: end; padding: 10px; border-bottom: 1px solid #eee;';
+            laborDiv.innerHTML = `
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Description</label>
+                    <input type="text" class="labor-desc" placeholder="Labor description" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateEstimateTotal()">
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Hours</label>
+                    <input type="number" class="labor-hours" placeholder="1.0" min="0" step="0.5" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateEstimateTotal()">
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Rate</label>
+                    <input type="number" class="labor-rate" placeholder="100.00" min="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateEstimateTotal()">
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Total</label>
+                    <div class="labor-total" style="padding: 8px; background: #f0f0f0; border-radius: 4px; text-align: center; font-weight: bold;">$0.00</div>
+                </div>
+                <button type="button" class="btn btn-danger" onclick="removeEstimateLabor(this)" style="padding: 8px 12px;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(laborDiv);
+            calculateEstimateTotal();
+        }
+
+        function removeEstimatePart(btn) {
+            btn.closest('.item-row').remove();
+            const container = document.getElementById('estimateParts');
+            if (container.querySelectorAll('.item-row').length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 20px;">No parts added yet</p>';
+            }
+            calculateEstimateTotal();
+        }
+
+        function removeEstimateLabor(btn) {
+            btn.closest('.item-row').remove();
+            const container = document.getElementById('estimateLabor');
+            if (container.querySelectorAll('.item-row').length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 20px;">No labor added yet</p>';
+            }
+            calculateEstimateTotal();
+        }
+
+        function calculateEstimateTotal() {
+            let partsSubtotal = 0;
+            let laborSubtotal = 0;
+
+            // Get tax rate from settings (default to 7% if not set)
+            const shopSettings = JSON.parse(localStorage.getItem('shopSettings') || '{}');
+            const taxRate = (parseFloat(shopSettings.taxRate) || 7) / 100;
+
+            // Calculate parts total
+            document.querySelectorAll('#estimateParts .item-row').forEach(row => {
+                const qty = parseFloat(row.querySelector('.part-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.part-price').value) || 0;
+                const total = qty * price;
+                row.querySelector('.part-total').textContent = '$' + total.toFixed(2);
+                partsSubtotal += total;
+            });
+
+            // Calculate labor total
+            document.querySelectorAll('#estimateLabor .item-row').forEach(row => {
+                const hours = parseFloat(row.querySelector('.labor-hours').value) || 0;
+                const rate = parseFloat(row.querySelector('.labor-rate').value) || 0;
+                const total = hours * rate;
+                row.querySelector('.labor-total').textContent = '$' + total.toFixed(2);
+                laborSubtotal += total;
+            });
+
+            // Calculate tax (tax rate on parts only)
+            const partsTax = partsSubtotal * taxRate;
+            const grandTotal = partsSubtotal + laborSubtotal + partsTax;
+
+            // Update tax label
+            const taxPercent = (taxRate * 100).toFixed(1);
+            const taxLabelElement = document.getElementById('estTaxLabel');
+            if (taxLabelElement) {
+                taxLabelElement.textContent = `Parts Tax (${taxPercent === '0.0' ? '0%' : taxPercent + '%'})`;
+            }
+
+            // Update display
+            document.getElementById('estPartsSubtotal').textContent = '$' + partsSubtotal.toFixed(2);
+            document.getElementById('estLaborSubtotal').textContent = '$' + laborSubtotal.toFixed(2);
+            document.getElementById('estPartsTax').textContent = '$' + partsTax.toFixed(2);
+            document.getElementById('estGrandTotal').textContent = '$' + grandTotal.toFixed(2);
+
+            return { partsSubtotal, laborSubtotal, partsTax, grandTotal };
         }
 
         // Invoice Modal Functions
@@ -1441,84 +1712,149 @@
             // Set default date to today
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('invDate').value = today;
+            
+            // Initialize empty parts and labor sections
+            document.getElementById('invoiceParts').innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 20px;">No parts added yet</p>';
+            document.getElementById('invoiceLabor').innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 20px;">No labor added yet</p>';
+            calculateInvoiceTotal();
         }
 
         function closeInvoiceModal() {
             document.getElementById('invoiceModal').classList.remove('active');
             document.getElementById('invoiceForm').reset();
+        }
+
+        function addInvoicePart() {
+            const container = document.getElementById('invoiceParts');
+            if (container.querySelector('p')) {
+                container.innerHTML = '';
+            }
             
-            // Reset line items
-            document.getElementById('invoiceLineItems').innerHTML = `
-                <h3>Line Items</h3>
-                <div class="line-item">
-                    <div class="row">
-                        <div class="half">
-                            <input type="text" placeholder="Description" class="line-item-desc" value="Labor">
-                        </div>
-                        <div class="third">
-                            <input type="number" placeholder="Hours" class="line-item-qty" value="1" step="0.5">
-                        </div>
-                        <div class="third">
-                            <input type="number" placeholder="Rate" class="line-item-rate" value="100">
-                        </div>
-                    </div>
-                    <div class="line-item-total">$100.00</div>
+            const partDiv = document.createElement('div');
+            partDiv.className = 'item-row';
+            partDiv.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: end; padding: 10px; border-bottom: 1px solid #eee;';
+            partDiv.innerHTML = `
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Description</label>
+                    <input type="text" class="inv-part-desc" placeholder="Part name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateInvoiceTotal()">
                 </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Quantity</label>
+                    <input type="number" class="inv-part-qty" placeholder="1" value="1" min="1" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateInvoiceTotal()">
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Price</label>
+                    <input type="number" class="inv-part-price" placeholder="0.00" min="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateInvoiceTotal()">
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Total</label>
+                    <div class="inv-part-total" style="padding: 8px; background: #f0f0f0; border-radius: 4px; text-align: center; font-weight: bold;">$0.00</div>
+                </div>
+                <button type="button" class="btn btn-danger" onclick="removeInvoicePart(this)" style="padding: 8px 12px;">
+                    <i class="fas fa-trash"></i>
+                </button>
             `;
-            
+            container.appendChild(partDiv);
             calculateInvoiceTotal();
         }
 
-        function addInvoiceLineItem() {
-            const container = document.getElementById('invoiceLineItems');
-            const newItem = document.createElement('div');
-            newItem.className = 'line-item';
-            newItem.innerHTML = `
-                <div class="row">
-                    <div class="half">
-                        <input type="text" placeholder="Description" class="line-item-desc">
-                    </div>
-                    <div class="third">
-                        <input type="number" placeholder="Hours" class="line-item-qty" step="0.5">
-                    </div>
-                    <div class="third">
-                        <input type="number" placeholder="Rate" class="line-item-rate">
-                    </div>
+        function addInvoiceLabor() {
+            const container = document.getElementById('invoiceLabor');
+            if (container.querySelector('p')) {
+                container.innerHTML = '';
+            }
+            
+            const laborDiv = document.createElement('div');
+            laborDiv.className = 'item-row';
+            laborDiv.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: end; padding: 10px; border-bottom: 1px solid #eee;';
+            laborDiv.innerHTML = `
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Description</label>
+                    <input type="text" class="inv-labor-desc" placeholder="Labor description" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateInvoiceTotal()">
                 </div>
-                <div class="line-item-total">$0.00</div>
-                <button type="button" class="btn btn-danger" onclick="this.closest('.line-item').remove()" style="margin-top: 5px; padding: 5px 10px; font-size: 12px;">
-                    <i class="fas fa-trash"></i> Remove
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Hours</label>
+                    <input type="number" class="inv-labor-hours" placeholder="1.0" min="0" step="0.5" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateInvoiceTotal()">
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Rate</label>
+                    <input type="number" class="inv-labor-rate" placeholder="100.00" min="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateInvoiceTotal()">
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: bold;">Total</label>
+                    <div class="inv-labor-total" style="padding: 8px; background: #f0f0f0; border-radius: 4px; text-align: center; font-weight: bold;">$0.00</div>
+                </div>
+                <button type="button" class="btn btn-danger" onclick="removeInvoiceLabor(this)" style="padding: 8px 12px;">
+                    <i class="fas fa-trash"></i>
                 </button>
             `;
-            container.appendChild(newItem);
+            container.appendChild(laborDiv);
+            calculateInvoiceTotal();
+        }
+
+        function removeInvoicePart(btn) {
+            btn.closest('.item-row').remove();
+            const container = document.getElementById('invoiceParts');
+            if (container.querySelectorAll('.item-row').length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 20px;">No parts added yet</p>';
+            }
+            calculateInvoiceTotal();
+        }
+
+        function removeInvoiceLabor(btn) {
+            btn.closest('.item-row').remove();
+            const container = document.getElementById('invoiceLabor');
+            if (container.querySelectorAll('.item-row').length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 20px;">No labor added yet</p>';
+            }
+            calculateInvoiceTotal();
         }
 
         function calculateInvoiceTotal() {
-            let subtotal = 0;
-            const lineItems = document.querySelectorAll('#invoiceLineItems .line-item');
-            
-            lineItems.forEach(item => {
-                const qty = parseFloat(item.querySelector('.line-item-qty').value) || 0;
-                const rate = parseFloat(item.querySelector('.line-item-rate').value) || 0;
-                const total = qty * rate;
-                subtotal += total;
-                item.querySelector('.line-item-total').textContent = '$' + total.toFixed(2);
-            });
-            
-            const taxRate = 0.08;
-            const tax = subtotal * taxRate;
-            const total = subtotal + tax;
-            
-            document.getElementById('invSubtotal').textContent = '$' + subtotal.toFixed(2);
-            document.getElementById('invTax').textContent = '$' + tax.toFixed(2);
-            document.getElementById('invTotal').textContent = '$' + total.toFixed(2);
-        }
+            let partsSubtotal = 0;
+            let laborSubtotal = 0;
 
-        // Add event listeners for real-time calculation
-        document.addEventListener('DOMContentLoaded', function() {
-            document.addEventListener('input', function(e) {
-                if (e.target.closest('#invoiceLineItems')) {
-                    calculateInvoiceTotal();
+            // Get tax rate from settings (default to 7% if not set)
+            const shopSettings = JSON.parse(localStorage.getItem('shopSettings') || '{}');
+            const taxRate = (parseFloat(shopSettings.taxRate) || 7) / 100;
+
+            // Calculate parts total
+            document.querySelectorAll('#invoiceParts .item-row').forEach(row => {
+                const qty = parseFloat(row.querySelector('.inv-part-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.inv-part-price').value) || 0;
+                const total = qty * price;
+                row.querySelector('.inv-part-total').textContent = '$' + total.toFixed(2);
+                partsSubtotal += total;
+            });
+
+            // Calculate labor total
+            document.querySelectorAll('#invoiceLabor .item-row').forEach(row => {
+                const hours = parseFloat(row.querySelector('.inv-labor-hours').value) || 0;
+                const rate = parseFloat(row.querySelector('.inv-labor-rate').value) || 0;
+                const total = hours * rate;
+                row.querySelector('.inv-labor-total').textContent = '$' + total.toFixed(2);
+                laborSubtotal += total;
+            });
+
+            // Calculate tax (tax rate on parts only)
+            const partsTax = partsSubtotal * taxRate;
+            const grandTotal = partsSubtotal + laborSubtotal + partsTax;
+
+            // Update tax label
+            const taxPercent = (taxRate * 100).toFixed(1);
+            const taxLabelElement = document.getElementById('invTaxLabel');
+            if (taxLabelElement) {
+                taxLabelElement.textContent = `Parts Tax (${taxPercent === '0.0' ? '0%' : taxPercent + '%'})`;
+            }
+
+            // Update display
+            document.getElementById('invPartsSubtotal').textContent = '$' + partsSubtotal.toFixed(2);
+            document.getElementById('invLaborSubtotal').textContent = '$' + laborSubtotal.toFixed(2);
+            document.getElementById('invPartsTax').textContent = '$' + partsTax.toFixed(2);
+            document.getElementById('invGrandTotal').textContent = '$' + grandTotal.toFixed(2);
+
+            return { partsSubtotal, laborSubtotal, partsTax, grandTotal };
+        }
                 }
             });
         });
@@ -1527,17 +1863,31 @@
         async function saveEstimate(event) {
             event.preventDefault();
             
-            const lineItems = [];
-            document.querySelectorAll('#estimateLineItems .line-item').forEach(item => {
-                const desc = item.querySelector('.line-item-desc').value;
-                const qty = parseFloat(item.querySelector('.line-item-qty').value) || 0;
-                const rate = parseFloat(item.querySelector('.line-item-rate').value) || 0;
+            const totals = calculateEstimateTotal();
+            
+            // Collect parts
+            const parts = [];
+            document.querySelectorAll('#estimateParts .item-row').forEach(row => {
+                const desc = row.querySelector('.part-desc').value;
+                const qty = parseFloat(row.querySelector('.part-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.part-price').value) || 0;
                 if (desc) {
-                    lineItems.push({ description: desc, quantity: qty, rate: rate, total: qty * rate });
+                    parts.push({ type: 'part', description: desc, quantity: qty, price: price, total: qty * price });
                 }
             });
             
-            const total = lineItems.reduce((sum, item) => sum + item.total, 0);
+            // Collect labor
+            const labor = [];
+            document.querySelectorAll('#estimateLabor .item-row').forEach(row => {
+                const desc = row.querySelector('.labor-desc').value;
+                const hours = parseFloat(row.querySelector('.labor-hours').value) || 0;
+                const rate = parseFloat(row.querySelector('.labor-rate').value) || 0;
+                if (desc) {
+                    labor.push({ type: 'labor', description: desc, hours: hours, rate: rate, total: hours * rate });
+                }
+            });
+            
+            const lineItems = [...parts, ...labor];
             
             const estimate = {
                 customerName: document.getElementById('estCustomerName').value,
@@ -1546,12 +1896,15 @@
                 vehicle: document.getElementById('estVehicle').value,
                 date: document.getElementById('estDate').value,
                 lineItems: lineItems,
-                total: total,
+                partsSubtotal: totals.partsSubtotal,
+                laborSubtotal: totals.laborSubtotal,
+                partsTax: totals.partsTax,
+                total: totals.grandTotal,
                 notes: document.getElementById('estNotes').value,
                 status: 'Pending'
             };
             
-            // Save to localStorage for now
+            // Save to localStorage
             let estimates = JSON.parse(localStorage.getItem('estimates') || '[]');
             estimate.id = 'EST-' + (estimates.length + 1).toString().padStart(4, '0');
             estimates.push(estimate);
@@ -1566,20 +1919,31 @@
         async function saveInvoice(event) {
             event.preventDefault();
             
-            const lineItems = [];
-            document.querySelectorAll('#invoiceLineItems .line-item').forEach(item => {
-                const desc = item.querySelector('.line-item-desc').value;
-                const qty = parseFloat(item.querySelector('.line-item-qty').value) || 0;
-                const rate = parseFloat(item.querySelector('.line-item-rate').value) || 0;
+            const totals = calculateInvoiceTotal();
+            
+            // Collect parts
+            const parts = [];
+            document.querySelectorAll('#invoiceParts .item-row').forEach(row => {
+                const desc = row.querySelector('.inv-part-desc').value;
+                const qty = parseFloat(row.querySelector('.inv-part-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.inv-part-price').value) || 0;
                 if (desc) {
-                    lineItems.push({ description: desc, quantity: qty, rate: rate, total: qty * rate });
+                    parts.push({ type: 'part', description: desc, quantity: qty, price: price, total: qty * price });
                 }
             });
             
-            const subtotal = lineItems.reduce((sum, item) => sum + item.total, 0);
-            const taxRate = 0.08;
-            const tax = subtotal * taxRate;
-            const total = subtotal + tax;
+            // Collect labor
+            const labor = [];
+            document.querySelectorAll('#invoiceLabor .item-row').forEach(row => {
+                const desc = row.querySelector('.inv-labor-desc').value;
+                const hours = parseFloat(row.querySelector('.inv-labor-hours').value) || 0;
+                const rate = parseFloat(row.querySelector('.inv-labor-rate').value) || 0;
+                if (desc) {
+                    labor.push({ type: 'labor', description: desc, hours: hours, rate: rate, total: hours * rate });
+                }
+            });
+            
+            const lineItems = [...parts, ...labor];
             
             const invoice = {
                 customerName: document.getElementById('invCustomerName').value,
@@ -1589,15 +1953,16 @@
                 date: document.getElementById('invDate').value,
                 dueDate: document.getElementById('invDueDate').value,
                 lineItems: lineItems,
-                subtotal: subtotal,
-                tax: tax,
-                total: total,
+                partsSubtotal: totals.partsSubtotal,
+                laborSubtotal: totals.laborSubtotal,
+                partsTax: totals.partsTax,
+                total: totals.grandTotal,
                 paymentMethod: document.getElementById('invPaymentMethod').value,
                 notes: document.getElementById('invNotes').value,
                 status: 'Unpaid'
             };
             
-            // Save to localStorage for now
+            // Save to localStorage
             let invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
             invoice.id = 'INV-' + (invoices.length + 1).toString().padStart(4, '0');
             invoices.push(invoice);
@@ -1613,24 +1978,57 @@
             const estimates = JSON.parse(localStorage.getItem('estimates') || '[]');
             const tbody = document.getElementById('estimatesTable');
             
+            // Update stats
+            const pending = estimates.filter(e => e.status === 'Pending').length;
+            const approved = estimates.filter(e => e.status === 'Approved').length;
+            const totalValue = estimates.reduce((sum, e) => sum + e.total, 0);
+            
+            document.getElementById('estTotalCount').textContent = estimates.length;
+            document.getElementById('estPendingCount').textContent = pending;
+            document.getElementById('estApprovedCount').textContent = approved;
+            document.getElementById('estTotalValue').textContent = `$${totalValue.toFixed(2)}`;
+            
             if (estimates.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #7f8c8d;">No estimates found</td></tr>';
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #7f8c8d;">
+                            <i class="fas fa-file-invoice-dollar" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                            <p>No estimates found</p>
+                            <p style="font-size: 12px;">Click "New Estimate" to create your first estimate</p>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
             
             tbody.innerHTML = estimates.map(est => `
-                <tr>
-                    <td><strong>${est.id}</strong></td>
-                    <td>${new Date(est.date).toLocaleDateString()}</td>
-                    <td>${est.customerName}</td>
-                    <td>${est.vehicle}</td>
-                    <td>$${est.total.toFixed(2)}</td>
-                    <td><span class="status-badge ${est.status === 'Approved' ? 'success' : 'warning'}">${est.status}</span></td>
-                    <td>
-                        <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;" onclick="convertToInvoice('${est.id}')">
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 12px; font-weight: 600; color: #667eea;">${est.id}</td>
+                    <td style="padding: 12px; color: #555;">${new Date(est.date).toLocaleDateString()}</td>
+                    <td style="padding: 12px;">
+                        <div style="font-weight: 500;">${est.customerName}</div>
+                        <div style="font-size: 11px; color: #888;">${est.customerPhone}</div>
+                    </td>
+                    <td style="padding: 12px;">${est.vehicle}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600; color: #2ecc71;">$${est.total.toFixed(2)}</td>
+                    <td style="padding: 12px; text-align: center;">
+                        <span style="padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; ${
+                            est.status === 'Approved' ? 'background: #d4edda; color: #155724;' :
+                            est.status === 'Pending' ? 'background: #fff3cd; color: #856404;' :
+                            'background: #f8d7da; color: #721c24;'
+                        }">${est.status}</span>
+                    </td>
+                    <td style="padding: 12px; text-align: center;">
+                        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px; margin-right: 5px;" onclick="viewEstimate('${est.id}')" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-success" style="padding: 6px 12px; font-size: 11px; margin-right: 5px;" onclick="convertToInvoice('${est.id}')" title="Convert to Invoice">
                             <i class="fas fa-file-invoice"></i>
                         </button>
-                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteEstimate('${est.id}')">
+                        <button class="btn btn-info" style="padding: 6px 12px; font-size: 11px; margin-right: 5px;" onclick="printEstimate('${est.id}')" title="Print">
+                            <i class="fas fa-print"></i>
+                        </button>
+                        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 11px;" onclick="deleteEstimate('${est.id}')" title="Delete">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -1643,24 +2041,57 @@
             const invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
             const tbody = document.getElementById('invoicesTable');
             
+            // Update stats
+            const unpaid = invoices.filter(i => i.status === 'Unpaid' || i.status === 'Partial').length;
+            const paid = invoices.filter(i => i.status === 'Paid').length;
+            const totalRevenue = invoices.reduce((sum, i) => sum + (i.status === 'Paid' ? i.total : 0), 0);
+            
+            document.getElementById('invTotalCount').textContent = invoices.length;
+            document.getElementById('invUnpaidCount').textContent = unpaid;
+            document.getElementById('invPaidCount').textContent = paid;
+            document.getElementById('invTotalRevenue').textContent = `$${totalRevenue.toFixed(2)}`;
+            
             if (invoices.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #7f8c8d;">No invoices found</td></tr>';
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #7f8c8d;">
+                            <i class="fas fa-file-invoice" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                            <p>No invoices found</p>
+                            <p style="font-size: 12px;">Click "New Invoice" to create your first invoice</p>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
             
             tbody.innerHTML = invoices.map(inv => `
-                <tr>
-                    <td><strong>${inv.id}</strong></td>
-                    <td>${new Date(inv.date).toLocaleDateString()}</td>
-                    <td>${inv.customerName}</td>
-                    <td>${inv.vehicle}</td>
-                    <td>$${inv.total.toFixed(2)}</td>
-                    <td><span class="status-badge ${inv.status === 'Paid' ? 'success' : 'warning'}">${inv.status}</span></td>
-                    <td>
-                        <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="printInvoice('${inv.id}')">
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 12px; font-weight: 600; color: #667eea;">${inv.id}</td>
+                    <td style="padding: 12px; color: #555;">${new Date(inv.date).toLocaleDateString()}</td>
+                    <td style="padding: 12px;">
+                        <div style="font-weight: 500;">${inv.customerName}</div>
+                        <div style="font-size: 11px; color: #888;">${inv.customerPhone}</div>
+                    </td>
+                    <td style="padding: 12px;">${inv.vehicle}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600; color: #2ecc71;">$${inv.total.toFixed(2)}</td>
+                    <td style="padding: 12px; text-align: center;">
+                        <span style="padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; ${
+                            inv.status === 'Paid' ? 'background: #d4edda; color: #155724;' :
+                            inv.status === 'Partial' ? 'background: #e2e3e5; color: #383d41;' :
+                            'background: #f8d7da; color: #721c24;'
+                        }">${inv.status}</span>
+                    </td>
+                    <td style="padding: 12px; text-align: center;">
+                        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px; margin-right: 5px;" onclick="viewInvoice('${inv.id}')" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-success" style="padding: 6px 12px; font-size: 11px; margin-right: 5px;" onclick="markAsPaid('${inv.id}')" title="Mark as Paid" ${inv.status === 'Paid' ? 'disabled style="opacity: 0.5;"' : ''}>
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="btn btn-info" style="padding: 6px 12px; font-size: 11px; margin-right: 5px;" onclick="printInvoice('${inv.id}')" title="Print">
                             <i class="fas fa-print"></i>
                         </button>
-                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteInvoice('${inv.id}')">
+                        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 11px;" onclick="deleteInvoice('${inv.id}')" title="Delete">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -1804,23 +2235,423 @@
 
         // Search functions
         function searchEstimates() {
+            loadEstimates();
             const searchTerm = document.getElementById('searchEstimates').value.toLowerCase();
-            const rows = document.querySelectorAll('#estimatesTable tr');
+            const statusFilter = document.getElementById('filterEstimatesByStatus').value;
+            const dateFilter = document.getElementById('filterEstimatesByDate').value;
+            const estimates = JSON.parse(localStorage.getItem('estimates') || '[]');
             
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            const filtered = estimates.filter(est => {
+                const matchesSearch = !searchTerm || 
+                    est.customerName.toLowerCase().includes(searchTerm) ||
+                    est.vehicle.toLowerCase().includes(searchTerm) ||
+                    est.id.toLowerCase().includes(searchTerm);
+                
+                const matchesStatus = statusFilter === 'all' || est.status === statusFilter;
+                
+                const estDate = new Date(est.date);
+                const today = new Date();
+                const matchesDate = dateFilter === 'all' ||
+                    (dateFilter === 'today' && estDate.toDateString() === today.toDateString()) ||
+                    (dateFilter === 'week' && isThisWeek(estDate)) ||
+                    (dateFilter === 'month' && estDate.getMonth() === today.getMonth() && estDate.getFullYear() === today.getFullYear()) ||
+                    (dateFilter === 'year' && estDate.getFullYear() === today.getFullYear());
+                
+                return matchesSearch && matchesStatus && matchesDate;
             });
+            
+            renderFilteredEstimates(filtered);
+        }
+
+        function filterEstimatesByStatus() {
+            searchEstimates();
+        }
+
+        function filterEstimatesByDate() {
+            searchEstimates();
+        }
+
+        function renderFilteredEstimates(estimates) {
+            const tbody = document.getElementById('estimatesTable');
+            
+            if (estimates.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #7f8c8d;">
+                            <i class="fas fa-search" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                            <p>No estimates match your filters</p>
+                            <p style="font-size: 12px;">Try adjusting your search or filter criteria</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = estimates.map(est => `
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 12px; font-weight: 600; color: #667eea;">${est.id}</td>
+                    <td style="padding: 12px; color: #555;">${new Date(est.date).toLocaleDateString()}</td>
+                    <td style="padding: 12px;">
+                        <div style="font-weight: 500;">${est.customerName}</div>
+                        <div style="font-size: 11px; color: #888;">${est.customerPhone}</div>
+                    </td>
+                    <td style="padding: 12px;">${est.vehicle}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600; color: #2ecc71;">$${est.total.toFixed(2)}</td>
+                    <td style="padding: 12px; text-align: center;">
+                        <span style="padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; ${
+                            est.status === 'Approved' ? 'background: #d4edda; color: #155724;' :
+                            est.status === 'Pending' ? 'background: #fff3cd; color: #856404;' :
+                            'background: #f8d7da; color: #721c24;'
+                        }">${est.status}</span>
+                    </td>
+                    <td style="padding: 12px; text-align: center;">
+                        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px; margin-right: 5px;" onclick="viewEstimate('${est.id}')" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-success" style="padding: 6px 12px; font-size: 11px; margin-right: 5px;" onclick="convertToInvoice('${est.id}')" title="Convert to Invoice">
+                            <i class="fas fa-file-invoice"></i>
+                        </button>
+                        <button class="btn btn-info" style="padding: 6px 12px; font-size: 11px; margin-right: 5px;" onclick="printEstimate('${est.id}')" title="Print">
+                            <i class="fas fa-print"></i>
+                        </button>
+                        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 11px;" onclick="deleteEstimate('${est.id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
         }
 
         function searchInvoices() {
+            loadInvoices();
             const searchTerm = document.getElementById('searchInvoices').value.toLowerCase();
-            const rows = document.querySelectorAll('#invoicesTable tr');
+            const statusFilter = document.getElementById('filterInvoicesByStatus').value;
+            const dateFilter = document.getElementById('filterInvoicesByDate').value;
+            const invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
             
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            const filtered = invoices.filter(inv => {
+                const matchesSearch = !searchTerm || 
+                    inv.customerName.toLowerCase().includes(searchTerm) ||
+                    inv.vehicle.toLowerCase().includes(searchTerm) ||
+                    inv.id.toLowerCase().includes(searchTerm);
+                
+                const matchesStatus = statusFilter === 'all' || inv.status === statusFilter;
+                
+                const invDate = new Date(inv.date);
+                const today = new Date();
+                const matchesDate = dateFilter === 'all' ||
+                    (dateFilter === 'today' && invDate.toDateString() === today.toDateString()) ||
+                    (dateFilter === 'week' && isThisWeek(invDate)) ||
+                    (dateFilter === 'month' && invDate.getMonth() === today.getMonth() && invDate.getFullYear() === today.getFullYear()) ||
+                    (dateFilter === 'year' && invDate.getFullYear() === today.getFullYear());
+                
+                return matchesSearch && matchesStatus && matchesDate;
             });
+            
+            renderFilteredInvoices(filtered);
+        }
+
+        function filterInvoicesByStatus() {
+            searchInvoices();
+        }
+
+        function filterInvoicesByDate() {
+            searchInvoices();
+        }
+
+        function renderFilteredInvoices(invoices) {
+            const tbody = document.getElementById('invoicesTable');
+            
+            if (invoices.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #7f8c8d;">
+                            <i class="fas fa-search" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                            <p>No invoices match your filters</p>
+                            <p style="font-size: 12px;">Try adjusting your search or filter criteria</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = invoices.map(inv => `
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 12px; font-weight: 600; color: #667eea;">${inv.id}</td>
+                    <td style="padding: 12px; color: #555;">${new Date(inv.date).toLocaleDateString()}</td>
+                    <td style="padding: 12px;">
+                        <div style="font-weight: 500;">${inv.customerName}</div>
+                        <div style="font-size: 11px; color: #888;">${inv.customerPhone}</div>
+                    </td>
+                    <td style="padding: 12px;">${inv.vehicle}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600; color: #2ecc71;">$${inv.total.toFixed(2)}</td>
+                    <td style="padding: 12px; text-align: center;">
+                        <span style="padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; ${
+                            inv.status === 'Paid' ? 'background: #d4edda; color: #155724;' :
+                            inv.status === 'Partial' ? 'background: #e2e3e5; color: #383d41;' :
+                            'background: #f8d7da; color: #721c24;'
+                        }">${inv.status}</span>
+                    </td>
+                    <td style="padding: 12px; text-align: center;">
+                        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px; margin-right: 5px;" onclick="viewInvoice('${inv.id}')" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-success" style="padding: 6px 12px; font-size: 11px; margin-right: 5px;" onclick="markAsPaid('${inv.id}')" title="Mark as Paid" ${inv.status === 'Paid' ? 'disabled style="opacity: 0.5;"' : ''}>
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="btn btn-info" style="padding: 6px 12px; font-size: 11px; margin-right: 5px;" onclick="printInvoice('${inv.id}')" title="Print">
+                            <i class="fas fa-print"></i>
+                        </button>
+                        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 11px;" onclick="deleteInvoice('${inv.id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function isThisWeek(date) {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+            const monday = new Date(today.setDate(diff));
+            const sunday = new Date(monday);
+            sunday.setDate(sunday.getDate() + 6);
+            return date >= monday && date <= sunday;
+        }
+
+        function viewEstimate(estimateId) {
+            const estimates = JSON.parse(localStorage.getItem('estimates') || '[]');
+            const estimate = estimates.find(e => e.id === estimateId);
+            
+            if (!estimate) {
+                alert('Estimate not found');
+                return;
+            }
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h3>📋 Estimate Details - ${estimate.id}</h3>
+                        <button class="close-btn" onclick="this.closest('.modal').remove()">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 15px 0; color: #667eea;">Customer Information</h4>
+                            <p><strong>Name:</strong> ${estimate.customerName}</p>
+                            <p><strong>Phone:</strong> ${estimate.customerPhone}</p>
+                            ${estimate.customerEmail ? `<p><strong>Email:</strong> ${estimate.customerEmail}</p>` : ''}
+                            <p><strong>Vehicle:</strong> ${estimate.vehicle}</p>
+                        </div>
+                        
+                        <h4 style="margin-bottom: 15px;">Line Items</h4>
+                        <table style="width: 100%; margin-bottom: 20px;">
+                            <thead>
+                                <tr style="background: #667eea; color: white;">
+                                    <th style="padding: 10px; text-align: left;">Description</th>
+                                    <th style="padding: 10px; text-align: right;">Hours</th>
+                                    <th style="padding: 10px; text-align: right;">Rate</th>
+                                    <th style="padding: 10px; text-align: right;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${estimate.lineItems.map(item => `
+                                    <tr style="border-bottom: 1px solid #dee2e6;">
+                                        <td style="padding: 10px;">${item.description}</td>
+                                        <td style="padding: 10px; text-align: right;">${item.hours}</td>
+                                        <td style="padding: 10px; text-align: right;">$${item.rate.toFixed(2)}</td>
+                                        <td style="padding: 10px; text-align: right;">$${item.total.toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        
+                        <div style="text-align: right; font-size: 18px; font-weight: bold; color: #2ecc71; margin-bottom: 20px;">
+                            Total: $${estimate.total.toFixed(2)}
+                        </div>
+                        
+                        <p><strong>Status:</strong> <span style="padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; ${
+                            estimate.status === 'Approved' ? 'background: #d4edda; color: #155724;' :
+                            estimate.status === 'Pending' ? 'background: #fff3cd; color: #856404;' :
+                            'background: #f8d7da; color: #721c24;'
+                        }">${estimate.status}</span></p>
+                        
+                        <p><strong>Date:</strong> ${new Date(estimate.date).toLocaleDateString()}</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function viewInvoice(invoiceId) {
+            const invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+            const invoice = invoices.find(i => i.id === invoiceId);
+            
+            if (!invoice) {
+                alert('Invoice not found');
+                return;
+            }
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h3>📄 Invoice Details - ${invoice.id}</h3>
+                        <button class="close-btn" onclick="this.closest('.modal').remove()">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 15px 0; color: #667eea;">Customer Information</h4>
+                            <p><strong>Name:</strong> ${invoice.customerName}</p>
+                            <p><strong>Phone:</strong> ${invoice.customerPhone}</p>
+                            ${invoice.customerEmail ? `<p><strong>Email:</strong> ${invoice.customerEmail}</p>` : ''}
+                            <p><strong>Vehicle:</strong> ${invoice.vehicle}</p>
+                        </div>
+                        
+                        <h4 style="margin-bottom: 15px;">Line Items</h4>
+                        <table style="width: 100%; margin-bottom: 20px;">
+                            <thead>
+                                <tr style="background: #667eea; color: white;">
+                                    <th style="padding: 10px; text-align: left;">Description</th>
+                                    <th style="padding: 10px; text-align: right;">Hours</th>
+                                    <th style="padding: 10px; text-align: right;">Rate</th>
+                                    <th style="padding: 10px; text-align: right;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${invoice.lineItems.map(item => `
+                                    <tr style="border-bottom: 1px solid #dee2e6;">
+                                        <td style="padding: 10px;">${item.description}</td>
+                                        <td style="padding: 10px; text-align: right;">${item.hours}</td>
+                                        <td style="padding: 10px; text-align: right;">$${item.rate.toFixed(2)}</td>
+                                        <td style="padding: 10px; text-align: right;">$${item.total.toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        
+                        <div style="text-align: right; margin-bottom: 20px;">
+                            <div style="margin-bottom: 5px;">Subtotal: $${invoice.subtotal.toFixed(2)}</div>
+                            <div style="margin-bottom: 5px;">Tax (${(invoice.taxRate * 100).toFixed(0)}%): $${invoice.tax.toFixed(2)}</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #2ecc71;">Total: $${invoice.total.toFixed(2)}</div>
+                        </div>
+                        
+                        <p><strong>Status:</strong> <span style="padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; ${
+                            invoice.status === 'Paid' ? 'background: #d4edda; color: #155724;' :
+                            invoice.status === 'Partial' ? 'background: #e2e3e5; color: #383d41;' :
+                            'background: #f8d7da; color: #721c24;'
+                        }">${invoice.status}</span></p>
+                        
+                        ${invoice.paymentMethod ? `<p><strong>Payment Method:</strong> ${invoice.paymentMethod}</p>` : ''}
+                        
+                        <p><strong>Date:</strong> ${new Date(invoice.date).toLocaleDateString()}</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function markAsPaid(invoiceId) {
+            if (!confirm('Mark this invoice as paid?')) return;
+            
+            const invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+            const invoice = invoices.find(i => i.id === invoiceId);
+            
+            if (!invoice) {
+                alert('Invoice not found');
+                return;
+            }
+            
+            invoice.status = 'Paid';
+            invoice.paidDate = new Date().toISOString();
+            localStorage.setItem('invoices', JSON.stringify(invoices));
+            
+            loadInvoices();
+            alert('Invoice marked as paid!');
+        }
+
+        function printEstimate(estimateId) {
+            const estimates = JSON.parse(localStorage.getItem('estimates') || '[]');
+            const estimate = estimates.find(e => e.id === estimateId);
+            
+            if (!estimate) {
+                alert('Estimate not found');
+                return;
+            }
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Estimate ${estimate.id}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+                        .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #667eea; padding-bottom: 20px; }
+                        .header h1 { color: #667eea; margin: 0; }
+                        .info { margin-bottom: 30px; }
+                        .info h3 { color: #667eea; margin-bottom: 10px; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        th { background: #667eea; color: white; padding: 12px; text-align: left; }
+                        td { padding: 12px; border-bottom: 1px solid #ddd; }
+                        .total { text-align: right; font-size: 24px; font-weight: bold; color: #2ecc71; margin-top: 20px; }
+                        .status { text-align: center; padding: 10px; border-radius: 5px; font-weight: bold; }
+                        .status.approved { background: #d4edda; color: #155724; }
+                        .status.pending { background: #fff3cd; color: #856404; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>📋 ESTIMATE</h1>
+                        <p style="color: #7f8c8d;">${new Date(estimate.date).toLocaleDateString()}</p>
+                    </div>
+                    
+                    <div class="info">
+                        <h3>Customer Information</h3>
+                        <p><strong>Name:</strong> ${estimate.customerName}</p>
+                        <p><strong>Phone:</strong> ${estimate.customerPhone}</p>
+                        ${estimate.customerEmail ? `<p><strong>Email:</strong> ${estimate.customerEmail}</p>` : ''}
+                        <p><strong>Vehicle:</strong> ${estimate.vehicle}</p>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th style="text-align: right;">Hours</th>
+                                <th style="text-align: right;">Rate</th>
+                                <th style="text-align: right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${estimate.lineItems.map(item => `
+                                <tr>
+                                    <td>${item.description}</td>
+                                    <td style="text-align: right;">${item.hours}</td>
+                                    <td style="text-align: right;">$${item.rate.toFixed(2)}</td>
+                                    <td style="text-align: right;">$${item.total.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <div class="total">Total: $${estimate.total.toFixed(2)}</div>
+                    
+                    <div class="status ${estimate.status.toLowerCase()}">
+                        Status: ${estimate.status}
+                    </div>
+                    
+                    <p style="text-align: center; color: #7f8c8d; margin-top: 40px; font-size: 12px;">
+                        Thank you for your business!
+                    </p>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
         }
 
         // Appointment Modal Functions
@@ -2005,7 +2836,7 @@
                 email: document.getElementById('settingEmail').value,
                 address: document.getElementById('settingAddress').value,
                 laborRate: parseFloat(document.getElementById('settingLaborRate').value),
-                taxRate: parseFloat(document.getElementById('settingTaxRate').value) / 100,
+                taxRate: parseFloat(document.getElementById('settingTaxRate').value), // Store as percentage (e.g., 7 for 7%)
                 diagnosticFee: parseFloat(document.getElementById('settingDiagnosticFee').value),
                 vapiServerUrl: document.getElementById('settingServerUrl').value
             };
@@ -2015,8 +2846,37 @@
             alert('✅ Settings saved successfully!');
         }
 
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('shopSettings') || '{}');
+            
+            if (settings.shopName) document.getElementById('settingShopName').value = settings.shopName;
+            if (settings.phone) document.getElementById('settingPhone').value = settings.phone;
+            if (settings.email) document.getElementById('settingEmail').value = settings.email;
+            if (settings.address) document.getElementById('settingAddress').value = settings.address;
+            if (settings.laborRate) document.getElementById('settingLaborRate').value = settings.laborRate;
+            if (settings.taxRate !== undefined) document.getElementById('settingTaxRate').value = settings.taxRate;
+            if (settings.diagnosticFee) document.getElementById('settingDiagnosticFee').value = settings.diagnosticFee;
+            if (settings.vapiServerUrl) document.getElementById('settingServerUrl').value = settings.vapiServerUrl;
+            
+            // Update tax labels in modals
+            const taxRate = (parseFloat(settings.taxRate) || 7);
+            updateTaxLabels(taxRate);
+        }
+
+        function updateTaxLabels(taxRate) {
+            const taxPercent = taxRate.toFixed(1);
+            const taxLabel = taxPercent === '0.0' ? '0%' : taxPercent + '%';
+            
+            const estTaxLabel = document.getElementById('estTaxLabel');
+            if (estTaxLabel) estTaxLabel.textContent = `Parts Tax (${taxLabel})`;
+            
+            const invTaxLabel = document.getElementById('invTaxLabel');
+            if (invTaxLabel) invTaxLabel.textContent = `Parts Tax (${taxLabel})`;
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            loadSettings(); // Load shop settings first
             loadAppointments();
             loadTechWorkflow();
             loadEstimates();
@@ -2269,17 +3129,75 @@
             const currentTab = document.querySelector('.nav-btn.active').textContent.trim();
             
             if (currentTab === 'Estimates') {
-                const lineItems = document.querySelectorAll('#estimateLineItems .line-item');
-                const newItem = createLineItem();
-                newItem.querySelector('.item-description').value = `${number} - ${description}`;
-                newItem.querySelector('.item-amount').value = price.toFixed(2);
-                document.getElementById('estimateLineItems').appendChild(newItem);
-                updateEstimateTotals();
+                const container = document.getElementById('estimateParts');
+                if (container.querySelector('p')) {
+                    container.innerHTML = '';
+                }
+                
+                const partDiv = document.createElement('div');
+                partDiv.className = 'item-row';
+                partDiv.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: end; padding: 10px; border-bottom: 1px solid #eee;';
+                partDiv.innerHTML = `
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold;">Description</label>
+                        <input type="text" class="part-desc" value="${number} - ${description}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateEstimateTotal()">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold;">Quantity</label>
+                        <input type="number" class="part-qty" value="1" min="1" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateEstimateTotal()">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold;">Price</label>
+                        <input type="number" class="part-price" value="${price.toFixed(2)}" min="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateEstimateTotal()">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold;">Total</label>
+                        <div class="part-total" style="padding: 8px; background: #f0f0f0; border-radius: 4px; text-align: center; font-weight: bold;">$${price.toFixed(2)}</div>
+                    </div>
+                    <button type="button" class="btn btn-danger" onclick="removeEstimatePart(this)" style="padding: 8px 12px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                container.appendChild(partDiv);
+                calculateEstimateTotal();
+                
+                // Close the parts lookup modal
+                document.querySelector('.modal.active .close-btn').click();
             } else if (currentTab === 'Invoices') {
-                const lineItems = document.querySelectorAll('#invoiceLineItems .line-item');
-                const newItem = createLineItem();
-                newItem.querySelector('.item-description').value = `${number} - ${description}`;
-                newItem.querySelector('.item-amount').value = price.toFixed(2);
+                const container = document.getElementById('invoiceParts');
+                if (container.querySelector('p')) {
+                    container.innerHTML = '';
+                }
+                
+                const partDiv = document.createElement('div');
+                partDiv.className = 'item-row';
+                partDiv.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: end; padding: 10px; border-bottom: 1px solid #eee;';
+                partDiv.innerHTML = `
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold;">Description</label>
+                        <input type="text" class="inv-part-desc" value="${number} - ${description}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateInvoiceTotal()">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold;">Quantity</label>
+                        <input type="number" class="inv-part-qty" value="1" min="1" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateInvoiceTotal()">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold;">Price</label>
+                        <input type="number" class="inv-part-price" value="${price.toFixed(2)}" min="0" step="0.01" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" oninput="calculateInvoiceTotal()">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold;">Total</label>
+                        <div class="inv-part-total" style="padding: 8px; background: #f0f0f0; border-radius: 4px; text-align: center; font-weight: bold;">$${price.toFixed(2)}</div>
+                    </div>
+                    <button type="button" class="btn btn-danger" onclick="removeInvoicePart(this)" style="padding: 8px 12px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                container.appendChild(partDiv);
+                calculateInvoiceTotal();
+                
+                // Close the parts lookup modal
+                document.querySelector('.modal.active .close-btn').click();
                 document.getElementById('invoiceLineItems').appendChild(newItem);
                 updateInvoiceTotals();
             }
