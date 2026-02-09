@@ -1,0 +1,154 @@
+{
+  "functions": [
+    {
+      "name": "check_vehicle_status",
+      "description": "Check if a vehicle is in the system and get its current status, repair progress, and any pending estimates",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "phone_number": {
+            "type": "string",
+            "description": "Customer's phone number to look up their vehicle"
+          }
+        },
+        "required": ["phone_number"]
+      },
+      "url": "https://vhicl-vapi-backend-puppeteer-production.up.railway.app/api/vapi/check-vehicle-status",
+      "method": "POST"
+    },
+    {
+      "name": "book_appointment",
+      "description": "Book a service appointment for a customer",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "customer_name": {
+            "type": "string",
+            "description": "Customer's full name"
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "Customer's phone number"
+          },
+          "date": {
+            "type": "string",
+            "description": "Appointment date (YYYY-MM-DD format)"
+          },
+          "time": {
+            "type": "string",
+            "description": "Appointment time (e.g., 2:00 PM)"
+          },
+          "service_type": {
+            "type": "string",
+            "description": "Type of service needed (e.g., oil change, brake repair, diagnostics)"
+          },
+          "vehicle_info": {
+            "type": "string",
+            "description": "Vehicle year, make, and model (e.g., 2018 Honda Accord)"
+          }
+        },
+        "required": ["customer_name", "phone_number", "date", "time", "service_type", "vehicle_info"]
+      },
+      "url": "https://vhicl-vapi-backend-puppeteer-production.up.railway.app/api/vapi/book-appointment",
+      "method": "POST"
+    },
+    {
+      "name": "get_estimate",
+      "description": "Get the repair estimate for a customer's vehicle",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "phone_number": {
+            "type": "string",
+            "description": "Customer's phone number"
+          },
+          "job_id": {
+            "type": "string",
+            "description": "Job ID if known (optional)"
+          }
+        },
+        "required": ["phone_number"]
+      },
+      "url": "https://vhicl-vapi-backend-puppeteer-production.up.railway.app/api/vapi/get-estimate",
+      "method": "POST"
+    },
+    {
+      "name": "approve_work",
+      "description": "Record customer approval to proceed with repairs",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "phone_number": {
+            "type": "string",
+            "description": "Customer's phone number"
+          },
+          "job_id": {
+            "type": "string",
+            "description": "Job ID to approve"
+          }
+        },
+        "required": ["phone_number", "job_id"]
+      },
+      "url": "https://vhicl-vapi-backend-puppeteer-production.up.railway.app/api/vapi/approve-work",
+      "method": "POST"
+    },
+    {
+      "name": "take_message",
+      "description": "Take a message for the shop owner when they need to call back",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "customer_name": {
+            "type": "string",
+            "description": "Customer's name"
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "Customer's callback number"
+          },
+          "message": {
+            "type": "string",
+            "description": "The message content"
+          },
+          "callback_requested": {
+            "type": "boolean",
+            "description": "Whether customer wants a callback"
+          }
+        },
+        "required": ["customer_name", "phone_number", "message"]
+      },
+      "url": "https://vhicl-vapi-backend-puppeteer-production.up.railway.app/api/vapi/take-message",
+      "method": "POST"
+    },
+    {
+      "name": "get_shop_hours",
+      "description": "Get the shop's hours of operation and location",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      },
+      "url": "https://vhicl-vapi-backend-puppeteer-production.up.railway.app/api/vapi/get-shop-hours",
+      "method": "POST"
+    },
+    {
+      "name": "search_parts",
+      "description": "Search for parts pricing and availability using Nexpart (takes 5-10 seconds)",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "part_name": {
+            "type": "string",
+            "description": "Name of the part needed (e.g., brake pads, oil filter)"
+          },
+          "vehicle_info": {
+            "type": "string",
+            "description": "Vehicle year, make, and model"
+          }
+        },
+        "required": ["part_name", "vehicle_info"]
+      },
+      "url": "https://vhicl-vapi-backend-puppeteer-production.up.railway.app/api/vapi/check-parts-availability",
+      "method": "POST"
+    }
+  ]
+}
