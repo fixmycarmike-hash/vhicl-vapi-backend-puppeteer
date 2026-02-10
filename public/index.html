@@ -370,6 +370,12 @@
             <button class="nav-btn" onclick="showScreen('appointments')">
                 <i class="fas fa-calendar"></i> Appointments
             </button>
+               <button class="nav-btn" onclick="showScreen('towing')">
+                   <i class="fas fa-truck-pickup"></i> Towing
+               </button>
+               <button class="nav-btn" onclick="showScreen('inventory')">
+                   <i class="fas fa-boxes"></i> Inventory
+               </button>
             <button class="nav-btn" onclick="window.location.href='settings-with-api-inventory.html'">
                 <i class="fas fa-cog"></i> Settings
             </button>
@@ -1152,6 +1158,270 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboardStats();
         });
-    </script>
+    
+// Towing Functions
+function loadTowingRequests() {
+    fetch('/api/towing/requests')
+        .then(res => res.json())
+        .then(requests => {
+            const container = document.getElementById('towingRequestsList');
+            container.innerHTML = requests.map(req => `
+                <div class="tow-request status-${req.status}">
+                    <div class="tow-header">
+                        <span class="tow-id">${req.id}</span>
+                        <span class="tow-status status-${req.status}">${req.status}</span>
+                    </div>
+                    <div class="vehicle-info">
+                        <div class="vehicle-details">
+                            <p><strong>Customer:</strong> ${req.customerName} (${req.customerPhone})</p>
+                            <p><strong>Vehicle:</strong> ${req.vehicle?.year} ${req.vehicle?.make} ${req.vehicle?.model} (${req.vehicle?.plate})</p>
+                            <p><strong>Pickup:</strong> ${req.pickupLocation}</p>
+                            <p><strong>Destination:</strong> ${req.destination}</p>
+                            ${req.notes ? `<p><strong>Notes:</strong> ${req.notes}</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="toolbar">
+                        ${req.status !== 'arrived' ? `<button class="action-btn" onclick="markArrived('${req.id}')">Mark Arrived</button>` : ''}
+                        ${req.status === 'pending' ? `<button class="action-btn" onclick="assignProvider('${req.id}')">Assign Provider</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        })
+        .catch(err => console.error('Error loading towing requests:', err));
+}
+
+function markArrived(towId) {
+    fetch(`/api/towing/${towId}/arrived`, { method: 'POST' })
+        .then(() => {
+            alert('✅ Car marked as arrived! Customer will be notified.');
+            loadTowingRequests();
+        })
+        .catch(err => alert('Error marking as arrived:', err));
+}
+
+// Inventory Functions
+function loadInventory() {
+    fetch('/api/inventory')
+        .then(res => res.json())
+        .then(items => {
+            const container = document.getElementById('inventoryList');
+            container.innerHTML = `
+                <div class="card">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f5f5f5;">
+                                <th style="padding: 10px; text-align: left;">Part</th>
+                                <th style="padding: 10px; text-align: left;">Category</th>
+                                <th style="padding: 10px; text-align: center;">Stock</th>
+                                <th style="padding: 10px; text-align: center;">Price</th>
+                                <th style="padding: 10px; text-align: center;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${items.map(item => `
+                                <tr style="border-bottom: 1px solid #e0e0e0;">
+                                    <td style="padding: 10px;">${item.name} (${item.partNumber})</td>
+                                    <td style="padding: 10px;">${item.category}</td>
+                                    <td style="padding: 10px; text-align: center;">${item.quantity}</td>
+                                    <td style="padding: 10px; text-align: center;">$${item.price.toFixed(2)}</td>
+                                    <td style="padding: 10px; text-align: center;">
+                                        ${item.quantity <= item.reorderPoint ? 
+                                            '<span style="color: #e74c3c; font-weight: bold;">LOW STOCK</span>' : 
+                                            '<span style="color: #27ae60;">In Stock</span>'}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        })
+        .catch(err => console.error('Error loading inventory:', err));
+}
+
+function showLowStock() {
+    fetch('/api/inventory/low-stock/5')
+        .then(res => res.json())
+        .then(items => {
+            alert(`Low Stock Alert:\n\n${items.map(i => `${i.name}: ${i.quantity} units`).join('\n')}`);
+        });
+}
+
+
+// ==================== TOWING FUNCTIONS ====================
+async function loadTowingRequests() {
+    try {
+        const response = await fetch('/api/towing/requests');
+        const requests = await response.json();
+        const container = document.getElementById('towingRequestsList');
+        
+        if (requests.length === 0) {
+            container.innerHTML = '<div class="card"><p>No towing requests found.</p></div>';
+            return;
+        }
+        
+        container.innerHTML = requests.map(req => `
+            <div class="card tow-request status-${req.status}" style="border-left: 4px solid ${getStatusColor(req.status)}">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="font-weight: bold; font-size: 18px;">${req.id}</span>
+                    <span style="padding: 5px 15px; border-radius: 20px; background: ${getStatusColor(req.status)}; color: white; font-weight: bold;">
+                        ${req.status.toUpperCase()}
+                    </span>
+                </div>
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+                    <p><strong>Customer:</strong> ${req.customerName} - <a href="tel:${req.customerPhone}">${req.customerPhone}</a></p>
+                    ${req.vehicle ? `<p><strong>Vehicle:</strong> ${req.vehicle.year} ${req.vehicle.color} ${req.vehicle.make} ${req.vehicle.model} (${req.vehicle.plate})</p>` : ''}
+                    <p><strong>Pickup:</strong> ${req.pickupLocation}</p>
+                    <p><strong>Destination:</strong> ${req.destination}</p>
+                    ${req.keyLocation ? `<p><strong>Key Location:</strong> ${req.keyLocation}</p>` : ''}
+                    ${req.customerMeeting ? `<p><strong>Customer Meeting:</strong> ${req.customerMeeting}</p>` : ''}
+                    ${req.assignedProvider ? `<p><strong>Provider:</strong> ${req.assignedProvider}</p>` : ''}
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    ${req.status !== 'arrived' ? `<button class="action-btn" onclick="markArrived('${req.id}')">✅ Mark Arrived</button>` : ''}
+                    ${req.status === 'pending' ? `<button class="action-btn" onclick="assignProvider('${req.id}')">🚚 Assign Provider</button>` : ''}
+                    <button class="action-btn" onclick="alert('Created: ${new Date(req.createdAt).toLocaleString()}')">📅 Details</button>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading towing requests:', error);
+        document.getElementById('towingRequestsList').innerHTML = '<div class="card" style="color: red;">Error loading towing requests</div>';
+    }
+}
+
+function getStatusColor(status) {
+    const colors = {
+        pending: '#f39c12',
+        assigned: '#3498db',
+        in_progress: '#e67e22',
+        arrived: '#27ae60',
+        completed: '#95a5a6'
+    };
+    return colors[status] || '#95a5a6';
+}
+
+async function markArrived(towId) {
+    if (!confirm('Mark this car as arrived? Customer will be notified via SMS.')) return;
+    
+    try {
+        const response = await fetch(`/api/towing/${towId}/arrived`, { method: 'POST' });
+        if (response.ok) {
+            alert('✅ Car marked as arrived! Customer has been notified.');
+            loadTowingRequests();
+        } else {
+            alert('Error marking as arrived');
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+async function assignProvider(towId) {
+    const providerName = prompt('Enter provider name:');
+    if (!providerName) return;
+    
+    const providerPhone = prompt('Enter provider phone:');
+    
+    try {
+        const response = await fetch(`/api/towing/requests/${towId}/assign`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ providerName, providerPhone })
+        });
+        
+        if (response.ok) {
+            alert('✅ Provider assigned!');
+            loadTowingRequests();
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+// ==================== INVENTORY FUNCTIONS ====================
+async function loadInventory() {
+    try {
+        const response = await fetch('/api/inventory');
+        const items = await response.json();
+        const container = document.getElementById('inventoryList');
+        
+        if (items.length === 0) {
+            container.innerHTML = '<div class="card"><p>No inventory items found.</p></div>';
+            return;
+        }
+        
+        const lowStockCount = items.filter(i => i.quantity <= i.reorderPoint).length;
+        
+        container.innerHTML = `
+            <div class="card">
+                <h3>Inventory Overview</h3>
+                <p><strong>Total Items:</strong> ${items.length} | <strong>Low Stock:</strong> <span style="color: #e74c3c;">${lowStockCount}</span></p>
+                <br>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f5f5f5;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Part Name</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Category</th>
+                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Stock</th>
+                            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #ddd;">Price</th>
+                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${items.map(item => `
+                            <tr style="border-bottom: 1px solid #e0e0e0; ${item.quantity <= item.reorderPoint ? 'background: #fee;' : ''}">
+                                <td style="padding: 12px;">
+                                    <strong>${item.name}</strong>
+                                    <div style="font-size: 12px; color: #666;">${item.partNumber || 'N/A'}</div>
+                                </td>
+                                <td style="padding: 12px;">${item.category}</td>
+                                <td style="padding: 12px; text-align: center; font-weight: bold;">
+                                    ${item.quantity} ${item.unit}
+                                </td>
+                                <td style="padding: 12px; text-align: right;">$${item.price.toFixed(2)}</td>
+                                <td style="padding: 12px; text-align: center;">
+                                    ${item.quantity <= item.reorderPoint ? 
+                                        '<span style="background: #e74c3c; color: white; padding: 4px 10px; border-radius: 15px; font-size: 11px;">LOW STOCK</span>' : 
+                                        '<span style="background: #27ae60; color: white; padding: 4px 10px; border-radius: 15px; font-size: 11px;">IN STOCK</span>'}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error loading inventory:', error);
+        document.getElementById('inventoryList').innerHTML = '<div class="card" style="color: red;">Error loading inventory</div>';
+    }
+}
+
+async function showLowStock() {
+    try {
+        const response = await fetch('/api/inventory/low-stock/5');
+        const items = await response.json();
+        
+        if (items.length === 0) {
+            alert('✅ No low stock items! All inventory levels are healthy.');
+        } else {
+            const message = `⚠️ LOW STOCK ALERT (${items.length} items):\n\n` + 
+                items.map(i => `• ${i.name}: ${i.quantity} ${i.unit} (min: ${i.reorderPoint})`).join('\n') +
+                '\n\nPlease reorder these items.';
+            alert(message);
+        }
+    } catch (error) {
+        alert('Error checking low stock: ' + error.message);
+    }
+}
+
+// Auto-load when screens are shown
+const originalShowScreen = window.showScreen;
+window.showScreen = function(screenId) {
+    originalShowScreen(screenId);
+    if (screenId === 'towing') loadTowingRequests();
+    if (screenId === 'inventory') loadInventory();
+};
+</script>
 </body>
 </html>
