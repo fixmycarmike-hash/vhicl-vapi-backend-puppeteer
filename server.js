@@ -14,6 +14,23 @@ try {
 }
 
 const app = express();
+// ==================== CUSTOMER & VEHICLE DATA ====================
+
+let customers = [];
+let vehicles = [];
+let towingRequests = [];
+let inventoryItems = [];
+let estimates = [];
+let invoices = [];
+
+// Helper function to find vehicle by customer phone
+function findVehicleByPhone(phone) {
+    const customer = customers.find(c => c.phone === phone);
+    if (!customer) return null;
+    return vehicles.find(v => v.customerId === customer.id);
+}
+
+
 const PORT = process.env.PORT || 3000;
 const shopSettingsService = ShopSettingsService ? new ShopSettingsService() : null;
 
@@ -76,47 +93,7 @@ app.post('/api/vapi/check-vehicle-status', async (req, res) => {
         const { phone_number } = req.body;
         
         // Mock implementation - in production, query database
-
-// ==================== CUSTOMER & VEHICLE DATA ====================
-
-let customers = [];
-let vehicles = [];
-
-// Customer structure:
-// {
-//   id: "CUST1234567890",
-//   firstName: "John",
-//   lastName: "Doe",
-//   phone: "555-123-4567",
-//   email: "john.doe@email.com",
-//   address: "123 Main St",
-//   city: "City",
-//   state: "State",
-//   zip: "12345",
-//   vehicles: ["VEH1234567890", "VEH0987654321"], // Array of vehicle IDs
-//   notes: "",
-//   createdAt: "2026-02-10T12:00:00.000Z",
-//   updatedAt: "2026-02-10T12:00:00.000Z"
-// }
-
-// Vehicle structure:
-// {
-//   id: "VEH1234567890",
-//   customerId: "CUST1234567890", // Links to customer
-//   year: 2022,
-//   make: "Ford",
-//   model: "F-150",
-//   trim: "Lariat",
-//   color: "Blue",
-//   vin: "ABC123456789012345",
-//   plate: "ABC1234",
-//   plateState: "CA",
-//   mileage: 45000,
-//   notes: "",
-//   createdAt: "2026-02-10T12:00:00.000Z",
-//   updatedAt: "2026-02-10T12:00:00.000Z"
-// }
-
+        const vehicles = [
             {
                 phone: '555-123-4567',
                 vehicle: '2018 Honda Accord',
@@ -1311,133 +1288,10 @@ app.post('/api/parts/stores', async (req, res) => {
     }
 });
 
-// ============ TOWING ENDPOINTS ============
-
-// Towing requests storage (in-memory)
-let towingRequests = [];
-
-// Get all towing requests
-app.get('/api/towing/requests', (req, res) => {
-  res.json(towingRequests);
-});
-
-// Get towing request by ID
-app.get('/api/towing/requests/:id', (req, res) => {
-  const request = towingRequests.find(r => r.id === req.params.id);
-  if (!request) {
-    return res.status(404).json({ error: 'Towing request not found' });
-  }
-  res.json(request);
-});
-
-// Create towing request
-app.post('/api/towing/requests', (req, res) => {
-  const { customerName, customerPhone, vehicle, pickupLocation, destination, keyLocation, customerMeeting, notes } = req.body;
-  
-  const newRequest = {
-    id: `TOW${Date.now()}`,
-    customerName,
-    customerPhone,
-    vehicle,
-    pickupLocation,
-    destination,
-    keyLocation,
-    customerMeeting,
-    notes,
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-    assignedProvider: null,
-    providerPhone: null
-  };
-  
-  towingRequests.push(newRequest);
-  res.status(201).json(newRequest);
-});
-
-// Update towing request status
-app.put('/api/towing/requests/:id/status', (req, res) => {
-  const request = towingRequests.find(r => r.id === req.params.id);
-  if (!request) {
-    return res.status(404).json({ error: 'Towing request not found' });
-  }
-  
-  request.status = req.body.status;
-  request.updatedAt = new Date().toISOString();
-  res.json(request);
-});
-
-// Mark car as arrived
-app.post('/api/towing/:towRequestId/arrived', (req, res) => {
-  const request = towingRequests.find(r => r.id === req.params.towRequestId);
-  if (!request) {
-    return res.status(404).json({ error: 'Towing request not found' });
-  }
-  
-  request.status = 'arrived';
-  request.arrivedAt = new Date().toISOString();
-  
-  // Send arrival SMS if configured
-  const settings = shopSettingsService.getSettings() || {};
-  if (settings.towing?.sendArrivalSMS) {
-    console.log('Sending arrival SMS to:', request.customerPhone);
-  }
-  
-  res.json({ success: true, message: 'Car marked as arrived', request });
-});
-
-// Assign towing provider
-app.post('/api/towing/requests/:id/assign', (req, res) => {
-  const request = towingRequests.find(r => r.id === req.params.id);
-  if (!request) {
-    return res.status(404).json({ error: 'Towing request not found' });
-  }
-  
-  request.assignedProvider = req.body.providerName;
-  request.providerPhone = req.body.providerPhone;
-  request.status = 'assigned';
-  request.updatedAt = new Date().toISOString();
-  res.json(request);
-});
-
-// Collect towing request from customer
-app.post('/api/towing/collect-request', (req, res) => {
-  const { customerName, customerPhone, vehicle, location, keyLocation, customerMeeting, destination, notes } = req.body;
-  
-  const newRequest = {
-    id: `TOW${Date.now()}`,
-    customerName,
-    customerPhone,
-    vehicle,
-    pickupLocation: location,
-    destination: destination || 'Shop',
-    keyLocation,
-    customerMeeting,
-    notes,
-    status: 'pending',
-    createdAt: new Date().toISOString()
-  };
-  
-  towingRequests.push(newRequest);
-  res.status(201).json(newRequest);
-});
-
-// Delete towing request
-app.delete('/api/towing/requests/:id', (req, res) => {
-  const index = towingRequests.findIndex(r => r.id === req.params.id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Towing request not found' });
-  }
-  
-  towingRequests.splice(index, 1);
-  res.json({ success: true, message: 'Towing request deleted' });
-});
-
 
 // ============ CUSTOMER & VEHICLE ENDPOINTS ============
 
-// ==================== CUSTOMERS ====================
-
-// Get all customers (with their vehicles)
+// Get all customers
 app.get('/api/customers', (req, res) => {
     const customersWithVehicles = customers.map(customer => ({
         ...customer,
@@ -1446,40 +1300,24 @@ app.get('/api/customers', (req, res) => {
     res.json(customersWithVehicles);
 });
 
-// Get customer by ID (with their vehicles)
+// Get customer by ID
 app.get('/api/customers/:id', (req, res) => {
     const customer = customers.find(c => c.id === req.params.id);
-    if (!customer) {
-        return res.status(404).json({ error: 'Customer not found' });
-    }
-    
+    if (!customer) return res.status(404).json({ error: 'Customer not found' });
     const customerVehicles = vehicles.filter(v => v.customerId === customer.id);
-    res.json({
-        ...customer,
-        vehicles: customerVehicles
-    });
+    res.json({ ...customer, vehicles: customerVehicles });
 });
 
-// Create new customer
+// Create customer
 app.post('/api/customers', (req, res) => {
     const { firstName, lastName, phone, email, address, city, state, zip, notes } = req.body;
-    
     const newCustomer = {
         id: `CUST${Date.now()}`,
-        firstName,
-        lastName,
-        phone,
-        email,
-        address,
-        city,
-        state,
-        zip,
-        notes,
+        firstName, lastName, phone, email, address, city, state, zip, notes,
         vehicles: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     };
-    
     customers.push(newCustomer);
     res.status(201).json(newCustomer);
 });
@@ -1487,246 +1325,72 @@ app.post('/api/customers', (req, res) => {
 // Update customer
 app.put('/api/customers/:id', (req, res) => {
     const customer = customers.find(c => c.id === req.params.id);
-    if (!customer) {
-        return res.status(404).json({ error: 'Customer not found' });
-    }
-    
-    const { firstName, lastName, phone, email, address, city, state, zip, notes } = req.body;
-    
-    customer.firstName = firstName || customer.firstName;
-    customer.lastName = lastName || customer.lastName;
-    customer.phone = phone || customer.phone;
-    customer.email = email || customer.email;
-    customer.address = address || customer.address;
-    customer.city = city || customer.city;
-    customer.state = state || customer.state;
-    customer.zip = zip || customer.zip;
-    customer.notes = notes || customer.notes;
-    customer.updatedAt = new Date().toISOString();
-    
+    if (!customer) return res.status(404).json({ error: 'Customer not found' });
+    Object.assign(customer, req.body, { updatedAt: new Date().toISOString() });
     res.json(customer);
 });
 
 // Delete customer
 app.delete('/api/customers/:id', (req, res) => {
     const index = customers.findIndex(c => c.id === req.params.id);
-    if (index === -1) {
-        return res.status(404).json({ error: 'Customer not found' });
-    }
-    
-    // Also delete all vehicles linked to this customer
+    if (index === -1) return res.status(404).json({ error: 'Customer not found' });
     const vehicleIds = customers[index].vehicles;
     vehicles = vehicles.filter(v => !vehicleIds.includes(v.id));
-    
     customers.splice(index, 1);
-    res.json({ success: true, message: 'Customer and their vehicles deleted' });
+    res.json({ success: true, message: 'Customer deleted' });
 });
 
-// Search customers by name, phone, or email
-app.get('/api/customers/search/:query', (req, res) => {
-    const query = req.params.query.toLowerCase();
-    const results = customers.filter(c => 
-        c.firstName?.toLowerCase().includes(query) ||
-        c.lastName?.toLowerCase().includes(query) ||
-        c.phone?.includes(query) ||
-        c.email?.toLowerCase().includes(query)
-    ).map(customer => ({
-        ...customer,
-        vehicles: vehicles.filter(v => v.customerId === customer.id)
-    }));
-    res.json(results);
-});
-
-// ==================== VEHICLES ====================
-
-// Get all vehicles (with customer info)
+// Get vehicles
 app.get('/api/vehicles', (req, res) => {
     const vehiclesWithCustomers = vehicles.map(vehicle => {
         const customer = customers.find(c => c.id === vehicle.customerId);
         return {
             ...vehicle,
-            customer: customer ? {
-                id: customer.id,
-                name: `${customer.firstName} ${customer.lastName}`,
-                phone: customer.phone,
-                email: customer.email
-            } : null
+            customer: customer ? { id: customer.id, name: `${customer.firstName} ${customer.lastName}`, phone: customer.phone } : null
         };
     });
     res.json(vehiclesWithCustomers);
 });
 
-// Get vehicle by ID (with customer info)
-app.get('/api/vehicles/:id', (req, res) => {
-    const vehicle = vehicles.find(v => v.id === req.params.id);
-    if (!vehicle) {
-        return res.status(404).json({ error: 'Vehicle not found' });
-    }
-    
-    const customer = customers.find(c => c.id === vehicle.customerId);
-    res.json({
-        ...vehicle,
-        customer: customer ? {
-            id: customer.id,
-            name: `${customer.firstName} ${customer.lastName}`,
-            phone: customer.phone,
-            email: customer.email,
-            address: customer.address,
-            city: customer.city,
-            state: customer.state,
-            zip: customer.zip
-        } : null
-    });
-});
-
-// Get vehicles by customer ID
-app.get('/api/customers/:customerId/vehicles', (req, res) => {
-    const customerVehicles = vehicles.filter(v => v.customerId === req.params.customerId);
-    res.json(customerVehicles);
-});
-
-// Create new vehicle (linked to customer)
+// Create vehicle
 app.post('/api/vehicles', (req, res) => {
     const { customerId, year, make, model, trim, color, vin, plate, plateState, mileage, notes } = req.body;
-    
-    // Verify customer exists
     const customer = customers.find(c => c.id === customerId);
-    if (!customer) {
-        return res.status(404).json({ error: 'Customer not found' });
-    }
+    if (!customer) return res.status(404).json({ error: 'Customer not found' });
     
     const newVehicle = {
         id: `VEH${Date.now()}`,
-        customerId,
-        year,
-        make,
-        model,
-        trim,
-        color,
-        vin,
-        plate,
-        plateState,
-        mileage,
-        notes,
+        customerId, year, make, model, trim, color, vin, plate, plateState, mileage, notes,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     };
-    
     vehicles.push(newVehicle);
-    
-    // Add vehicle ID to customer's vehicles array
     customer.vehicles.push(newVehicle.id);
     customer.updatedAt = new Date().toISOString();
-    
     res.status(201).json(newVehicle);
 });
 
 // Update vehicle
 app.put('/api/vehicles/:id', (req, res) => {
     const vehicle = vehicles.find(v => v.id === req.params.id);
-    if (!vehicle) {
-        return res.status(404).json({ error: 'Vehicle not found' });
-    }
-    
-    const { year, make, model, trim, color, vin, plate, plateState, mileage, notes } = req.body;
-    
-    vehicle.year = year || vehicle.year;
-    vehicle.make = make || vehicle.make;
-    vehicle.model = model || vehicle.model;
-    vehicle.trim = trim || vehicle.trim;
-    vehicle.color = color || vehicle.color;
-    vehicle.vin = vin || vehicle.vin;
-    vehicle.plate = plate || vehicle.plate;
-    vehicle.plateState = plateState || vehicle.plateState;
-    vehicle.mileage = mileage || vehicle.mileage;
-    vehicle.notes = notes || vehicle.notes;
-    vehicle.updatedAt = new Date().toISOString();
-    
+    if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
+    Object.assign(vehicle, req.body, { updatedAt: new Date().toISOString() });
     res.json(vehicle);
 });
 
 // Delete vehicle
 app.delete('/api/vehicles/:id', (req, res) => {
     const index = vehicles.findIndex(v => v.id === req.params.id);
-    if (index === -1) {
-        return res.status(404).json({ error: 'Vehicle not found' });
-    }
-    
+    if (index === -1) return res.status(404).json({ error: 'Vehicle not found' });
     const vehicle = vehicles[index];
-    
-    // Remove vehicle ID from customer's vehicles array
     const customer = customers.find(c => c.id === vehicle.customerId);
     if (customer) {
         customer.vehicles = customer.vehicles.filter(vId => vId !== vehicle.id);
         customer.updatedAt = new Date().toISOString();
     }
-    
     vehicles.splice(index, 1);
     res.json({ success: true, message: 'Vehicle deleted' });
 });
-
-// Search vehicles by plate, VIN, or customer name
-app.get('/api/vehicles/search/:query', (req, res) => {
-    const query = req.params.query.toLowerCase();
-    const results = vehicles.filter(v => {
-        const customer = customers.find(c => c.id === v.customerId);
-        const customerName = customer ? `${customer.firstName} ${customer.lastName}`.toLowerCase() : '';
-        return v.plate?.toLowerCase().includes(query) ||
-               v.vin?.toLowerCase().includes(query) ||
-               v.make?.toLowerCase().includes(query) ||
-               v.model?.toLowerCase().includes(query) ||
-               customerName.includes(query);
-    }).map(vehicle => {
-        const customer = customers.find(c => c.id === vehicle.customerId);
-        return {
-            ...vehicle,
-            customer: customer ? {
-                id: customer.id,
-                name: `${customer.firstName} ${customer.lastName}`,
-                phone: customer.phone
-            } : null
-        };
-    });
-    res.json(results);
-});
-
-// Get compatible vehicles (keep existing endpoint)
-app.get('/api/vehicles/compatible/:year/:make/:model', async (req, res) => {
-    try {
-        const { year, make, model } = req.params;
-        
-        // This would normally call Nexpart API
-        // For now, return mock data
-        const compatibleParts = [
-            {
-                partNumber: 'BRK-1234',
-                name: 'Front Brake Pads',
-                description: 'Ceramic brake pads',
-                price: 89.99,
-                availability: 'In Stock',
-                quantity: 12
-            },
-            {
-                partNumber: 'OIL-5678',
-                name: 'Engine Oil Filter',
-                description: 'High-efficiency oil filter',
-                price: 15.99,
-                availability: 'In Stock',
-                quantity: 25
-            }
-        ];
-        
-        res.json({
-            year,
-            make,
-            model,
-            parts: compatibleParts
-        });
-    } catch (error) {
-        res.status(500).json({ error: 'Error fetching compatible vehicles' });
-    }
-});
-
 
 // ============ INVENTORY ENDPOINTS ============
 
