@@ -292,6 +292,7 @@
         <div class="tab-container">
             <div class="tab-nav">
                 <button class="tab active" onclick="showTab('shop-info')">Shop Info</button>
+                <button class="tab" onclick="showTab('towing')">🚚 Towing</button>
                 <button class="tab" onclick="showTab('api')">🔑 API Credentials</button>
                 <button class="tab" onclick="showTab('inventory')">📦 Inventory</button>
                 <button class="tab" onclick="showTab('payment')">Payment</button>
@@ -764,6 +765,381 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Towing Tab -->
+            <div id="towing" class="tab-content">
+                <h2>🚚 Towing Integration</h2>
+                <div class="help-text">
+                    Configure towing service integration including AI-powered communications, pricing, and provider management.
+                </div>
+                <br>
+
+                <div class="alert alert-info">
+                    <strong>💡 Tip:</strong> Enable Grok AI to automate towing communications with customers and providers.
+                </div>
+
+                <!-- General Settings -->
+                <div class="card">
+                    <div class="card-header">⚙️ General Settings</div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Enable Towing</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.enabled" checked>
+                                    <label>Enable towing service integration</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Auto-Assign Provider</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.autoAssignProvider">
+                                    <label>Automatically assign towing provider</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Notify on Status Change</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.notifyOnStatusChange" checked>
+                                    <label>Send notifications when status changes</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Notify Customer</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.notifyCustomer" checked>
+                                    <label>Send notifications to customer</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Default Provider ID</label>
+                        <input type="text" id="towing.defaultProviderId" placeholder="Default towing provider ID">
+                        <div class="help-text">
+                            Leave empty to manually select provider each time
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VAPI/ALEX Settings -->
+                <div class="card">
+                    <div class="card-header">🎤 VAPI/ALEX (Voice AI for Towing)</div>
+                    <div class="alert alert-info">
+                        <strong>💡 How it works:</strong> ALEX will automatically call the towing company with all the details: pickup location, vehicle info (color, make, model, tag), destination, key location, and ETA request.
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Use ALEX for Calling</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.vapi.useAlexForCalling" checked>
+                                    <label>ALEX will call towing companies directly</label>
+                                </div>
+                                <div class="help-text">
+                                    ALEX makes phone calls to towing providers with all vehicle details
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Auto-Intake on Arrival</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.autoIntakeOnArrival" checked>
+                                    <label>Auto-intake customer when tow arrives at shop</label>
+                                </div>
+                                <div class="help-text">
+                                    When tow truck arrives, ALEX will start customer intake process
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Towing Company Phone Number</label>
+                        <input type="tel" id="towing.vapi.phoneNumber" placeholder="(555) 123-4567">
+                        <div class="help-text">
+                            Default towing company phone number for ALEX to call
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>VAPI Assistant ID (Optional)</label>
+                        <input type="text" id="towing.vapi.assistantId" placeholder="Assistant ID for towing calls">
+                        <div class="help-text">
+                            Leave empty to use the main ALEX assistant for towing calls
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Twilio SMS Settings -->
+                <div class="card">
+                    <div class="card-header">📱 Twilio SMS Notifications</div>
+                    <div class="alert alert-info">
+                        <strong>💡 When car arrives:</strong> Staff will click "Car Arrived" button → ALEX sends SMS to customer → Auto-intake starts if enabled
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Enable Twilio SMS</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.twilio.enabled" checked>
+                                    <label>Enable SMS notifications</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Send Arrival SMS</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.sendArrivalSMS" checked>
+                                    <label>Send SMS when car arrives at shop</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Twilio Account SID</label>
+                                <input type="password" id="towing.twilio.accountSid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Twilio Auth Token</label>
+                                <input type="password" id="towing.twilio.authToken" placeholder="Your auth token">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>From Phone Number</label>
+                        <input type="tel" id="towing.twilio.fromNumber" placeholder="+15551234567">
+                        <div class="help-text">
+                            Your shop's Twilio phone number that sends SMS to customers
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Arrival SMS Template</label>
+                        <textarea id="towing.arrivalSMSTemplate" rows="3">🚗 Your {{year}} {{color}} {{make}} {{model}} ({{plate}}) has safely arrived at {{shopName}}! We'll be in touch shortly with an estimate. 📞 {{shopPhone}}</textarea>
+                        <div class="help-text">
+                            Variables: {{year}}, {{color}}, {{make}}, {{model}}, {{plate}}, {{shopName}}, {{shopPhone}}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Intake Questions -->
+                <div class="card">
+                    <div class="card-header">📋 What ALEX Will Ask Customer</div>
+                    <div class="help-text">
+                        Configure what information ALEX collects from the customer when they need a tow
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Collect Pickup Location</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.customerIntake.collectLocation" checked>
+                                    <label>Ask for exact pickup address</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Collect Vehicle Info</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.customerIntake.collectVehicleInfo" checked>
+                                    <label>Ask for color, make, model, tag number</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Collect Key Location</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.customerIntake.collectKeyLocation" checked>
+                                    <label>Ask where the keys are</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Ask if Customer Meeting Driver</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.customerIntake.askCustomerMeeting" checked>
+                                    <label>Ask if customer will meet tow driver</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Towing Destination</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="towing.customerIntake.confirmDestination" checked>
+                            <label>Ask if towing to shop or other location</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- What ALEX Tells Towing Company -->
+                <div class="card">
+                    <div class="card-header">📞 What ALEX Will Tell Towing Company</div>
+                    <div class="help-text">
+                        Configure what information ALEX provides when calling the towing provider
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Provide Vehicle Details</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.providerCallInfo.provideVehicleDetails" checked>
+                                    <label>Tell them: color, make, model, tag number</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Provide Pickup Location</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.providerCallInfo.providePickupLocation" checked>
+                                    <label>Tell them exact pickup address</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Provide Destination</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.providerCallInfo.provideDestination" checked>
+                                    <label>Tell them where to tow the vehicle</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Provide Key Information</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.providerCallInfo.provideKeyInfo" checked>
+                                    <label>Tell them where the keys are located</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Ask About ETA</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.providerCallInfo.askAboutETA" checked>
+                                    <label>Ask for estimated arrival time</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Confirm Pricing</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="towing.providerCallInfo.confirmPricing" checked>
+                                    <label>Get price quote from towing company</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing Settings -->
+                <div class="card">
+                    <div class="card-header">💰 Pricing Settings</div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Base Fee ($)</label>
+                                <input type="number" id="towing.pricing.baseFee" value="75" step="0.01" min="0">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Per Mile Rate ($)</label>
+                                <input type="number" id="towing.pricing.perMileRate" value="4.50" step="0.01" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>After Hours Rate ($)</label>
+                                <input type="number" id="towing.pricing.afterHoursRate" value="6.50" step="0.01" min="0">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Weekend Multiplier</label>
+                                <input type="number" id="towing.pricing.weekendMultiplier" value="1.5" step="0.1" min="1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Heavy Vehicle Multiplier</label>
+                                <input type="number" id="towing.pricing.heavyVehicleMultiplier" value="2.0" step="0.1" min="1">
+                            </div>
+                        </div>
+                    </div>
+                    <h3>After Hours Schedule</h3>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Start Time</label>
+                                <input type="time" id="towing.pricing.afterHoursStart" value="18:00">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>End Time</label>
+                                <input type="time" id="towing.pricing.afterHoursEnd" value="08:00">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Area -->
+                <div class="card">
+                    <div class="card-header">📍 Service Area</div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Max Distance (miles)</label>
+                                <input type="number" id="towing.serviceArea.maxDistance" value="50" min="1">
+                                <div class="help-text">
+                                    Maximum distance shop will tow vehicles
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Served Zip Codes (comma-separated)</label>
+                        <textarea id="towing.serviceArea.zipCodes" rows="3" placeholder="12345, 12346, 12347"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Served Cities (comma-separated)</label>
+                        <textarea id="towing.serviceArea.cities" rows="3" placeholder="City1, City2, City3"></textarea>
+                    </div>
+                </div>
+
+                </div>
 
             <!-- Payment Tab -->
             <div id="payment" class="tab-content">
