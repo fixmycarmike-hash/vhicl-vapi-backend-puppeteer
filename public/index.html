@@ -379,12 +379,13 @@
             <button class="nav-btn active" onclick="showScreen('dashboard')">🏠 Dashboard</button>
             <button class="nav-btn" onclick="showScreen('customers')">👥 Customers</button>
             <button class="nav-btn" onclick="showScreen('appointments')">📅 Appointments</button>
+            <button class="nav-btn" onclick="showScreen('maintenance')">🔧 Maintenance</button>
             <button class="nav-btn" onclick="showScreen('estimates')">📋 Estimates</button>
             <button class="nav-btn" onclick="showScreen('invoices')">💰 Invoices</button>
             <button class="nav-btn" onclick="showScreen('towing')">🚗 Towing</button>
             <button class="nav-btn" onclick="showScreen('inventory')">📦 Inventory</button>
+            <button class="nav-btn" onclick="showScreen('vapi')">📞 VAPI</button>
             <button class="nav-btn" onclick="showScreen('analytics')">📊 Analytics</button>
-            <button class="nav-btn" onclick="showScreen('techflow')">🔗 Techflow</button>
             <button class="nav-btn" onclick="showScreen('settings')">⚙️ Settings</button>
             <div id="apiIndicator" style="display: none; align-items: center; gap: 5px; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
                 <i class="fas fa-circle"></i> <span id="apiIndicatorText">API</span>
@@ -683,211 +684,168 @@
             </div>
         </div>
 
-        <!-- Techflow Screen -->
-        <div id="techflow" class="screen">
-            <h1 style="color: white; margin-bottom: 1.5rem;">🔗 Techflow Integration</h1>
+        <!-- Maintenance Screen -->
+        <div id="maintenance" class="screen">
+            <h1 style="color: white; margin-bottom: 1.5rem;">🔧 Maintenance Listings</h1>
             
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">VIN Decodes Today</div>
-                    <div class="stat-value">24</div>
-                    <div class="stat-label"><i class="fas fa-check"></i> 100% Success Rate</div>
+                    <div class="stat-label">Active Vehicles</div>
+                    <div class="stat-value">8</div>
+                    <div class="stat-label"><i class="fas fa-car"></i> In the shop</div>
                 </div>
                 <div class="stat-card green">
-                    <div class="stat-label">Parts Lookups</div>
-                    <div class="stat-value">156</div>
-                    <div class="stat-label"><i class="fas fa-box"></i> Found matches</div>
+                    <div class="stat-label">Completed Today</div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-label"><i class="fas fa-check"></i> Ready for pickup</div>
                 </div>
                 <div class="stat-card blue">
-                    <div class="stat-label">API Calls</div>
-                    <div class="stat-value">1,234</div>
-                    <div class="stat-label"><i class="fas fa-chart-line"></i> This month</div>
+                    <div class="stat-label">Pending</div>
+                    <div class="stat-value">2</div>
+                    <div class="stat-label"><i class="fas fa-clock"></i> Waiting for parts</div>
                 </div>
                 <div class="stat-card revenue">
-                    <div class="stat-label">Saved Time</div>
-                    <div class="stat-value">12h</div>
-                    <div class="stat-label"><i class="fas fa-clock"></i> Automated work</div>
+                    <div class="stat-label">Revenue Today</div>
+                    <div class="stat-value">$1,234</div>
+                    <div class="stat-label"><i class="fas fa-dollar-sign"></i> From maintenance</div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">🚗 VIN Decoder</h2>
-                    <span class="status-badge status-approved">Connected</span>
-                </div>
-                <div class="form-group">
-                    <label>Enter VIN Number</label>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <input type="text" id="vinInput" placeholder="17-digit VIN (e.g., 1HGCM82633A004352)" style="flex: 1; text-transform: uppercase;">
-                        <button class="btn btn-primary" onclick="decodeVin()">
-                            <i class="fas fa-search"></i> Decode
-                        </button>
-                    </div>
-                </div>
-                <div id="vinResults" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
-                    <!-- VIN results will appear here -->
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">🔍 Parts Lookup</h2>
-                    <span class="status-badge status-approved">Connected</span>
-                </div>
-                <div class="form-group">
-                    <label>Vehicle (or VIN)</label>
-                    <input type="text" id="partsVehicle" placeholder="e.g., 2018 Honda Accord or VIN">
-                </div>
-                <div class="form-group">
-                    <label>Part Name or Number</label>
-                    <input type="text" id="partsSearch" placeholder="e.g., Brake Pads, Oil Filter, or part number">
-                </div>
-                <div class="form-group">
-                    <label>Part Category</label>
-                    <select id="partsCategory">
-                        <option value="">All Categories</option>
-                        <option value="brakes">Brakes</option>
-                        <option value="engine">Engine</option>
-                        <option value="suspension">Suspension</option>
-                        <option value="electrical">Electrical</option>
-                        <option value="filters">Filters</option>
-                        <option value="fluids">Fluids</option>
-                        <option value="transmission">Transmission</option>
-                        <option value="exhaust">Exhaust</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary" onclick="lookupParts()">
-                    <i class="fas fa-search"></i> Search Parts
-                </button>
-                <div id="partsResults" style="display: none; margin-top: 1rem;">
-                    <!-- Parts results will appear here -->
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">📋 Service Schedules</h2>
-                    <span class="status-badge status-approved">Connected</span>
-                </div>
-                <div class="form-group">
-                    <label>Vehicle VIN</label>
-                    <input type="text" id="scheduleVin" placeholder="Enter VIN to get manufacturer service schedule">
-                </div>
-                <button class="btn btn-primary" onclick="getServiceSchedule()">
-                    <i class="fas fa-calendar-alt"></i> Get Service Schedule
-                </button>
-                <div id="scheduleResults" style="display: none; margin-top: 1rem;">
-                    <!-- Service schedule will appear here -->
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">📊 Vehicle History</h2>
-                    <span class="status-badge status-approved">Connected</span>
-                </div>
-                <div class="form-group">
-                    <label>Vehicle VIN</label>
-                    <input type="text" id="historyVin" placeholder="Enter VIN for vehicle history report">
-                </div>
-                <button class="btn btn-primary" onclick="getVehicleHistory()">
-                    <i class="fas fa-history"></i> Get History Report
-                </button>
-                <div id="historyResults" style="display: none; margin-top: 1rem;">
-                    <!-- Vehicle history will appear here -->
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">🤖 ALEX AI Features</h2>
-                    <span class="status-badge status-completed">Active</span>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                    <div class="card" style="padding: 1rem; cursor: pointer;" onclick="showScreen('estimates'); setTimeout(() => generateAlexEstimate(), 500);">
-                        <h3 style="color: #0a2540; margin-bottom: 0.5rem;"><i class="fas fa-robot"></i> AI Estimates</h3>
-                        <p style="color: #666; font-size: 0.9rem;">Generate estimates using ALEX AI</p>
-                    </div>
-                    <div class="card" style="padding: 1rem; cursor: pointer;" onclick="showScreen('customers')">
-                        <h3 style="color: #0a2540; margin-bottom: 0.5rem;"><i class="fas fa-users"></i> Customer Lookup</h3>
-                        <p style="color: #666; font-size: 0.9rem;">AI-powered customer search</p>
-                    </div>
-                    <div class="card" style="padding: 1rem; cursor: pointer;" onclick="showScreen('inventory')">
-                        <h3 style="color: #0a2540; margin-bottom: 0.5rem;"><i class="fas fa-box"></i> Parts Intelligence</h3>
-                        <p style="color: #666; font-size: 0.9rem;">Smart parts recommendations</p>
-                    </div>
-                    <div class="card" style="padding: 1rem; cursor: pointer;" onclick="showScreen('towing')">
-                        <h3 style="color: #0a2540; margin-bottom: 0.5rem;"><i class="fas fa-truck"></i> Tow Dispatch</h3>
-                        <p style="color: #666; font-size: 0.9rem;">Automated tow scheduling</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">📞 Phone Integration (VAPI)</h2>
-                    <span class="status-badge status-pending">Setup Required</span>
-                </div>
-                <p style="color: #666; margin-bottom: 1rem;">Automate phone calls for parts ordering, customer notifications, and more.</p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                    <button class="btn btn-primary" onclick="startVapiPartsCall()">
-                        <i class="fas fa-phone"></i> Call Parts Store
-                    </button>
-                    <button class="btn btn-primary" onclick="startVapiCustomerCall()">
-                        <i class="fas fa-phone"></i> Call Customer
-                    </button>
-                    <button class="btn btn-primary" onclick="startVapiTowCall()">
-                        <i class="fas fa-phone"></i> Call Tow Provider
-                    </button>
-                    <button class="btn btn-success" onclick="configureVapi()">
-                        <i class="fas fa-cog"></i> Configure VAPI
+                    <h2 class="card-title">Active Maintenance Jobs</h2>
+                    <button class="btn btn-primary" onclick="openMaintenanceModal()">
+                        <i class="fas fa-plus"></i> Add Vehicle
                     </button>
                 </div>
+                <div id="maintenanceList" class="loading">Loading maintenance jobs...</div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">📈 API Usage & Billing</h2>
+                    <h2 class="card-title">Maintenance History</h2>
                 </div>
                 <table class="table">
                     <thead>
                         <tr>
+                            <th>Date</th>
+                            <th>Vehicle</th>
                             <th>Service</th>
-                            <th>API Calls (This Month)</th>
                             <th>Cost</th>
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="maintenanceHistory">
                         <tr>
-                            <td>VIN Decoder</td>
-                            <td>24</td>
-                            <td>$2.40</td>
-                            <td><span class="status-badge status-approved">Active</span></td>
+                            <td>2025-01-15</td>
+                            <td>2018 Honda Accord</td>
+                            <td>Brake Service</td>
+                            <td>$345</td>
+                            <td><span class="status-badge status-paid">Completed</span></td>
                         </tr>
                         <tr>
-                            <td>Parts Lookup</td>
-                            <td>156</td>
-                            <td>$15.60</td>
-                            <td><span class="status-badge status-approved">Active</span></td>
+                            <td>2025-01-14</td>
+                            <td>2020 Toyota Camry</td>
+                            <td>Oil Change</td>
+                            <td>$65</td>
+                            <td><span class="status-badge status-paid">Completed</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VAPI Screen -->
+        <div id="vapi" class="screen">
+            <h1 style="color: white; margin-bottom: 1.5rem;">📞 VAPI Phone System</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Calls Today</div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-label"><i class="fas fa-phone"></i> Total calls</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-label">Connected</div>
+                    <div class="stat-value">10</div>
+                    <div class="stat-label"><i class="fas fa-check"></i> Successful</div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-label">Avg Duration</div>
+                    <div class="stat-value">3:45</div>
+                    <div class="stat-label"><i class="fas fa-clock"></i> Minutes</div>
+                </div>
+                <div class="stat-card revenue">
+                    <div class="stat-label">Cost This Month</div>
+                    <div class="stat-value">$45.20</div>
+                    <div class="stat-label"><i class="fas fa-dollar-sign"></i> Phone costs</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🎤 VAPI Scripts</h2>
+                    <button class="btn btn-primary" onclick="openVapiScriptModal()">
+                        <i class="fas fa-plus"></i> New Script
+                    </button>
+                </div>
+                <div id="vapiScriptsList" class="loading">Loading scripts...</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📞 Quick Call Actions</h2>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <button class="btn btn-primary" onclick="makeVapiCall('parts')">
+                        <i class="fas fa-box"></i> Call Parts Store
+                    </button>
+                    <button class="btn btn-primary" onclick="makeVapiCall('customer')">
+                        <i class="fas fa-user"></i> Call Customer
+                    </button>
+                    <button class="btn btn-primary" onclick="makeVapiCall('tow')">
+                        <i class="fas fa-truck"></i> Call Tow Provider
+                    </button>
+                    <button class="btn btn-primary" onclick="makeVapiCall('billing')">
+                        <i class="fas fa-credit-card"></i> Call for Payment
+                    </button>
+                    <button class="btn btn-primary" onclick="makeVapiCall('reminder')">
+                        <i class="fas fa-bell"></i> Send Reminder
+                    </button>
+                    <button class="btn btn-primary" onclick="makeVapiCall('survey')">
+                        <i class="fas fa-star"></i> Survey Call
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📋 Call History</h2>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Type</th>
+                            <th>Number</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="callHistory">
+                        <tr>
+                            <td>10:30 AM</td>
+                            <td>Parts Store</td>
+                            <td>(555) 123-4567</td>
+                            <td>2:15</td>
+                            <td><span class="status-badge status-approved">Completed</span></td>
                         </tr>
                         <tr>
-                            <td>Vehicle History</td>
-                            <td>8</td>
-                            <td>$8.00</td>
-                            <td><span class="status-badge status-approved">Active</span></td>
-                        </tr>
-                        <tr>
-                            <td>Service Schedules</td>
-                            <td>12</td>
-                            <td>$6.00</td>
-                            <td><span class="status-badge status-approved">Active</span></td>
-                        </tr>
-                        <tr style="font-weight: bold; background: #f8f9fa;">
-                            <td>Total</td>
-                            <td>200</td>
-                            <td>$32.00</td>
-                            <td><span class="status-badge status-paid">Paid</span></td>
+                            <td>9:45 AM</td>
+                            <td>Customer</td>
+                            <td>(555) 987-6543</td>
+                            <td>1:30</td>
+                            <td><span class="status-badge status-approved">Completed</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -964,85 +922,223 @@
                 </div>
             </div>
 
+            <!-- VAPI Configuration -->
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">Techflow API Configuration</h2>
-                    <span class="status-badge" id="apiBadge" style="background: #f8d7da; color: #721c24;">Disconnected</span>
+                    <h2 class="card-title">📞 VAPI Configuration</h2>
+                    <span class="status-badge" id="vapiBadge" style="background: #f8d7da; color: #721c24;">Disconnected</span>
                 </div>
                 <div class="form-group">
-                    <label>API Endpoint</label>
-                    <input type="text" id="apiEndpoint" placeholder="https://api.techflow.io/v1">
-                    <small style="color: #666;">Enter the base URL for the Techflow API</small>
+                    <label>VAPI API Key</label>
+                    <input type="password" id="vapiApiKey" placeholder="Enter your VAPI API key">
+                    <small style="color: #666;">Your VAPI authentication key</small>
                 </div>
                 <div class="form-group">
-                    <label>API Key</label>
-                    <input type="password" id="apiKey" placeholder="Enter your Techflow API key">
-                    <small style="color: #666;">Your secret API key for authentication</small>
+                    <label>VAPI Phone Number</label>
+                    <input type="tel" id="vapiPhoneNumber" placeholder="+1 (555) 123-4567">
+                    <small style="color: #666;">The phone number VAPI uses to make calls</small>
                 </div>
                 <div class="form-group">
-                    <label>API Version</label>
-                    <select id="apiVersion">
-                        <option value="v1">v1 (Legacy)</option>
-                        <option value="v2">v2 (Current)</option>
-                        <option value="v3">v3 (Beta)</option>
+                    <label>Default Voice</label>
+                    <select id="vapiVoice">
+                        <option value="rachel">Rachel (Female)</option>
+                        <option value="drew">Drew (Male)</option>
+                        <option value="cleo">Cleo (Female)</option>
+                        <option value="adam">Adam (Male)</option>
+                        <option value="emily">Emily (Female)</option>
+                        <option value="callum">Callum (Male)</option>
+                        <option value="jess">Jess (Female)</option>
+                        <option value="joseph">Joseph (Male)</option>
                     </select>
-                </div>
-                <div class="form-group">
-                    <label>Environment</label>
-                    <select id="apiEnvironment">
-                        <option value="production">Production</option>
-                        <option value="staging">Staging</option>
-                        <option value="development">Development</option>
-                        <option value="sandbox">Sandbox</option>
-                    </select>
-                    <small style="color: #666;">Choose the appropriate environment for your API calls</small>
                 </div>
                 <div class="form-group">
                     <label>
-                        <input type="checkbox" id="apiEnabled">
-                        <strong>Enable Techflow API Integration</strong>
+                        <input type="checkbox" id="vapiEnabled">
+                        <strong>Enable VAPI Phone Integration</strong>
                     </label>
                     <small style="color: #666; display: block; margin-top: 0.25rem;">
-                        Enable this to use Techflow features like VIN decoding, parts lookup, and vehicle history
+                        Enable automated phone calls for parts ordering, customer notifications, etc.
                     </small>
                 </div>
                 <div class="form-group">
-                    <label>Request Timeout (seconds)</label>
-                    <input type="number" id="apiTimeout" value="30" min="5" max="300">
-                    <small style="color: #666;">How long to wait for API responses before timing out</small>
+                    <label>
+                        <input type="checkbox" id="vapiRecordCalls" checked>
+                        <strong>Record Calls</strong>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        Record all VAPI calls for quality assurance
+                    </small>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="saveVapiSettings()">
+                        <i class="fas fa-save"></i> Save VAPI Settings
+                    </button>
+                    <button class="btn btn-success" onclick="testVapiConnection()">
+                        <i class="fas fa-phone"></i> Test Call
+                    </button>
+                </div>
+            </div>
+
+            <!-- Twilio Configuration -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📱 Twilio Configuration</h2>
+                    <span class="status-badge" id="twilioBadge" style="background: #f8d7da; color: #721c24;">Disconnected</span>
                 </div>
                 <div class="form-group">
-                    <label>Retry Attempts</label>
-                    <input type="number" id="apiRetries" value="3" min="0" max="10">
-                    <small style="color: #666;">Number of times to retry failed API requests</small>
+                    <label>Account SID</label>
+                    <input type="text" id="twilioAccountSid" placeholder="ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX">
+                    <small style="color: #666;">Your Twilio Account SID</small>
                 </div>
                 <div class="form-group">
-                    <label>Rate Limit (requests/minute)</label>
-                    <input type="number" id="apiRateLimit" value="60" min="10" max="1000">
-                    <small style="color: #666;">Maximum number of API requests per minute</small>
+                    <label>Auth Token</label>
+                    <input type="password" id="twilioAuthToken" placeholder="Your Twilio Auth Token">
+                    <small style="color: #666;">Your Twilio authentication token</small>
                 </div>
-                
-                <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin: 1rem 0;">
-                    <h4 style="color: #0a2540; margin-bottom: 0.5rem;">📋 Techflow API Features</h4>
-                    <ul style="color: #666; font-size: 0.9rem; padding-left: 1.5rem;">
-                        <li><strong>VIN Decoding:</strong> Automatically decode vehicle information from VIN</li>
-                        <li><strong>Parts Lookup:</strong> Find compatible parts for specific vehicles</li>
-                        <li><strong>Vehicle History:</strong> Access vehicle history reports</li>
-                        <li><strong>Service Schedules:</strong> Get manufacturer-recommended service intervals</li>
-                        <li><strong>Repair Estimates:</strong> Generate estimates based on industry data</li>
-                    </ul>
+                <div class="form-group">
+                    <label>Twilio Phone Number</label>
+                    <input type="tel" id="twilioPhoneNumber" placeholder="+1 (555) 123-4567">
+                    <small style="color: #666;">Your Twilio phone number for SMS</small>
                 </div>
-                
-                <div id="apiStatus" class="api-status"></div>
-                <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
-                    <button class="btn btn-primary" onclick="testApiConnection()">
-                        <i class="fas fa-plug"></i> Test Connection
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="twilioEnabled">
+                        <strong>Enable Twilio SMS Integration</strong>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        Send SMS notifications for appointments, reminders, and updates
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="twilioAutoReminders" checked>
+                        <strong>Send Automatic Appointment Reminders</strong>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        Automatically send SMS reminders 24 hours before appointments
+                    </small>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="saveTwilioSettings()">
+                        <i class="fas fa-save"></i> Save Twilio Settings
                     </button>
-                    <button class="btn btn-success" onclick="saveApiSettings()">
-                        <i class="fas fa-save"></i> Save API Settings
+                    <button class="btn btn-success" onclick="testTwilioSMS()">
+                        <i class="fas fa-sms"></i> Test SMS
                     </button>
-                    <button class="btn" style="background: #666; color: white;" onclick="resetApiSettings()">
-                        <i class="fas fa-undo"></i> Reset to Defaults
+                </div>
+            </div>
+
+            <!-- PayPal Configuration -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">💳 PayPal Configuration</h2>
+                    <span class="status-badge" id="paypalBadge" style="background: #f8d7da; color: #721c24;">Disconnected</span>
+                </div>
+                <div class="form-group">
+                    <label>Client ID</label>
+                    <input type="text" id="paypalClientId" placeholder="Your PayPal Client ID">
+                    <small style="color: #666;">Your PayPal REST API Client ID</small>
+                </div>
+                <div class="form-group">
+                    <label>Client Secret</label>
+                    <input type="password" id="paypalClientSecret" placeholder="Your PayPal Client Secret">
+                    <small style="color: #666;">Your PayPal REST API Client Secret</small>
+                </div>
+                <div class="form-group">
+                    <label>Environment</label>
+                    <select id="paypalEnvironment">
+                        <option value="sandbox">Sandbox (Testing)</option>
+                        <option value="live">Live (Production)</option>
+                    </select>
+                    <small style="color: #666;">Use Sandbox for testing, Live for real payments</small>
+                </div>
+                <div class="form-group">
+                    <label>PayPal Email</label>
+                    <input type="email" id="paypalEmail" placeholder="payments@yourshop.com">
+                    <small style="color: #666;">Email address for receiving PayPal payments</small>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="paypalEnabled">
+                        <strong>Enable PayPal Payments</strong>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        Allow customers to pay invoices via PayPal
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="paypalAlexBilling" checked>
+                        <strong>ALEX Auto-Billing</strong>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        ALEX will automatically email invoices with PayPal payment links
+                    </small>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="savePaypalSettings()">
+                        <i class="fas fa-save"></i> Save PayPal Settings
+                    </button>
+                    <button class="btn btn-success" onclick="testPaypalConnection()">
+                        <i class="fas fa-credit-card"></i> Test Connection
+                    </button>
+                </div>
+            </div>
+
+            <!-- SendGrid Configuration -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📧 SendGrid Configuration</h2>
+                    <span class="status-badge" id="sendgridBadge" style="background: #f8d7da; color: #721c24;">Disconnected</span>
+                </div>
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="password" id="sendgridApiKey" placeholder="SG.xxxxxxxxxxxxxx">
+                    <small style="color: #666;">Your SendGrid API key</small>
+                </div>
+                <div class="form-group">
+                    <label>From Email</label>
+                    <input type="email" id="sendgridFromEmail" placeholder="noreply@yourshop.com">
+                    <small style="color: #666;">Email address that sends emails</small>
+                </div>
+                <div class="form-group">
+                    <label>From Name</label>
+                    <input type="text" id="sendgridFromName" placeholder="VHICL Pro Auto Shop">
+                    <small style="color: #666;">Display name for sent emails</small>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="sendgridEnabled">
+                        <strong>Enable SendGrid Email</strong>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        Send invoices, estimates, and notifications via email
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="sendgridAlexEmail" checked>
+                        <strong>ALEX Email Invoices</strong>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        ALEX will automatically email completed invoices with PayPal links
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>Email Template</label>
+                    <select id="sendgridTemplate">
+                        <option value="default">Default Template</option>
+                        <option value="professional">Professional</option>
+                        <option value="friendly">Friendly</option>
+                        <option value="minimal">Minimal</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="saveSendgridSettings()">
+                        <i class="fas fa-save"></i> Save SendGrid Settings
+                    </button>
+                    <button class="btn btn-success" onclick="testSendgridEmail()">
+                        <i class="fas fa-envelope"></i> Test Email
                     </button>
                 </div>
             </div>
@@ -1115,6 +1211,110 @@
             <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="generateAlexEstimate()">
                 <i class="fas fa-magic"></i> Generate with ALEX AI
             </button>
+        </div>
+    </div>
+
+    <!-- Maintenance Modal -->
+    <div id="maintenanceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Maintenance Job</h2>
+                <button class="close-btn" onclick="closeModal('maintenanceModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Customer Name</label>
+                <input type="text" id="maintenanceCustomer" placeholder="Customer name">
+            </div>
+            <div class="form-group">
+                <label>Vehicle</label>
+                <input type="text" id="maintenanceVehicle" placeholder="e.g., 2018 Honda Accord">
+            </div>
+            <div class="form-group">
+                <label>VIN</label>
+                <input type="text" id="maintenanceVin" placeholder="17-digit VIN">
+            </div>
+            <div class="form-group">
+                <label>Service Type</label>
+                <select id="maintenanceService">
+                    <option value="Oil Change">Oil Change</option>
+                    <option value="Brake Service">Brake Service</option>
+                    <option value="Suspension Work">Suspension Work</option>
+                    <option value="Engine Repair">Engine Repair</option>
+                    <option value="Transmission">Transmission</option>
+                    <option value="Electrical">Electrical</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Priority</label>
+                <select id="maintenancePriority">
+                    <option value="Normal">Normal</option>
+                    <option value="High">High</option>
+                    <option value="Low">Low</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Bay Assignment</label>
+                <select id="maintenanceBay">
+                    <option value="Bay 1">Bay 1</option>
+                    <option value="Bay 2">Bay 2</option>
+                    <option value="Bay 3">Bay 3</option>
+                    <option value="Bay 4">Bay 4</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Technician</label>
+                <select id="maintenanceTechnician">
+                    <option value="Mike Johnson">Mike Johnson</option>
+                    <option value="Sarah Williams">Sarah Williams</option>
+                    <option value="Tom Davis">Tom Davis</option>
+                    <option value="Unassigned">Unassigned</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Estimated Cost ($)</label>
+                <input type="number" id="maintenanceCost" placeholder="0.00" min="0" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="maintenanceNotes" rows="3" placeholder="Any special instructions or notes..."></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="saveMaintenanceJob()">Add Job</button>
+        </div>
+    </div>
+
+    <!-- VAPI Script Modal -->
+    <div id="vapiScriptModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>Create VAPI Script</h2>
+                <button class="close-btn" onclick="closeModal('vapiScriptModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Script Name</label>
+                <input type="text" id="vapiScriptName" placeholder="e.g., Parts Store Call">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" id="vapiScriptDescription" placeholder="What this script is for">
+            </div>
+            <div class="form-group">
+                <label>Voice</label>
+                <select id="vapiScriptVoice">
+                    <option value="rachel">Rachel (Female)</option>
+                    <option value="drew">Drew (Male)</option>
+                    <option value="cleo">Cleo (Female)</option>
+                    <option value="adam">Adam (Male)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Script Text</label>
+                <textarea id="vapiScriptText" rows="6" placeholder="Enter the script text here. Use placeholders like [CUSTOMER_NAME], [SHOP_NAME], etc."></textarea>
+                <small style="color: #666;">
+                    Available placeholders: [SHOP_NAME], [CUSTOMER_NAME], [VEHICLE], [SERVICE], [DATE], [TIME], [AMOUNT], [LOCATION]
+                </small>
+            </div>
+            <button class="btn btn-primary" onclick="saveVapiScript()">Save Script</button>
         </div>
     </div>
 
@@ -1338,6 +1538,8 @@
             if (towingRequests.length === 0) initSampleTowing();
             if (estimates.length === 0) initSampleEstimates();
             if (invoices.length === 0) initSampleInvoices();
+            if (maintenanceJobs.length === 0) initSampleMaintenance();
+            if (vapiScripts.length === 0) initSampleVapiScripts();
             
             // Render all screens
             renderCustomers();
@@ -1346,6 +1548,9 @@
             renderInvoices();
             renderTowing();
             renderInventory();
+            renderMaintenanceList();
+            renderMaintenanceHistory();
+            renderVapiScripts();
         });
 
         // ============ STORAGE FUNCTIONS ============
@@ -1357,6 +1562,9 @@
                 invoices = JSON.parse(localStorage.getItem('vhicl_invoices') || '[]');
                 towingRequests = JSON.parse(localStorage.getItem('vhicl_towing') || '[]');
                 inventory = JSON.parse(localStorage.getItem('vhicl_inventory') || '[]');
+                maintenanceJobs = JSON.parse(localStorage.getItem('vhicl_maintenance') || '[]');
+                maintenanceHistory = JSON.parse(localStorage.getItem('vhicl_maintenance_history') || '[]');
+                vapiScripts = JSON.parse(localStorage.getItem('vhicl_vapi_scripts') || '[]');
                 settings = JSON.parse(localStorage.getItem('vhicl_settings') || '{}');
             } catch (error) {
                 console.error('Error loading from storage:', error);
@@ -1370,6 +1578,9 @@
             localStorage.setItem('vhicl_invoices', JSON.stringify(invoices));
             localStorage.setItem('vhicl_towing', JSON.stringify(towingRequests));
             localStorage.setItem('vhicl_inventory', JSON.stringify(inventory));
+            localStorage.setItem('vhicl_maintenance', JSON.stringify(maintenanceJobs));
+            localStorage.setItem('vhicl_maintenance_history', JSON.stringify(maintenanceHistory));
+            localStorage.setItem('vhicl_vapi_scripts', JSON.stringify(vapiScripts));
         }
 
         // ============ SETTINGS FUNCTIONS ============
@@ -1431,8 +1642,39 @@
             document.getElementById('apiRetries').value = settings.apiRetries;
             document.getElementById('apiRateLimit').value = settings.apiRateLimit;
             
-            // Update API badge
+            // Populate VAPI settings
+            document.getElementById('vapiApiKey').value = settings.vapiApiKey || '';
+            document.getElementById('vapiPhoneNumber').value = settings.vapiPhoneNumber || '';
+            document.getElementById('vapiVoice').value = settings.vapiVoice || 'rachel';
+            document.getElementById('vapiEnabled').checked = settings.vapiEnabled || false;
+            document.getElementById('vapiRecordCalls').checked = settings.vapiRecordCalls !== false;
+            
+            // Populate Twilio settings
+            document.getElementById('twilioAccountSid').value = settings.twilioAccountSid || '';
+            document.getElementById('twilioAuthToken').value = settings.twilioAuthToken || '';
+            document.getElementById('twilioPhoneNumber').value = settings.twilioPhoneNumber || '';
+            document.getElementById('twilioEnabled').checked = settings.twilioEnabled || false;
+            document.getElementById('twilioAutoReminders').checked = settings.twilioAutoReminders !== false;
+            
+            // Populate PayPal settings
+            document.getElementById('paypalClientId').value = settings.paypalClientId || '';
+            document.getElementById('paypalClientSecret').value = settings.paypalClientSecret || '';
+            document.getElementById('paypalEnvironment').value = settings.paypalEnvironment || 'sandbox';
+            document.getElementById('paypalEmail').value = settings.paypalEmail || '';
+            document.getElementById('paypalEnabled').checked = settings.paypalEnabled || false;
+            document.getElementById('paypalAlexBilling').checked = settings.paypalAlexBilling !== false;
+            
+            // Populate SendGrid settings
+            document.getElementById('sendgridApiKey').value = settings.sendgridApiKey || '';
+            document.getElementById('sendgridFromEmail').value = settings.sendgridFromEmail || '';
+            document.getElementById('sendgridFromName').value = settings.sendgridFromName || 'VHICL Pro Auto Shop';
+            document.getElementById('sendgridEnabled').checked = settings.sendgridEnabled || false;
+            document.getElementById('sendgridAlexEmail').checked = settings.sendgridAlexEmail !== false;
+            document.getElementById('sendgridTemplate').value = settings.sendgridTemplate || 'default';
+            
+            // Update badges
             updateApiBadge();
+            updateIntegrationBadges();
             
             // Show/hide parts matrix
             togglePartsMatrix();
@@ -2632,6 +2874,534 @@
             const template = templates[templateId];
             if (template) {
                 document.getElementById('alexServices').value = template.services;
+            }
+        }
+
+        // ============ MAINTENANCE FUNCTIONS ============
+        let maintenanceJobs = [];
+        let maintenanceHistory = [];
+
+        function initSampleMaintenance() {
+            maintenanceJobs = [
+                {
+                    id: 1,
+                    customerName: 'John Smith',
+                    vehicle: '2018 Honda Accord',
+                    vin: '1HGCM82633A004352',
+                    service: 'Brake Replacement',
+                    status: 'In Progress',
+                    priority: 'High',
+                    startDate: '2025-01-15',
+                    bay: 'Bay 1',
+                    technician: 'Mike Johnson',
+                    cost: 345,
+                    notes: 'Customer waiting, expedite'
+                },
+                {
+                    id: 2,
+                    customerName: 'Jane Doe',
+                    vehicle: '2020 Toyota Camry',
+                    vin: '4T1BF1FK8CU123456',
+                    service: 'Oil Change + Inspection',
+                    status: 'Completed',
+                    priority: 'Normal',
+                    startDate: '2025-01-15',
+                    bay: 'Bay 2',
+                    technician: 'Sarah Williams',
+                    cost: 85,
+                    notes: 'No issues found'
+                },
+                {
+                    id: 3,
+                    customerName: 'Bob Wilson',
+                    vehicle: '2019 Ford F-150',
+                    vin: '1FTEW1EP4KF123456',
+                    service: 'Transmission Flush',
+                    status: 'Waiting for Parts',
+                    priority: 'Medium',
+                    startDate: '2025-01-14',
+                    bay: 'Bay 3',
+                    technician: 'Tom Davis',
+                    cost: 250,
+                    notes: 'Waiting for transmission fluid'
+                }
+            ];
+            saveToStorage();
+        }
+
+        function renderMaintenanceList() {
+            const list = document.getElementById('maintenanceList');
+            if (maintenanceJobs.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666;">No active maintenance jobs.</p>';
+                return;
+            }
+            
+            list.innerHTML = maintenanceJobs.map(job => {
+                const statusColors = {
+                    'In Progress': '#00d4ff',
+                    'Completed': '#43e97b',
+                    'Waiting for Parts': '#f39c12',
+                    'Pending': '#95a5a6'
+                };
+                
+                return `
+                    <div class="card" style="margin-bottom: 1rem; border-left: 4px solid ${statusColors[job.status] || '#666'};">
+                        <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem;">
+                            <div style="flex: 1; min-width: 300px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <h3 style="color: #0a2540; margin: 0;">${job.customerName}</h3>
+                                    <span class="status-badge" style="background: ${statusColors[job.status]}; color: white;">${job.status}</span>
+                                </div>
+                                <p style="color: #666; margin: 0.25rem 0;"><strong>Vehicle:</strong> ${job.vehicle}</p>
+                                <p style="color: #666; margin: 0.25rem 0;"><strong>VIN:</strong> ${job.vin}</p>
+                                <p style="color: #666; margin: 0.25rem 0;"><strong>Service:</strong> ${job.service}</p>
+                                <p style="color: #666; margin: 0.25rem 0;"><strong>Bay:</strong> ${job.bay} | <strong>Technician:</strong> ${job.technician}</p>
+                                <p style="color: #666; margin: 0.25rem 0;"><strong>Cost:</strong> $${job.cost.toFixed(2)}</p>
+                                ${job.notes ? `<p style="color: #f39c12; margin: 0.25rem 0; font-style: italic;"><i class="fas fa-sticky-note"></i> ${job.notes}</p>` : ''}
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <button class="btn btn-success" onclick="completeMaintenance(${job.id})">
+                                    <i class="fas fa-check"></i> Complete
+                                </button>
+                                <button class="btn btn-primary" onclick="updateMaintenance(${job.id})">
+                                    <i class="fas fa-edit"></i> Update
+                                </button>
+                                <button class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;" onclick="sendAlexBill(${job.id})">
+                                    <i class="fas fa-robot"></i> ALEX Bill
+                                </button>
+                                <button class="btn btn-danger" onclick="deleteMaintenance(${job.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openMaintenanceModal() {
+            document.getElementById('maintenanceModal').classList.add('active');
+        }
+
+        function saveMaintenanceJob() {
+            const job = {
+                id: Date.now(),
+                customerName: document.getElementById('maintenanceCustomer').value,
+                vehicle: document.getElementById('maintenanceVehicle').value,
+                vin: document.getElementById('maintenanceVin').value,
+                service: document.getElementById('maintenanceService').value,
+                priority: document.getElementById('maintenancePriority').value,
+                bay: document.getElementById('maintenanceBay').value,
+                technician: document.getElementById('maintenanceTechnician').value,
+                cost: parseFloat(document.getElementById('maintenanceCost').value) || 0,
+                notes: document.getElementById('maintenanceNotes').value,
+                status: 'Pending',
+                startDate: new Date().toISOString().split('T')[0]
+            };
+            
+            if (!job.customerName || !job.vehicle) {
+                alert('Please enter customer name and vehicle');
+                return;
+            }
+            
+            maintenanceJobs.push(job);
+            saveToStorage();
+            renderMaintenanceList();
+            closeModal('maintenanceModal');
+            
+            // Clear form
+            document.getElementById('maintenanceCustomer').value = '';
+            document.getElementById('maintenanceVehicle').value = '';
+            document.getElementById('maintenanceVin').value = '';
+            document.getElementById('maintenanceCost').value = '';
+            document.getElementById('maintenanceNotes').value = '';
+            
+            alert('Maintenance job added successfully!');
+        }
+
+        function completeMaintenance(id) {
+            const job = maintenanceJobs.find(j => j.id === id);
+            if (job) {
+                job.status = 'Completed';
+                job.completedDate = new Date().toISOString().split('T')[0];
+                
+                // Add to history
+                maintenanceHistory.push({
+                    date: job.completedDate,
+                    vehicle: job.vehicle,
+                    service: job.service,
+                    cost: job.cost,
+                    status: 'Completed'
+                });
+                
+                // Remove from active jobs
+                maintenanceJobs = maintenanceJobs.filter(j => j.id !== id);
+                saveToStorage();
+                renderMaintenanceList();
+                renderMaintenanceHistory();
+                
+                alert(`Job completed for ${job.customerName}!`);
+            }
+        }
+
+        function updateMaintenance(id) {
+            alert('Update maintenance job modal will open');
+        }
+
+        function deleteMaintenance(id) {
+            if (confirm('Are you sure you want to delete this maintenance job?')) {
+                maintenanceJobs = maintenanceJobs.filter(j => j.id !== id);
+                saveToStorage();
+                renderMaintenanceList();
+            }
+        }
+
+        function renderMaintenanceHistory() {
+            const history = document.getElementById('maintenanceHistory');
+            if (maintenanceHistory.length === 0) {
+                history.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666;">No maintenance history yet.</td></tr>';
+                return;
+            }
+            
+            history.innerHTML = maintenanceHistory.map(h => `
+                <tr>
+                    <td>${h.date}</td>
+                    <td>${h.vehicle}</td>
+                    <td>${h.service}</td>
+                    <td>$${h.cost.toFixed(2)}</td>
+                    <td><span class="status-badge status-paid">${h.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // ALEX Billing via Email + PayPal
+        function sendAlexBill(jobId) {
+            const job = maintenanceJobs.find(j => j.id === jobId);
+            if (!job) return;
+            
+            // Check if integrations are enabled
+            const sendgridEnabled = settings.sendgridEnabled || false;
+            const paypalEnabled = settings.paypalEnabled || false;
+            const alexAutoBilling = settings.paypalAlexBilling || false;
+            
+            if (!sendgridEnabled || !paypalEnabled || !alexAutoBilling) {
+                alert('Please enable SendGrid, PayPal, and ALEX Auto-Billing in Settings first.');
+                showScreen('settings');
+                return;
+            }
+            
+            // Generate PayPal payment link
+            const paypalLink = generatePaypalLink(job);
+            
+            // Create invoice email
+            const emailContent = {
+                to: 'customer@email.com', // Would come from customer record
+                subject: `Invoice for ${job.service} - ${job.vehicle}`,
+                body: `
+Dear Customer,
+
+Your vehicle is ready for pickup!
+
+Vehicle: ${job.vehicle}
+Service: ${job.service}
+Total: $${job.cost.toFixed(2)}
+
+${paypalEnabled ? `\nPay securely via PayPal: ${paypalLink}` : ''}
+
+Thank you for choosing VHICL Pro Auto Shop!
+
+Best regards,
+ALEX AI Assistant
+                `
+            };
+            
+            // Send email via SendGrid
+            alert(`ALEX is sending invoice email with PayPal link...\n\nTo: customer@email.com\nSubject: Invoice for ${job.service}\nAmount: $${job.cost.toFixed(2)}\nPayPal Link: ${paypalLink}`);
+            
+            // In production, this would call the backend to:
+            // 1. Create PayPal payment
+            // 2. Generate invoice
+            // 3. Send email via SendGrid
+        }
+
+        function generatePaypalLink(job) {
+            const clientId = settings.paypalClientId || '';
+            const environment = settings.paypalEnvironment || 'sandbox';
+            const baseUrl = environment === 'sandbox' 
+                ? 'https://www.sandbox.paypal.com/cgi-bin/webscr'
+                : 'https://www.paypal.com/cgi-bin/webscr';
+            
+            return `${baseUrl}?cmd=_xclick&business=${settings.paypalEmail}&item_name=${encodeURIComponent(job.service + ' - ' + job.vehicle)}&amount=${job.cost.toFixed(2)}&currency_code=USD`;
+        }
+
+        // ============ VAPI FUNCTIONS ============
+        let vapiScripts = [];
+
+        function initSampleVapiScripts() {
+            vapiScripts = [
+                {
+                    id: 1,
+                    name: 'Parts Store Call',
+                    description: 'Call parts store to check availability and place order',
+                    script: 'Hello, this is [SHOP_NAME]. I need to check availability for [PART_NAME] for a [YEAR] [MAKE] [MODEL]. Can you tell me if it\'s in stock and the price?',
+                    voice: 'rachel'
+                },
+                {
+                    id: 2,
+                    name: 'Customer Reminder',
+                    description: 'Remind customer about upcoming appointment',
+                    script: 'Hello [CUSTOMER_NAME], this is [SHOP_NAME]. This is a reminder that your appointment for [SERVICE] on your [YEAR] [MAKE] [MODEL] is scheduled for [DATE] at [TIME]. Please call us if you need to reschedule.',
+                    voice: 'rachel'
+                },
+                {
+                    id: 3,
+                    name: 'Payment Request',
+                    description: 'Call customer for payment',
+                    script: 'Hello [CUSTOMER_NAME], this is [SHOP_NAME]. Your vehicle [YEAR] [MAKE] [MODEL] is ready for pickup. The total for [SERVICE] is $[AMOUNT]. You can pay via PayPal using the link sent to your email, or by phone. Would you like to make a payment now?',
+                    voice: 'drew'
+                },
+                {
+                    id: 4,
+                    name: 'Tow Dispatch',
+                    description: 'Call tow service to schedule pickup',
+                    script: 'Hello, this is [SHOP_NAME]. We need to schedule a tow for a customer. The pickup location is [LOCATION], and the vehicle is a [YEAR] [MAKE] [MODEL]. When can you have a truck available?',
+                    voice: 'drew'
+                }
+            ];
+        }
+
+        function renderVapiScripts() {
+            const list = document.getElementById('vapiScriptsList');
+            if (vapiScripts.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666;">No VAPI scripts yet. Create your first script!</p>';
+                return;
+            }
+            
+            list.innerHTML = vapiScripts.map(script => `
+                <div class="card" style="margin-bottom: 1rem; padding: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <h4 style="color: #0a2540; margin-bottom: 0.5rem;">
+                                <i class="fas fa-microphone"></i> ${script.name}
+                            </h4>
+                            <p style="color: #666; font-size: 0.9rem; margin: 0;">${script.description}</p>
+                            <p style="color: #00d4ff; font-size: 0.9rem; margin: 0.25rem 0;">
+                                <strong>Voice:</strong> ${script.voice}
+                            </p>
+                            <div style="background: #f8f9fa; padding: 0.5rem; border-radius: 5px; margin-top: 0.5rem; font-family: monospace; font-size: 0.85rem;">
+                                "${script.script.substring(0, 100)}..."
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-primary" onclick="useVapiScript(${script.id})">
+                                <i class="fas fa-phone"></i> Use
+                            </button>
+                            <button class="btn" style="background: #666; color: white;" onclick="editVapiScript(${script.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteVapiScript(${script.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openVapiScriptModal() {
+            document.getElementById('vapiScriptModal').classList.add('active');
+        }
+
+        function saveVapiScript() {
+            const script = {
+                id: Date.now(),
+                name: document.getElementById('vapiScriptName').value,
+                description: document.getElementById('vapiScriptDescription').value,
+                voice: document.getElementById('vapiScriptVoice').value,
+                script: document.getElementById('vapiScriptText').value
+            };
+            
+            if (!script.name || !script.script) {
+                alert('Please enter script name and script text');
+                return;
+            }
+            
+            vapiScripts.push(script);
+            saveToStorage();
+            renderVapiScripts();
+            closeModal('vapiScriptModal');
+            
+            // Clear form
+            document.getElementById('vapiScriptName').value = '';
+            document.getElementById('vapiScriptDescription').value = '';
+            document.getElementById('vapiScriptText').value = '';
+            
+            alert('VAPI script saved successfully!');
+        }
+
+        function useVapiScript(id) {
+            const script = vapiScripts.find(s => s.id === id);
+            if (script) {
+                alert(`Using VAPI script: ${script.name}\n\nVoice: ${script.voice}\nScript: ${script.script}`);
+            }
+        }
+
+        function editVapiScript(id) {
+            alert('Edit VAPI Script modal will open');
+        }
+
+        function deleteVapiScript(id) {
+            if (confirm('Are you sure you want to delete this script?')) {
+                vapiScripts = vapiScripts.filter(s => s.id !== id);
+                renderVapiScripts();
+            }
+        }
+
+        function makeVapiCall(type) {
+            const vapiEnabled = settings.vapiEnabled || false;
+            if (!vapiEnabled) {
+                alert('Please enable VAPI in Settings first.');
+                showScreen('settings');
+                return;
+            }
+            
+            const callTypes = {
+                'parts': { script: 'Parts Store Call', prompt: 'Enter parts store phone number' },
+                'customer': { script: 'Customer Call', prompt: 'Enter customer phone number' },
+                'tow': { script: 'Tow Dispatch', prompt: 'Enter tow provider phone number' },
+                'billing': { script: 'Payment Request', prompt: 'Enter customer phone number' },
+                'reminder': { script: 'Customer Reminder', prompt: 'Enter customer phone number' },
+                'survey': { script: 'Survey Call', prompt: 'Enter customer phone number' }
+            };
+            
+            const callInfo = callTypes[type];
+            const phoneNumber = prompt(callInfo.prompt);
+            
+            if (phoneNumber) {
+                alert(`VAPI is initiating call to ${phoneNumber}...\n\nUsing script: ${callInfo.script}\nVoice: ${settings.vapiVoice || 'rachel'}\n\nIn production, this would make an actual call.`);
+            }
+        }
+
+        // ============ INTEGRATION SETTINGS FUNCTIONS ============
+        function saveVapiSettings() {
+            settings.vapiApiKey = document.getElementById('vapiApiKey').value;
+            settings.vapiPhoneNumber = document.getElementById('vapiPhoneNumber').value;
+            settings.vapiVoice = document.getElementById('vapiVoice').value;
+            settings.vapiEnabled = document.getElementById('vapiEnabled').checked;
+            settings.vapiRecordCalls = document.getElementById('vapiRecordCalls').checked;
+            
+            localStorage.setItem('vhicl_settings', JSON.stringify(settings));
+            updateIntegrationBadges();
+            alert('VAPI settings saved successfully!');
+        }
+
+        function saveTwilioSettings() {
+            settings.twilioAccountSid = document.getElementById('twilioAccountSid').value;
+            settings.twilioAuthToken = document.getElementById('twilioAuthToken').value;
+            settings.twilioPhoneNumber = document.getElementById('twilioPhoneNumber').value;
+            settings.twilioEnabled = document.getElementById('twilioEnabled').checked;
+            settings.twilioAutoReminders = document.getElementById('twilioAutoReminders').checked;
+            
+            localStorage.setItem('vhicl_settings', JSON.stringify(settings));
+            updateIntegrationBadges();
+            alert('Twilio settings saved successfully!');
+        }
+
+        function savePaypalSettings() {
+            settings.paypalClientId = document.getElementById('paypalClientId').value;
+            settings.paypalClientSecret = document.getElementById('paypalClientSecret').value;
+            settings.paypalEnvironment = document.getElementById('paypalEnvironment').value;
+            settings.paypalEmail = document.getElementById('paypalEmail').value;
+            settings.paypalEnabled = document.getElementById('paypalEnabled').checked;
+            settings.paypalAlexBilling = document.getElementById('paypalAlexBilling').checked;
+            
+            localStorage.setItem('vhicl_settings', JSON.stringify(settings));
+            updateIntegrationBadges();
+            alert('PayPal settings saved successfully!');
+        }
+
+        function saveSendgridSettings() {
+            settings.sendgridApiKey = document.getElementById('sendgridApiKey').value;
+            settings.sendgridFromEmail = document.getElementById('sendgridFromEmail').value;
+            settings.sendgridFromName = document.getElementById('sendgridFromName').value;
+            settings.sendgridEnabled = document.getElementById('sendgridEnabled').checked;
+            settings.sendgridAlexEmail = document.getElementById('sendgridAlexEmail').checked;
+            settings.sendgridTemplate = document.getElementById('sendgridTemplate').value;
+            
+            localStorage.setItem('vhicl_settings', JSON.stringify(settings));
+            updateIntegrationBadges();
+            alert('SendGrid settings saved successfully!');
+        }
+
+        function updateIntegrationBadges() {
+            // Update VAPI badge
+            const vapiBadge = document.getElementById('vapiBadge');
+            if (settings.vapiEnabled && settings.vapiApiKey) {
+                vapiBadge.style.background = '#d4edda';
+                vapiBadge.style.color = '#155724';
+                vapiBadge.textContent = 'Connected';
+            } else {
+                vapiBadge.style.background = '#f8d7da';
+                vapiBadge.style.color = '#721c24';
+                vapiBadge.textContent = 'Disconnected';
+            }
+            
+            // Update Twilio badge
+            const twilioBadge = document.getElementById('twilioBadge');
+            if (settings.twilioEnabled && settings.twilioAccountSid && settings.twilioAuthToken) {
+                twilioBadge.style.background = '#d4edda';
+                twilioBadge.style.color = '#155724';
+                twilioBadge.textContent = 'Connected';
+            } else {
+                twilioBadge.style.background = '#f8d7da';
+                twilioBadge.style.color = '#721c24';
+                twilioBadge.textContent = 'Disconnected';
+            }
+            
+            // Update PayPal badge
+            const paypalBadge = document.getElementById('paypalBadge');
+            if (settings.paypalEnabled && settings.paypalClientId && settings.paypalClientSecret) {
+                paypalBadge.style.background = '#d4edda';
+                paypalBadge.style.color = '#155724';
+                paypalBadge.textContent = 'Connected';
+            } else {
+                paypalBadge.style.background = '#f8d7da';
+                paypalBadge.style.color = '#721c24';
+                paypalBadge.textContent = 'Disconnected';
+            }
+            
+            // Update SendGrid badge
+            const sendgridBadge = document.getElementById('sendgridBadge');
+            if (settings.sendgridEnabled && settings.sendgridApiKey) {
+                sendgridBadge.style.background = '#d4edda';
+                sendgridBadge.style.color = '#155724';
+                sendgridBadge.textContent = 'Connected';
+            } else {
+                sendgridBadge.style.background = '#f8d7da';
+                sendgridBadge.style.color = '#721c24';
+                sendgridBadge.textContent = 'Disconnected';
+            }
+        }
+
+        function testVapiConnection() {
+            alert('VAPI test call will be made to verify connection...');
+        }
+
+        function testTwilioSMS() {
+            const phoneNumber = prompt('Enter phone number to send test SMS:');
+            if (phoneNumber) {
+                alert(`Test SMS sent to ${phoneNumber}!\n\nThis would send an actual SMS via Twilio in production.`);
+            }
+        }
+
+        function testPaypalConnection() {
+            alert('Testing PayPal API connection...\n\nThis would verify Client ID and Secret in production.');
+        }
+
+        function testSendgridEmail() {
+            const emailAddress = prompt('Enter email address to send test email:');
+            if (emailAddress) {
+                alert(`Test email sent to ${emailAddress}!\n\nThis would send an actual email via SendGrid in production.`);
             }
         }
 
