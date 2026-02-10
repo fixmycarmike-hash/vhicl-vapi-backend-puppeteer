@@ -294,6 +294,67 @@ class ShopSettingsService {
                 },
                 autoOrderOnLowStock: false,
                 defaultSupplierId: 'store-1'
+            },
+            // Towing Integration
+            towing: {
+                enabled: true,
+                // VAPI/ALEX for calling towing companies
+                vapi: {
+                    enabled: true,
+                    useAlexForCalling: true, // ALEX will call towing companies
+                    phoneNumber: '', // Towing company phone number
+                    assistantId: '', // VAPI assistant for towing calls
+                },
+                // Twilio for SMS notifications
+                twilio: {
+                    enabled: true,
+                    accountSid: '',
+                    authToken: '',
+                    fromNumber: '' // Shop's Twilio phone number
+                },
+                // What ALEX will ask the customer when requesting tow
+                customerIntake: {
+                    collectLocation: true, // Exact pickup location
+                    collectVehicleInfo: true, // Color, make, model, tag number
+                    collectKeyLocation: true, // Where are the keys?
+                    askCustomerMeeting: true, // Will customer meet tow driver?
+                    confirmDestination: true, // Towing to shop or elsewhere?
+                },
+                // What ALEX will tell the towing company
+                providerCallInfo: {
+                    provideVehicleDetails: true, // Color, make, model, tag
+                    providePickupLocation: true, // Exact address
+                    provideDestination: true, // Where to tow
+                    provideKeyInfo: true, // Where keys are located
+                    askAboutETA: true, // Request estimated arrival time
+                    confirmPricing: true, // Get price quote
+                },
+                // Auto-intake customer if towing to shop
+                autoIntakeOnArrival: true,
+                // SMS notification when car arrives
+                sendArrivalSMS: true,
+                arrivalSMSTemplate: '🚗 Your {{year}} {{color}} {{make}} {{model}} ({{plate}}) has safely arrived at {{shopName}}! We\'ll be in touch shortly with an estimate. 📞 {{shopPhone}}',
+                // Default towing settings
+                defaultProviderId: '',
+                autoAssignProvider: false,
+                notifyOnStatusChange: true,
+                notifyCustomer: true,
+                // Pricing
+                pricing: {
+                    baseFee: 75,
+                    perMileRate: 4.50,
+                    afterHoursRate: 6.50,
+                    afterHoursStart: '18:00',
+                    afterHoursEnd: '08:00',
+                    weekendMultiplier: 1.5,
+                    heavyVehicleMultiplier: 2.0
+                },
+                // Service area
+                serviceArea: {
+                    maxDistance: 50, // miles
+                    zipCodes: [],
+                    cities: []
+                }
             }
         };
     }
@@ -442,6 +503,22 @@ class ShopSettingsService {
                     platform.apiSecret = this.maskApiKey(platform.apiSecret);
                 }
             });
+        }
+        
+        // Mask VAPI settings (towing)
+        if (masked.towing?.vapi?.phoneNumber) {
+            masked.towing.vapi.phoneNumber = this.maskApiKey(masked.towing.vapi.phoneNumber);
+        }
+        if (masked.towing?.vapi?.assistantId) {
+            masked.towing.vapi.assistantId = this.maskApiKey(masked.towing.vapi.assistantId);
+        }
+        
+        // Mask Twilio credentials (towing)
+        if (masked.towing?.twilio?.accountSid) {
+            masked.towing.twilio.accountSid = this.maskApiKey(masked.towing.twilio.accountSid);
+        }
+        if (masked.towing?.twilio?.authToken) {
+            masked.towing.twilio.authToken = this.maskApiKey(masked.towing.twilio.authToken);
         }
         
         return masked;
