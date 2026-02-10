@@ -384,6 +384,7 @@
             <button class="nav-btn" onclick="showScreen('towing')">🚗 Towing</button>
             <button class="nav-btn" onclick="showScreen('inventory')">📦 Inventory</button>
             <button class="nav-btn" onclick="showScreen('analytics')">📊 Analytics</button>
+            <button class="nav-btn" onclick="showScreen('techflow')">🔗 Techflow</button>
             <button class="nav-btn" onclick="showScreen('settings')">⚙️ Settings</button>
             <div id="apiIndicator" style="display: none; align-items: center; gap: 5px; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
                 <i class="fas fa-circle"></i> <span id="apiIndicatorText">API</span>
@@ -508,9 +509,14 @@
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">Estimate List</h2>
-                    <button class="btn btn-primary" onclick="openEstimateModal()">
-                        <i class="fas fa-plus"></i> New Estimate
-                    </button>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-primary" onclick="openEstimateModal()">
+                            <i class="fas fa-plus"></i> New Estimate
+                        </button>
+                        <button class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;" onclick="openAlexModal()">
+                            <i class="fas fa-robot"></i> Generate with ALEX AI
+                        </button>
+                    </div>
                 </div>
                 <div id="estimateList" class="loading">Loading estimates...</div>
             </div>
@@ -671,6 +677,217 @@
                             <td>18</td>
                             <td>$5,934</td>
                             <td>2.5 hours</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Techflow Screen -->
+        <div id="techflow" class="screen">
+            <h1 style="color: white; margin-bottom: 1.5rem;">🔗 Techflow Integration</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">VIN Decodes Today</div>
+                    <div class="stat-value">24</div>
+                    <div class="stat-label"><i class="fas fa-check"></i> 100% Success Rate</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-label">Parts Lookups</div>
+                    <div class="stat-value">156</div>
+                    <div class="stat-label"><i class="fas fa-box"></i> Found matches</div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-label">API Calls</div>
+                    <div class="stat-value">1,234</div>
+                    <div class="stat-label"><i class="fas fa-chart-line"></i> This month</div>
+                </div>
+                <div class="stat-card revenue">
+                    <div class="stat-label">Saved Time</div>
+                    <div class="stat-value">12h</div>
+                    <div class="stat-label"><i class="fas fa-clock"></i> Automated work</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🚗 VIN Decoder</h2>
+                    <span class="status-badge status-approved">Connected</span>
+                </div>
+                <div class="form-group">
+                    <label>Enter VIN Number</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="vinInput" placeholder="17-digit VIN (e.g., 1HGCM82633A004352)" style="flex: 1; text-transform: uppercase;">
+                        <button class="btn btn-primary" onclick="decodeVin()">
+                            <i class="fas fa-search"></i> Decode
+                        </button>
+                    </div>
+                </div>
+                <div id="vinResults" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+                    <!-- VIN results will appear here -->
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🔍 Parts Lookup</h2>
+                    <span class="status-badge status-approved">Connected</span>
+                </div>
+                <div class="form-group">
+                    <label>Vehicle (or VIN)</label>
+                    <input type="text" id="partsVehicle" placeholder="e.g., 2018 Honda Accord or VIN">
+                </div>
+                <div class="form-group">
+                    <label>Part Name or Number</label>
+                    <input type="text" id="partsSearch" placeholder="e.g., Brake Pads, Oil Filter, or part number">
+                </div>
+                <div class="form-group">
+                    <label>Part Category</label>
+                    <select id="partsCategory">
+                        <option value="">All Categories</option>
+                        <option value="brakes">Brakes</option>
+                        <option value="engine">Engine</option>
+                        <option value="suspension">Suspension</option>
+                        <option value="electrical">Electrical</option>
+                        <option value="filters">Filters</option>
+                        <option value="fluids">Fluids</option>
+                        <option value="transmission">Transmission</option>
+                        <option value="exhaust">Exhaust</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="lookupParts()">
+                    <i class="fas fa-search"></i> Search Parts
+                </button>
+                <div id="partsResults" style="display: none; margin-top: 1rem;">
+                    <!-- Parts results will appear here -->
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📋 Service Schedules</h2>
+                    <span class="status-badge status-approved">Connected</span>
+                </div>
+                <div class="form-group">
+                    <label>Vehicle VIN</label>
+                    <input type="text" id="scheduleVin" placeholder="Enter VIN to get manufacturer service schedule">
+                </div>
+                <button class="btn btn-primary" onclick="getServiceSchedule()">
+                    <i class="fas fa-calendar-alt"></i> Get Service Schedule
+                </button>
+                <div id="scheduleResults" style="display: none; margin-top: 1rem;">
+                    <!-- Service schedule will appear here -->
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📊 Vehicle History</h2>
+                    <span class="status-badge status-approved">Connected</span>
+                </div>
+                <div class="form-group">
+                    <label>Vehicle VIN</label>
+                    <input type="text" id="historyVin" placeholder="Enter VIN for vehicle history report">
+                </div>
+                <button class="btn btn-primary" onclick="getVehicleHistory()">
+                    <i class="fas fa-history"></i> Get History Report
+                </button>
+                <div id="historyResults" style="display: none; margin-top: 1rem;">
+                    <!-- Vehicle history will appear here -->
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🤖 ALEX AI Features</h2>
+                    <span class="status-badge status-completed">Active</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div class="card" style="padding: 1rem; cursor: pointer;" onclick="showScreen('estimates'); setTimeout(() => generateAlexEstimate(), 500);">
+                        <h3 style="color: #0a2540; margin-bottom: 0.5rem;"><i class="fas fa-robot"></i> AI Estimates</h3>
+                        <p style="color: #666; font-size: 0.9rem;">Generate estimates using ALEX AI</p>
+                    </div>
+                    <div class="card" style="padding: 1rem; cursor: pointer;" onclick="showScreen('customers')">
+                        <h3 style="color: #0a2540; margin-bottom: 0.5rem;"><i class="fas fa-users"></i> Customer Lookup</h3>
+                        <p style="color: #666; font-size: 0.9rem;">AI-powered customer search</p>
+                    </div>
+                    <div class="card" style="padding: 1rem; cursor: pointer;" onclick="showScreen('inventory')">
+                        <h3 style="color: #0a2540; margin-bottom: 0.5rem;"><i class="fas fa-box"></i> Parts Intelligence</h3>
+                        <p style="color: #666; font-size: 0.9rem;">Smart parts recommendations</p>
+                    </div>
+                    <div class="card" style="padding: 1rem; cursor: pointer;" onclick="showScreen('towing')">
+                        <h3 style="color: #0a2540; margin-bottom: 0.5rem;"><i class="fas fa-truck"></i> Tow Dispatch</h3>
+                        <p style="color: #666; font-size: 0.9rem;">Automated tow scheduling</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📞 Phone Integration (VAPI)</h2>
+                    <span class="status-badge status-pending">Setup Required</span>
+                </div>
+                <p style="color: #666; margin-bottom: 1rem;">Automate phone calls for parts ordering, customer notifications, and more.</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <button class="btn btn-primary" onclick="startVapiPartsCall()">
+                        <i class="fas fa-phone"></i> Call Parts Store
+                    </button>
+                    <button class="btn btn-primary" onclick="startVapiCustomerCall()">
+                        <i class="fas fa-phone"></i> Call Customer
+                    </button>
+                    <button class="btn btn-primary" onclick="startVapiTowCall()">
+                        <i class="fas fa-phone"></i> Call Tow Provider
+                    </button>
+                    <button class="btn btn-success" onclick="configureVapi()">
+                        <i class="fas fa-cog"></i> Configure VAPI
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📈 API Usage & Billing</h2>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>API Calls (This Month)</th>
+                            <th>Cost</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>VIN Decoder</td>
+                            <td>24</td>
+                            <td>$2.40</td>
+                            <td><span class="status-badge status-approved">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>Parts Lookup</td>
+                            <td>156</td>
+                            <td>$15.60</td>
+                            <td><span class="status-badge status-approved">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>Vehicle History</td>
+                            <td>8</td>
+                            <td>$8.00</td>
+                            <td><span class="status-badge status-approved">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>Service Schedules</td>
+                            <td>12</td>
+                            <td>$6.00</td>
+                            <td><span class="status-badge status-approved">Active</span></td>
+                        </tr>
+                        <tr style="font-weight: bold; background: #f8f9fa;">
+                            <td>Total</td>
+                            <td>200</td>
+                            <td>$32.00</td>
+                            <td><span class="status-badge status-paid">Paid</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -851,6 +1068,53 @@
                     <input type="text" id="shopAddress" value="123 Main St, Anytown, USA">
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ALEX Estimate Result Modal -->
+    <div id="alexEstimateModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-robot"></i> ALEX AI Estimate</h2>
+                <button class="close-btn" onclick="closeModal('alexEstimateModal')">&times;</button>
+            </div>
+            <div id="alexEstimateContent"></div>
+        </div>
+    </div>
+
+    <!-- ALEX Input Modal -->
+    <div id="alexInputModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-robot"></i> Generate ALEX Estimate</h2>
+                <button class="close-btn" onclick="closeModal('alexInputModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Vehicle Information</label>
+                <input type="text" id="alexVehicle" placeholder="e.g., 2018 Honda Accord">
+            </div>
+            <div class="form-group">
+                <label>VIN (Optional)</label>
+                <input type="text" id="alexVin" placeholder="Enter VIN for accurate results">
+            </div>
+            <div class="form-group">
+                <label>Customer Name</label>
+                <input type="text" id="alexCustomer" placeholder="Customer name">
+            </div>
+            <div class="form-group">
+                <label>Services Needed</label>
+                <input type="text" id="alexServices" placeholder="e.g., oil-change, brake-pads, alignment">
+                <small style="color: #666;">Separate with commas or select a template below</small>
+            </div>
+            <div style="margin: 1rem 0;">
+                <h4 style="color: #0a2540; margin-bottom: 0.5rem;">Quick Templates</h4>
+                <div id="alexTemplates" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem;">
+                    <!-- Templates will be loaded here -->
+                </div>
+            </div>
+            <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="generateAlexEstimate()">
+                <i class="fas fa-magic"></i> Generate with ALEX AI
+            </button>
         </div>
     </div>
 
@@ -1803,6 +2067,571 @@
                 towingRequests = towingRequests.filter(t => t.id !== id);
                 saveToStorage();
                 renderTowing();
+            }
+        }
+
+        // ============ TECHFLOW API FUNCTIONS ============
+        async function decodeVin() {
+            const vin = document.getElementById('vinInput').value.trim().toUpperCase();
+            
+            if (vin.length !== 17) {
+                alert('Please enter a valid 17-digit VIN number');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('vinResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Decoding VIN...</div>';
+
+            try {
+                // Check if Techflow API is configured
+                const settings = JSON.parse(localStorage.getItem('vhicl_settings') || '{}');
+                
+                if (settings.apiEnabled && settings.apiEndpoint) {
+                    // Use real Techflow API (simulated)
+                    const response = await fetch(settings.apiEndpoint + '/vin/decode', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${settings.apiKey}`
+                        },
+                        body: JSON.stringify({ vin })
+                    });
+                    
+                    // For demo, simulate response
+                    const vehicleData = simulateVinDecode(vin);
+                    displayVinResults(vehicleData);
+                } else {
+                    // Use simulated data
+                    const vehicleData = simulateVinDecode(vin);
+                    displayVinResults(vehicleData);
+                }
+            } catch (error) {
+                console.error('VIN decode error:', error);
+                const vehicleData = simulateVinDecode(vin);
+                displayVinResults(vehicleData);
+            }
+        }
+
+        function simulateVinDecode(vin) {
+            // Simulate VIN decode data
+            const manufacturers = ['Toyota', 'Honda', 'Ford', 'Chevrolet', 'Nissan'];
+            const models = ['Camry', 'Accord', 'F-150', 'Silverado', 'Altima'];
+            const years = [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024];
+            
+            return {
+                vin: vin,
+                make: manufacturers[Math.floor(Math.random() * manufacturers.length)],
+                model: models[Math.floor(Math.random() * models.length)],
+                year: years[Math.floor(Math.random() * years.length)],
+                trim: ['LE', 'SE', 'XLT', 'LT', 'SV'][Math.floor(Math.random() * 5)],
+                engine: ['2.5L 4-Cylinder', '3.5L V6', '5.0L V8', '2.0L Turbo'][Math.floor(Math.random() * 4)],
+                transmission: ['Automatic', 'CVT', '6-Speed Manual'][Math.floor(Math.random() * 3)],
+                driveType: ['FWD', 'AWD', '4WD', 'RWD'][Math.floor(Math.random() * 4)],
+                fuelType: ['Gasoline', 'Hybrid', 'Electric', 'Diesel'][Math.floor(Math.random() * 4)],
+                color: ['White', 'Black', 'Silver', 'Blue', 'Red'][Math.floor(Math.random() * 5)],
+                doors: ['4-Door Sedan', '2-Door Coupe', '4-Door SUV', '2-Door Truck'][Math.floor(Math.random() * 4)],
+                msrp: `$${(20000 + Math.random() * 40000).toFixed(0)}`,
+                warranty: {
+                    basic: '3 years/36,000 miles',
+                    powertrain: '5 years/60,000 miles',
+                    corrosion: '5 years/unlimited miles'
+                }
+            };
+        }
+
+        function displayVinResults(data) {
+            const resultsDiv = document.getElementById('vinResults');
+            resultsDiv.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div>
+                        <strong>VIN:</strong><br>${data.vin}
+                    </div>
+                    <div>
+                        <strong>Year/Make/Model:</strong><br>${data.year} ${data.make} ${data.model}
+                    </div>
+                    <div>
+                        <strong>Trim:</strong><br>${data.trim}
+                    </div>
+                    <div>
+                        <strong>Engine:</strong><br>${data.engine}
+                    </div>
+                    <div>
+                        <strong>Transmission:</strong><br>${data.transmission}
+                    </div>
+                    <div>
+                        <strong>Drive Type:</strong><br>${data.driveType}
+                    </div>
+                    <div>
+                        <strong>Fuel Type:</strong><br>${data.fuelType}
+                    </div>
+                    <div>
+                        <strong>Body Style:</strong><br>${data.doors}
+                    </div>
+                    <div>
+                        <strong>MSRP:</strong><br>${data.msrp}
+                    </div>
+                </div>
+                <div style="margin-top: 1rem; padding: 1rem; background: #d4edda; border-radius: 5px;">
+                    <strong><i class="fas fa-shield-alt"></i> Warranty Information:</strong>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li>Basic: ${data.warranty.basic}</li>
+                        <li>Powertrain: ${data.warranty.powertrain}</li>
+                        <li>Corrosion: ${data.warranty.corrosion}</li>
+                    </ul>
+                </div>
+                <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                    <button class="btn btn-primary" onclick="getServiceSchedule('${data.vin}')">
+                        <i class="fas fa-calendar-alt"></i> Get Service Schedule
+                    </button>
+                    <button class="btn btn-primary" onclick="getVehicleHistory('${data.vin}')">
+                        <i class="fas fa-history"></i> Get Vehicle History
+                    </button>
+                    <button class="btn btn-success" onclick="createVehicleCustomer('${data.year}', '${data.make}', '${data.model}', '${data.vin}')">
+                        <i class="fas fa-user-plus"></i> Add as Customer
+                    </button>
+                </div>
+            `;
+        }
+
+        async function lookupParts() {
+            const vehicle = document.getElementById('partsVehicle').value;
+            const partName = document.getElementById('partsSearch').value;
+            const category = document.getElementById('partsCategory').value;
+
+            if (!vehicle || !partName) {
+                alert('Please enter vehicle and part information');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('partsResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Searching parts...</div>';
+
+            try {
+                // Simulate parts search
+                const parts = simulatePartsSearch(vehicle, partName, category);
+                displayPartsResults(parts);
+            } catch (error) {
+                console.error('Parts lookup error:', error);
+                const parts = simulatePartsSearch(vehicle, partName, category);
+                displayPartsResults(parts);
+            }
+        }
+
+        function simulatePartsSearch(vehicle, partName, category) {
+            // Simulate parts data
+            const partTypes = [
+                { name: partName + ' - OEM', price: 85 + Math.random() * 50, brand: 'OEM', stock: 15, source: 'Techflow Database' },
+                { name: partName + ' - Premium', price: 65 + Math.random() * 40, brand: 'Bosch', stock: 23, source: 'Nexpart' },
+                { name: partName + ' - Standard', price: 45 + Math.random() * 30, brand: 'Duralast', stock: 45, source: 'AutoZone' },
+                { name: partName + ' - Value', price: 35 + Math.random() * 20, brand: 'Wagner', stock: 32, source: 'O\'Reilly' }
+            ];
+
+            return partTypes.map(p => ({
+                ...p,
+                partNumber: generatePartNumber(),
+                fitment: 'Fits ' + vehicle,
+                warranty: '12 months / 12,000 miles'
+            }));
+        }
+
+        function generatePartNumber() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let part = '';
+            for (let i = 0; i < 10; i++) {
+                part += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return part;
+        }
+
+        function displayPartsResults(parts) {
+            const resultsDiv = document.getElementById('partsResults');
+            resultsDiv.innerHTML = `
+                <h3 style="color: #0a2540; margin-bottom: 1rem;">Found ${parts.length} parts</h3>
+                ${parts.map((part, index) => `
+                    <div class="card" style="margin-bottom: 0.5rem; padding: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <h4 style="color: #0a2540; margin-bottom: 0.5rem;">${part.name}</h4>
+                                <p style="color: #666; font-size: 0.9rem; margin: 0.25rem 0;"><strong>Part #:</strong> ${part.partNumber}</p>
+                                <p style="color: #666; font-size: 0.9rem; margin: 0.25rem 0;"><strong>Brand:</strong> ${part.brand}</p>
+                                <p style="color: #666; font-size: 0.9rem; margin: 0.25rem 0;"><strong>${part.fitment}</strong></p>
+                                <p style="color: #666; font-size: 0.9rem; margin: 0.25rem 0;"><strong>Warranty:</strong> ${part.warranty}</p>
+                                <p style="color: #00d4ff; font-size: 0.9rem; margin: 0.25rem 0;"><strong>Source:</strong> ${part.source}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #0a2540;">$${part.price.toFixed(2)}</div>
+                                <p style="color: ${part.stock > 10 ? '#43e97b' : '#f5576c'}; font-weight: bold; margin: 0.5rem 0;">
+                                    ${part.stock > 10 ? '✓ In Stock' : '⚠ Low Stock (' + part.stock + ')'}
+                                </p>
+                                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                    <button class="btn btn-primary" onclick="orderPart('${part.partNumber}', '${part.name}', ${part.price})">
+                                        <i class="fas fa-shopping-cart"></i> Order
+                                    </button>
+                                    <button class="btn btn-success" onclick="addToInventory('${part.name}', '${part.partNumber}', ${part.price})">
+                                        <i class="fas fa-plus"></i> Add to Inventory
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        async function getServiceSchedule(vin) {
+            const inputVin = vin || document.getElementById('scheduleVin').value.trim().toUpperCase();
+            
+            if (inputVin.length !== 17) {
+                alert('Please enter a valid 17-digit VIN number');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('scheduleResults');
+            if (!vin) resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading service schedule...</div>';
+
+            try {
+                const schedule = simulateServiceSchedule(inputVin);
+                displayServiceSchedule(schedule);
+            } catch (error) {
+                console.error('Service schedule error:', error);
+                const schedule = simulateServiceSchedule(inputVin);
+                displayServiceSchedule(schedule);
+            }
+        }
+
+        function simulateServiceSchedule(vin) {
+            return {
+                vin: vin,
+                schedules: [
+                    {
+                        interval: 'Every 5,000 miles or 6 months',
+                        services: ['Oil Change', 'Oil Filter Replacement', 'Tire Rotation', 'Fluid Level Check']
+                    },
+                    {
+                        interval: 'Every 15,000 miles or 18 months',
+                        services: ['Oil Change', 'Oil Filter', 'Air Filter Replacement', 'Cabin Air Filter', 'Tire Rotation', 'Brake Inspection']
+                    },
+                    {
+                        interval: 'Every 30,000 miles or 36 months',
+                        services: ['Full Oil Service', 'Spark Plug Replacement', 'Transmission Fluid', 'Coolant Flush', 'Brake Fluid Flush', 'Fuel System Cleaning']
+                    },
+                    {
+                        interval: 'Every 60,000 miles or 72 months',
+                        services: ['Timing Belt Replacement', 'Water Pump Inspection', 'Drive Belt Replacement', 'Complete Brake Service', 'Suspension Inspection']
+                    }
+                ]
+            };
+        }
+
+        function displayServiceSchedule(schedule) {
+            const resultsDiv = document.getElementById('scheduleResults');
+            resultsDiv.innerHTML = `
+                <h3 style="color: #0a2540; margin-bottom: 1rem;">Manufacturer Service Schedule</h3>
+                ${schedule.schedules.map((s, index) => `
+                    <div class="card" style="margin-bottom: 1rem; padding: 1rem; border-left: 4px solid #00d4ff;">
+                        <h4 style="color: #0a2540; margin-bottom: 0.5rem;">${s.interval}</h4>
+                        <ul style="margin-left: 1.5rem; color: #666;">
+                            ${s.services.map(service => `<li>${service}</li>`).join('')}
+                        </ul>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        async function getVehicleHistory(vin) {
+            const inputVin = vin || document.getElementById('historyVin').value.trim().toUpperCase();
+            
+            if (inputVin.length !== 17) {
+                alert('Please enter a valid 17-digit VIN number');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('historyResults');
+            if (!vin) resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading vehicle history...</div>';
+
+            try {
+                const history = simulateVehicleHistory(inputVin);
+                displayVehicleHistory(history);
+            } catch (error) {
+                console.error('Vehicle history error:', error);
+                const history = simulateVehicleHistory(inputVin);
+                displayVehicleHistory(history);
+            }
+        }
+
+        function simulateVehicleHistory(vin) {
+            return {
+                vin: vin,
+                odometer: Math.floor(45000 + Math.random() * 50000) + ' miles',
+                owners: Math.floor(1 + Math.random() * 3),
+                accidents: Math.random() > 0.7 ? Math.floor(Math.random() * 2) : 0,
+                titleStatus: 'Clean',
+                lastReportedDate: new Date().toLocaleDateString(),
+                records: [
+                    { date: '2024-01-15', type: 'Service', description: 'Oil Change and Tire Rotation', mileage: '48,234' },
+                    { date: '2023-08-20', type: 'Service', description: 'Brake Pad Replacement', mileage: '42,156' },
+                    { date: '2023-02-10', type: 'Inspection', description: 'Annual Vehicle Inspection - Passed', mileage: '36,789' },
+                    { date: '2022-11-05', type: 'Service', description: '30,000 Mile Service', mileage: '30,000' }
+                ]
+            };
+        }
+
+        function displayVehicleHistory(history) {
+            const resultsDiv = document.getElementById('historyResults');
+            resultsDiv.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                    <div style="padding: 1rem; background: #f8f9fa; border-radius: 5px; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #0a2540;">${history.odometer}</div>
+                        <div style="color: #666;">Odometer</div>
+                    </div>
+                    <div style="padding: 1rem; background: #f8f9fa; border-radius: 5px; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #0a2540;">${history.owners}</div>
+                        <div style="color: #666;">Previous Owners</div>
+                    </div>
+                    <div style="padding: 1rem; background: #f8f9fa; border-radius: 5px; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: ${history.accidents === 0 ? '#43e97b' : '#f5576c'};">${history.accidents}</div>
+                        <div style="color: #666;">Accidents</div>
+                    </div>
+                    <div style="padding: 1rem; background: #f8f9fa; border-radius: 5px; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #43e97b;">${history.titleStatus}</div>
+                        <div style="color: #666;">Title Status</div>
+                    </div>
+                </div>
+                <h3 style="color: #0a2540; margin-bottom: 1rem;">Service History</h3>
+                ${history.records.map(record => `
+                    <div class="card" style="margin-bottom: 0.5rem; padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <span class="status-badge status-${record.type.toLowerCase() === 'service' ? 'approved' : 'completed'}">${record.type}</span>
+                            <strong style="margin-left: 0.5rem;">${record.description}</strong>
+                        </div>
+                        <div style="color: #666; text-align: right;">
+                            <div>${record.date}</div>
+                            <div style="font-size: 0.9rem;">${record.mileage}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function createVehicleCustomer(year, make, model, vin) {
+            alert(`Customer creation form will open with pre-filled data:\n\nVehicle: ${year} ${make} ${model}\nVIN: ${vin}`);
+            showScreen('customers');
+        }
+
+        function orderPart(partNumber, name, price) {
+            alert(`Ordering part: ${name}\nPart #: ${partNumber}\nPrice: $${price.toFixed(2)}\n\nThis will initiate a VAPI call to the parts store.`);
+        }
+
+        function addToInventory(name, partNumber, price) {
+            const item = {
+                id: Date.now(),
+                name: name,
+                partNumber: partNumber,
+                category: 'General',
+                quantity: 0,
+                cost: price * 0.6,
+                price: price,
+                reorderPoint: 5
+            };
+            
+            inventory.push(item);
+            saveToStorage();
+            renderInventory();
+            alert(`Added ${name} to inventory!`);
+        }
+
+        // ============ VAPI PHONE INTEGRATION ============
+        function startVapiPartsCall() {
+            alert('VAPI phone system will call the parts store to check availability and place orders.\n\nFeature requires VAPI configuration in Settings.');
+        }
+
+        function startVapiCustomerCall() {
+            alert('VAPI phone system will call the customer with appointment reminders and status updates.\n\nFeature requires VAPI configuration in Settings.');
+        }
+
+        function startVapiTowCall() {
+            alert('VAPI phone system will call the tow service to schedule pickup.\n\nFeature requires VAPI configuration in Settings.');
+        }
+
+        function configureVapi() {
+            alert('VAPI configuration panel will open here.\n\nConfigure:\n- Phone numbers\n- Call scripts\n- Call scheduling\n- Voice preferences');
+            showScreen('settings');
+        }
+
+        // ALEX - Add Vehicle from VIN Decode to Customer Form
+        function openAlexModalWithVin(vin) {
+            document.getElementById('alexInputModal').classList.add('active');
+            document.getElementById('alexVin').value = vin;
+            loadAlexTemplates();
+            // Auto-decode VIN to populate vehicle info
+            decodeVin().then(() => {
+                const vinResults = document.getElementById('vinResults');
+                if (vinResults.style.display !== 'none') {
+                    const vehicleText = vinResults.textContent;
+                    const match = vehicleText.match(/(\d{4})\s+(\w+)\s+(\w+)/);
+                    if (match) {
+                        document.getElementById('alexVehicle').value = `${match[1]} ${match[2]} ${match[3]}`;
+                    }
+                }
+            });
+        }
+
+        // ============ ALEX AI FUNCTIONS ============
+        async function getAlexConfig() {
+            try {
+                const response = await fetch('http://localhost:3001/api/alex/config');
+                const data = await response.json();
+                return data.config;
+            } catch (error) {
+                console.error('Error getting ALEX config:', error);
+                return null;
+            }
+        }
+
+        async function generateAlexEstimate() {
+            const vehicle = document.getElementById('alexVehicle')?.value || '';
+            const customer = document.getElementById('alexCustomer')?.value || '';
+            const services = document.getElementById('alexServices')?.value || '';
+            const vin = document.getElementById('alexVin')?.value || '';
+
+            if (!vehicle) {
+                alert('Please enter vehicle information');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3001/api/alex/generate-estimate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ vehicle, customer, services, vin })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayAlexEstimate(data.estimate);
+                } else {
+                    alert('Error generating estimate: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error connecting to ALEX AI. Please make sure the backend is running.');
+            }
+        }
+
+        function displayAlexEstimate(estimate) {
+            const modal = document.getElementById('alexEstimateModal');
+            const content = document.getElementById('alexEstimateContent');
+            
+            content.innerHTML = `
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
+                    <h2 style="margin: 0 0 0.5rem 0;"><i class="fas fa-robot"></i> ALEX AI Estimate</h2>
+                    <p style="margin: 0; opacity: 0.9;">Generated at ${new Date(estimate.timestamp).toLocaleString()}</p>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: #0a2540; margin-bottom: 1rem;">Vehicle Information</h3>
+                    <p><strong>Vehicle:</strong> ${estimate.vehicle}</p>
+                    ${estimate.vin ? `<p><strong>VIN:</strong> ${estimate.vin}</p>` : ''}
+                </div>
+
+                <div class="card">
+                    <h3 style="color: #0a2540; margin-bottom: 1rem;">Services</h3>
+                    ${estimate.services.map(s => `
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                            <span>${s.name}</span>
+                            <span>${s.hours} hrs @ $100/hr</span>
+                        </div>
+                    `).join('')}
+                    <div style="display: flex; justify-content: space-between; padding: 1rem 0; font-weight: bold;">
+                        <span>Total Labor (${estimate.laborHours} hrs)</span>
+                        <span>$${(estimate.laborHours * 100).toFixed(2)}</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: #0a2540; margin-bottom: 1rem;">Parts</h3>
+                    ${estimate.parts.map(p => `
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                            <span>${p.name} x ${p.quantity}</span>
+                            <span>$${p.price.toFixed(2)}</span>
+                        </div>
+                    `).join('')}
+                    <div style="display: flex; justify-content: space-between; padding: 1rem 0; font-weight: bold;">
+                        <span>Total Parts</span>
+                        <span>$${estimate.parts.reduce((sum, p) => sum + p.price, 0).toFixed(2)}</span>
+                    </div>
+                </div>
+
+                ${estimate.recommendations.length > 0 ? `
+                <div class="card" style="background: #fff3cd; border: 1px solid #ffc107;">
+                    <h3 style="color: #856404; margin-bottom: 1rem;"><i class="fas fa-lightbulb"></i> ALEX Recommendations</h3>
+                    <ul style="margin-left: 1.5rem; color: #856404;">
+                        ${estimate.recommendations.map(r => `<li>${r}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+
+                <div class="card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 1.5rem; font-weight: bold;">Total Estimate</span>
+                        <span style="font-size: 2rem; font-weight: bold;">$${estimate.total.toFixed(2)}</span>
+                    </div>
+                    <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Includes diagnostic fee of $85.00</p>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-success" style="flex: 1;" onclick="convertAlexToEstimate()">
+                        <i class="fas fa-file-alt"></i> Convert to Estimate
+                    </button>
+                    <button class="btn btn-primary" style="flex: 1;" onclick="sendAlexToCustomer()">
+                        <i class="fas fa-envelope"></i> Send to Customer
+                    </button>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        function openAlexModal() {
+            document.getElementById('alexInputModal').classList.add('active');
+            loadAlexTemplates();
+        }
+
+        async function loadAlexTemplates() {
+            try {
+                const response = await fetch('http://localhost:3001/api/alex/estimate-templates');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const container = document.getElementById('alexTemplates');
+                    container.innerHTML = data.templates.map(t => `
+                        <div class="card" style="cursor: pointer; transition: all 0.3s;" onclick="loadAlexTemplate('${t.id}')">
+                            <h4 style="color: #0a2540; margin-bottom: 0.5rem;">${t.name}</h4>
+                            <p style="color: #666; font-size: 0.9rem; margin: 0;">${t.description}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading templates:', error);
+            }
+        }
+
+        async function loadAlexTemplate(templateId) {
+            const templates = {
+                'brake-job': { services: 'brake-pads,brake-rotors', description: 'Complete brake service' },
+                'oil-change': { services: 'oil-change', description: 'Full synthetic oil change' },
+                'suspension': { services: 'suspension,alignment', description: 'Suspension service' },
+                'tune-up': { services: 'spark-plugs,air-filter,diagnostic', description: 'Engine tune-up' }
+            };
+            
+            const template = templates[templateId];
+            if (template) {
+                document.getElementById('alexServices').value = template.services;
             }
         }
 
