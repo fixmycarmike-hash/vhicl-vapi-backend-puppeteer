@@ -1271,6 +1271,127 @@ app.post('/api/parts/stores', async (req, res) => {
     }
 });
 
+// ============ TOWING ENDPOINTS ============
+
+// Towing requests storage (in-memory)
+let towingRequests = [];
+
+// Get all towing requests
+app.get('/api/towing/requests', (req, res) => {
+  res.json(towingRequests);
+});
+
+// Get towing request by ID
+app.get('/api/towing/requests/:id', (req, res) => {
+  const request = towingRequests.find(r => r.id === req.params.id);
+  if (!request) {
+    return res.status(404).json({ error: 'Towing request not found' });
+  }
+  res.json(request);
+});
+
+// Create towing request
+app.post('/api/towing/requests', (req, res) => {
+  const { customerName, customerPhone, vehicle, pickupLocation, destination, keyLocation, customerMeeting, notes } = req.body;
+  
+  const newRequest = {
+    id: `TOW${Date.now()}`,
+    customerName,
+    customerPhone,
+    vehicle,
+    pickupLocation,
+    destination,
+    keyLocation,
+    customerMeeting,
+    notes,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    assignedProvider: null,
+    providerPhone: null
+  };
+  
+  towingRequests.push(newRequest);
+  res.status(201).json(newRequest);
+});
+
+// Update towing request status
+app.put('/api/towing/requests/:id/status', (req, res) => {
+  const request = towingRequests.find(r => r.id === req.params.id);
+  if (!request) {
+    return res.status(404).json({ error: 'Towing request not found' });
+  }
+  
+  request.status = req.body.status;
+  request.updatedAt = new Date().toISOString();
+  res.json(request);
+});
+
+// Mark car as arrived
+app.post('/api/towing/:towRequestId/arrived', (req, res) => {
+  const request = towingRequests.find(r => r.id === req.params.towRequestId);
+  if (!request) {
+    return res.status(404).json({ error: 'Towing request not found' });
+  }
+  
+  request.status = 'arrived';
+  request.arrivedAt = new Date().toISOString();
+  
+  // Send arrival SMS if configured
+  const settings = shopSettingsService.getSettings() || {};
+  if (settings.towing?.sendArrivalSMS) {
+    console.log('Sending arrival SMS to:', request.customerPhone);
+  }
+  
+  res.json({ success: true, message: 'Car marked as arrived', request });
+});
+
+// Assign towing provider
+app.post('/api/towing/requests/:id/assign', (req, res) => {
+  const request = towingRequests.find(r => r.id === req.params.id);
+  if (!request) {
+    return res.status(404).json({ error: 'Towing request not found' });
+  }
+  
+  request.assignedProvider = req.body.providerName;
+  request.providerPhone = req.body.providerPhone;
+  request.status = 'assigned';
+  request.updatedAt = new Date().toISOString();
+  res.json(request);
+});
+
+// Collect towing request from customer
+app.post('/api/towing/collect-request', (req, res) => {
+  const { customerName, customerPhone, vehicle, location, keyLocation, customerMeeting, destination, notes } = req.body;
+  
+  const newRequest = {
+    id: `TOW${Date.now()}`,
+    customerName,
+    customerPhone,
+    vehicle,
+    pickupLocation: location,
+    destination: destination || 'Shop',
+    keyLocation,
+    customerMeeting,
+    notes,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+  
+  towingRequests.push(newRequest);
+  res.status(201).json(newRequest);
+});
+
+// Delete towing request
+app.delete('/api/towing/requests/:id', (req, res) => {
+  const index = towingRequests.findIndex(r => r.id === req.params.id);
+  if (index === -1) {
+    return res.status(404).json({ error: 'Towing request not found' });
+  }
+  
+  towingRequests.splice(index, 1);
+  res.json({ success: true, message: 'Towing request deleted' });
+});
+
 // ============ INVENTORY ENDPOINTS ============
 
 // In-memory inventory storage (in production, use a database)
