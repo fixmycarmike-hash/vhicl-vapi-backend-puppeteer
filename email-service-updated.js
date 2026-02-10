@@ -1,352 +1,400 @@
-class EmailService {
-  constructor(sendGridApiKey, fromEmail, fromName) {
-    this.sendGridApiKey = sendGridApiKey;
-    this.fromEmail = fromEmail || process.env.SENDGRID_FROM_EMAIL || 'noreply@vhiclpro.com';
-    this.fromName = fromName || process.env.SENDGRID_FROM_NAME || 'VHICL Pro';
-    this.nodemailer = require('nodemailer');
-    this.sendgridTransport = require('nodemailer-sendgrid-transport');
-    this.transporter = null;
-    this.initialized = false;
-  }
+// Email Service Module for VHICL Pro
+// Handles all email notifications for customer service lifecycle
 
-  async initialize() {
-    if (!this.sendGridApiKey) {
-      console.warn('⚠️  SendGrid API key not configured. Email service will be disabled.');
-      return false;
-    }
+const nodemailer = require('nodemailer');
+const fs = require('fs').promises;
+const path = require('path');
+const shopSettingsService = require('./shop-settings-service-complete');
 
+// Email configuration
+const emailConfig = {
+    service: process.env.EMAIL_SERVICE || 'gmail', // 'gmail', 'sendgrid', 'ses', etc.
+    from: process.env.EMAIL_FROM || 'noreply@vhiclpro.com',
+    fromName: process.env.EMAIL_FROM_NAME || 'VHICL Pro',
+    replyTo: process.env.EMAIL_REPLY_TO || 'noreply@vhiclpro.com',
+    
+    // Gmail settings
+    gmailUser: process.env.GMAIL_USER,
+    gmailPassword: process.env.GMAIL_PASSWORD,
+    
+    // SendGrid settings
+    sendgridApiKey: process.env.SENDGRID_API_KEY,
+    
+    // BCC recipients (optional)
+    bccEmails: process.env.BCC_EMAILS ? process.env.BCC_EMAILS.split(',') : [],
+    
+    // Tracking
+    trackOpens: true,
+    trackClicks: true
+};
+
+// Create transporter based on configuration
+let transporter = null;
+
+async function initializeTransporter() {
     try {
-      this.transporter = this.nodemailer.createTransport(this.sendgridTransport({
-        auth: {
-          api_key: this.sendGridApiKey
+        if (emailConfig.service === 'gmail') {
+            transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: emailConfig.gmailUser,
+                    pass: emailConfig.gmailPassword
+                }
+            });
+        } else if (emailConfig.service === 'sendgrid') {
+            const sgTransport = require('nodemailer-sendgrid-transport');
+            transporter = nodemailer.createTransport(sgTransport({
+                apiKey: emailConfig.sendgridApiKey
+            }));
+        } else {
+            // Default to SMTP
+            transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: process.env.SMTP_PORT || 587,
+                secure: false, // true for 465, false for other ports
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASSWORD
+                }
+            });
         }
-      }));
-      this.initialized = true;
-      console.log('✅ EmailService initialized successfully');
-      return true;
+        
+        console.log('Email transporter initialized successfully');
+        return true;
     } catch (error) {
-      console.error('❌ Failed to initialize EmailService:', error.message);
-      return false;
+        console.error('Error initializing email transporter:', error);
+        return false;
     }
-  }
-
-  isReady() {
-    return this.initialized && this.transporter;
-  }
-
-  async sendEmail(to, subject, htmlContent, textContent = '') {
-    if (!this.isReady()) {
-      throw new Error('EmailService not initialized. Check SendGrid API key.');
-    }
-
-    const mailOptions = {
-      from: `${this.fromName} <${this.fromEmail}>`,
-      to: Array.isArray(to) ? to.join(', ') : to,
-      subject: subject,
-      html: htmlContent,
-      text: textContent || htmlContent.replace(/<[^>]*>/g, '')
-    };
-
-    try {
-      const info = await this.transporter.sendMail(mailOptions);
-      console.log('✅ Email sent successfully:', info.messageId);
-      return { success: true, messageId: info.messageId };
-    } catch (error) {
-      console.error('❌ Failed to send email:', error.message);
-      throw error;
-    }
-  }
-
-  async sendWorkOrder(workOrderData) {
-    const {
-      customerName,
-      customerEmail,
-      vehicleInfo,
-      services,
-      estimate,
-      workOrderId,
-      shopInfo
-    } = workOrderData;
-
-    const subject = `Work Order #${workOrderId} - ${vehicleInfo.year} ${vehicleInfo.make} ${vehicleInfo.model}`;
-    
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #2563eb;">Work Order #${workOrderId}</h2>
-        
-        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Customer Information</h3>
-          <p><strong>Name:</strong> ${customerName}</p>
-          <p><strong>Email:</strong> ${customerEmail}</p>
-        </div>
-
-        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Vehicle Information</h3>
-          <p><strong>Vehicle:</strong> ${vehicleInfo.year} ${vehicleInfo.make} ${vehicleInfo.model}</p>
-          ${vehicleInfo.color ? `<p><strong>Color:</strong> ${vehicleInfo.color}</p>` : ''}
-          ${vehicleInfo.licensePlate ? `<p><strong>License Plate:</strong> ${vehicleInfo.licensePlate}</p>` : ''}
-          ${vehicleInfo.mileage ? `<p><strong>Mileage:</strong> ${vehicleInfo.mileage}</p>` : ''}
-        </div>
-
-        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Services Requested</h3>
-          <ul style="margin: 0; padding-left: 20px;">
-            ${services.map(service => `<li>${service.name} - $${service.price}</li>`).join('')}
-          </ul>
-        </div>
-
-        <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0; color: #1e40af;">Estimated Cost</h3>
-          <p style="font-size: 24px; font-weight: bold; margin: 0;">$${estimate.total}</p>
-          <p style="margin: 5px 0 0 0; font-size: 14px; color: #6b7280;">
-            Parts: $${estimate.parts} | Labor: $${estimate.labor} | Tax: $${estimate.tax}
-          </p>
-        </div>
-
-        <p style="color: #6b7280; font-size: 14px;">
-          Thank you for choosing ${shopInfo.name || 'VHICL Pro'}. We'll contact you shortly with updates.
-        </p>
-      </div>
-    `;
-
-    return this.sendEmail(customerEmail, subject, htmlContent);
-  }
-
-  async sendQuote(quoteData) {
-    const {
-      customerName,
-      customerEmail,
-      vehicleInfo,
-      parts,
-      labor,
-      total,
-      quoteId,
-      shopInfo
-    } = quoteData;
-
-    const subject = `Quote #${quoteId} - ${vehicleInfo.year} ${vehicleInfo.make} ${vehicleInfo.model}`;
-    
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #2563eb;">Quote #${quoteId}</h2>
-        
-        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Customer Information</h3>
-          <p><strong>Name:</strong> ${customerName}</p>
-          <p><strong>Email:</strong> ${customerEmail}</p>
-        </div>
-
-        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Vehicle Information</h3>
-          <p><strong>Vehicle:</strong> ${vehicleInfo.year} ${vehicleInfo.make} ${vehicleInfo.model}</p>
-          ${vehicleInfo.color ? `<p><strong>Color:</strong> ${vehicleInfo.color}</p>` : ''}
-        </div>
-
-        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Parts</h3>
-          <ul style="margin: 0; padding-left: 20px;">
-            ${parts.map(part => `<li>${part.name} - $${part.price}</li>`).join('')}
-          </ul>
-          <p><strong>Parts Total:</strong> $${parts.reduce((sum, p) => sum + p.price, 0)}</p>
-        </div>
-
-        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Labor</h3>
-          <ul style="margin: 0; padding-left: 20px;">
-            ${labor.map(item => `<li>${item.name} - $${item.price}</li>`).join('')}
-          </ul>
-          <p><strong>Labor Total:</strong> $${labor.reduce((sum, l) => sum + l.price, 0)}</p>
-        </div>
-
-        <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0; color: #1e40af;">Total Estimate</h3>
-          <p style="font-size: 24px; font-weight: bold; margin: 0;">$${total}</p>
-        </div>
-
-        <p style="color: #6b7280; font-size: 14px;">
-          This quote is valid for 30 days. Please contact us to approve and schedule service.
-        </p>
-      </div>
-    `;
-
-    return this.sendEmail(customerEmail, subject, htmlContent);
-  }
-
-  async sendAppointmentConfirmation(appointmentData) {
-    const {
-      customerName,
-      customerEmail,
-      vehicleInfo,
-      appointmentDate,
-      appointmentTime,
-      serviceType,
-      shopInfo
-    } = appointmentData;
-
-    const subject = `Appointment Confirmed - ${serviceType} on ${appointmentDate}`;
-    
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #10b981;">✅ Appointment Confirmed</h2>
-        
-        <div style="background: #d1fae5; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0; color: #065f46;">Appointment Details</h3>
-          <p><strong>Date:</strong> ${appointmentDate}</p>
-          <p><strong>Time:</strong> ${appointmentTime}</p>
-          <p><strong>Service:</strong> ${serviceType}</p>
-        </div>
-
-        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Customer Information</h3>
-          <p><strong>Name:</strong> ${customerName}</p>
-          <p><strong>Email:</strong> ${customerEmail}</p>
-        </div>
-
-        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Vehicle Information</h3>
-          <p><strong>Vehicle:</strong> ${vehicleInfo.year} ${vehicleInfo.make} ${vehicleInfo.model}</p>
-          ${vehicleInfo.color ? `<p><strong>Color:</strong> ${vehicleInfo.color}</p>` : ''}
-        </div>
-
-        <p style="color: #6b7280; font-size: 14px;">
-          Please arrive 10 minutes early. If you need to reschedule, please contact us at ${shopInfo.phone || 'our shop'}.
-        </p>
-
-        <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <p style="margin: 0; font-size: 14px;">
-            <strong>🔑 Key Drop Box:</strong> Please drop your keys in the key drop box and we'll take it from there!
-          </p>
-        </div>
-      </div>
-    `;
-
-    return this.sendEmail(customerEmail, subject, htmlContent);
-  }
-
-  async sendVehicleReadyNotification(vehicleData) {
-    const {
-      customerName,
-      customerEmail,
-      vehicleInfo,
-      servicesCompleted,
-      totalCost,
-      shopInfo
-    } = vehicleData;
-
-    const subject = `🚗 Your Vehicle is Ready! - ${vehicleInfo.year} ${vehicleInfo.make} ${vehicleInfo.model}`;
-    
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #10b981;">🚗 Your Vehicle is Ready!</h2>
-        
-        <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <p style="margin: 0; font-size: 16px;">
-            <strong>${vehicleInfo.year} ${vehicleInfo.make} ${vehicleInfo.model}</strong>
-          </p>
-          ${vehicleInfo.color ? `<p style="margin: 5px 0 0 0;">Color: ${vehicleInfo.color}</p>` : ''}
-        </div>
-
-        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Services Completed</h3>
-          <ul style="margin: 0; padding-left: 20px;">
-            ${servicesCompleted.map(service => `<li>${service}</li>`).join('')}
-          </ul>
-        </div>
-
-        <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0; color: #1e40af;">Total Cost</h3>
-          <p style="font-size: 24px; font-weight: bold; margin: 0;">$${totalCost}</p>
-        </div>
-
-        <p style="color: #6b7280; font-size: 14px;">
-          Please pick up your vehicle during business hours. If you have any questions, contact us at ${shopInfo.phone || 'our shop'}.
-        </p>
-      </div>
-    `;
-
-    return this.sendEmail(customerEmail, subject, htmlContent);
-  }
-
-  async sendPaymentConfirmation(paymentData) {
-    const {
-      customerName,
-      customerEmail,
-      amount,
-      paymentMethod,
-      workOrderId,
-      shopInfo
-    } = paymentData;
-
-    const subject = `Payment Confirmation - Work Order #${workOrderId}`;
-    
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #10b981;">✅ Payment Received</h2>
-        
-        <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0; color: #1e40af;">Payment Details</h3>
-          <p><strong>Amount:</strong> $${amount}</p>
-          <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-          <p><strong>Work Order:</strong> #${workOrderId}</p>
-        </div>
-
-        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Customer Information</h3>
-          <p><strong>Name:</strong> ${customerName}</p>
-          <p><strong>Email:</strong> ${customerEmail}</p>
-        </div>
-
-        <p style="color: #6b7280; font-size: 14px;">
-          Thank you for your payment! Your receipt has been processed. If you have any questions, please contact us.
-        </p>
-      </div>
-    `;
-
-    return this.sendEmail(customerEmail, subject, htmlContent);
-  }
-
-  async sendIntakeConfirmation(intakeData) {
-    const {
-      customerName,
-      customerEmail,
-      vehicleInfo,
-      intakeType,
-      shopInfo
-    } = intakeData;
-
-    const subject = `Vehicle Intake Confirmed - ${vehicleInfo.year} ${vehicleInfo.make} ${vehicleInfo.model}`;
-    
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #10b981;">✅ Vehicle Intake Confirmed</h2>
-        
-        <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <p style="margin: 0; font-size: 16px;">
-            <strong>${vehicleInfo.year} ${vehicleInfo.make} ${vehicleInfo.model}</strong>
-          </p>
-          ${vehicleInfo.color ? `<p style="margin: 5px 0 0 0;">Color: ${vehicleInfo.color}</p>` : ''}
-        </div>
-
-        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Intake Type</h3>
-          <p><strong>Type:</strong> ${intakeType}</p>
-          <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
-        </div>
-
-        <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <p style="margin: 0; font-size: 14px;">
-            <strong>🔑 Key Drop Box:</strong> Please drop your keys in the key drop box and we'll take it from there!
-          </p>
-        </div>
-
-        <p style="color: #6b7280; font-size: 14px;">
-          We'll contact you shortly with an estimate and update on your vehicle's status.
-        </p>
-      </div>
-    `;
-
-    return this.sendEmail(customerEmail, subject, htmlContent);
-  }
 }
 
-module.exports = EmailService;
+// Load and render email template
+async function loadTemplate(templateName, data) {
+    try {
+        const templatePath = path.join(__dirname, 'email-templates', templateName);
+        let templateContent = await fs.readFile(templatePath, 'utf-8');
+        
+        // Replace placeholders with actual data
+        // Using simple string replacement for compatibility
+        Object.keys(data).forEach(key => {
+            const placeholder = `{{${key}}}`;
+            const regex = new RegExp(placeholder, 'g');
+            templateContent = templateContent.replace(regex, data[key] || '');
+        });
+        
+        // Handle conditional blocks (simple implementation)
+        templateContent = templateContent.replace(/{{#if [^}]+}}[\s\S]*?{{\/if}}/g, (match) => {
+            // For now, remove conditional blocks
+            // In production, you'd use a proper template engine like Handlebars
+            return '';
+        });
+        
+        // Handle each loops (simple implementation)
+        templateContent = templateContent.replace(/{{#each [^}]+}}[\s\S]*?{{\/each}}/g, (match) => {
+            // For now, replace with a simple message
+            // In production, you'd use a proper template engine like Handlebars
+            return '<li>Items listed in your estimate</li>';
+        });
+        
+        return templateContent;
+    } catch (error) {
+        console.error('Error loading email template:', error);
+        throw error;
+    }
+}
+
+// Send email
+async function sendEmail(to, subject, htmlContent, textContent = null) {
+    try {
+        if (!transporter) {
+            await initializeTransporter();
+        }
+        
+        if (!transporter) {
+            throw new Error('Email transporter not initialized');
+        }
+        
+        const mailOptions = {
+            from: `${emailConfig.fromName} <${emailConfig.from}>`,
+            to: to,
+            replyTo: emailConfig.replyTo,
+            subject: subject,
+            html: htmlContent,
+            text: textContent || stripHtml(htmlContent)
+        };
+        
+        // Add BCC if configured
+        if (emailConfig.bccEmails.length > 0) {
+            mailOptions.bcc = emailConfig.bccEmails.join(', ');
+        }
+        
+        // Add tracking headers if SendGrid
+        if (emailConfig.service === 'sendgrid') {
+            mailOptions.headers = {
+                'X-SG-Track-Clicks': emailConfig.trackClicks ? 'true' : 'false',
+                'X-SG-Track-Opens': emailConfig.trackOpens ? 'true' : 'false'
+            };
+        }
+        
+        const info = await transporter.sendMail(mailOptions);
+        
+        console.log('Email sent successfully:', info.messageId);
+        return {
+            success: true,
+            messageId: info.messageId,
+            response: info.response
+        };
+    } catch (error) {
+        console.error('Error sending email:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+// Strip HTML tags for plain text version
+function stripHtml(html) {
+    return html.replace(/<[^>]*>/g, '')
+               .replace(/&nbsp;/g, ' ')
+               .replace(/&amp;/g, '&')
+               .replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&#39;/g, "'")
+               .replace(/&quot;/g, '"')
+               .trim();
+}
+
+// Email notification functions
+
+/**
+ * Send check-in confirmation email
+ */
+async function sendCheckinConfirmation(customerData) {
+    try {
+        const shopSettings = shopSettingsService.getSettings();
+        const templateData = {
+            shop_name: shopSettings.shopName,
+            customer_name: customerData.customerName,
+            year: customerData.vehicleYear,
+            make: customerData.vehicleMake,
+            model: customerData.vehicleModel,
+            vin: customerData.vin,
+            mileage: customerData.mileage,
+            checkin_date: customerData.checkinDate,
+            concerns: customerData.concerns || [],
+            shop_phone: shopSettings.shopPhone,
+            shop_email: shopSettings.shopEmail,
+            shop_address: shopSettings.shopAddress,
+            business_hours: shopSettings.businessHours,
+            current_year: new Date().getFullYear()
+        };
+        
+        const htmlContent = await loadTemplate('checkin-confirmation.html', templateData);
+        
+        return await sendEmail(
+            customerData.customerEmail,
+            `Vehicle Check-in Confirmed - ${shopSettings.shopName}`,
+            htmlContent
+        );
+    } catch (error) {
+        console.error('Error sending check-in confirmation:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Send estimate ready email
+ */
+async function sendEstimateReady(estimateData) {
+    try {
+        const shopSettings = shopSettingsService.getSettings();
+        const templateData = {
+            shop_name: shopSettings.shopName,
+            customer_name: estimateData.customerName,
+            year: estimateData.vehicleYear,
+            make: estimateData.vehicleMake,
+            model: estimateData.vehicleModel,
+            estimate_id: estimateData.estimateId,
+            estimate_date: estimateData.estimateDate,
+            total_amount: estimateData.totalAmount,
+            is_urgent: estimateData.isUrgent || false,
+            view_estimate_url: estimateData.viewUrl,
+            shop_phone_url: estimateData.phoneUrl,
+            shop_phone: shopSettings.shopPhone,
+            shop_email: shopSettings.shopEmail,
+            shop_address: shopSettings.shopAddress,
+            business_hours: shopSettings.businessHours,
+            current_year: new Date().getFullYear()
+        };
+        
+        const htmlContent = await loadTemplate('estimate-ready.html', templateData);
+        
+        return await sendEmail(
+            estimateData.customerEmail,
+            `Your Estimate is Ready - ${shopSettings.shopName}`,
+            htmlContent
+        );
+    } catch (error) {
+        console.error('Error sending estimate ready email:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Send estimate approved email
+ */
+async function sendEstimateApproved(approvalData) {
+    try {
+        const templateData = {
+            shop_name: approvalData.shopName || 'Your Shop',
+            customer_name: approvalData.customerName,
+            year: approvalData.vehicleYear,
+            make: approvalData.vehicleMake,
+            model: approvalData.vehicleModel,
+            estimate_id: approvalData.estimateId,
+            approval_date: approvalData.approvalDate,
+            approval_method: approvalData.approvalMethod || 'Online',
+            approved_amount: approvalData.approvedAmount,
+            expected_start_date: approvalData.expectedStartDate,
+            parts_expected_date: approvalData.partsExpectedDate,
+            expected_completion_date: approvalData.expectedCompletionDate,
+            shop_phone: approvalData.shopPhone,
+            shop_email: approvalData.shopEmail,
+            shop_address: approvalData.shopAddress,
+            business_hours: approvalData.businessHours || 'Monday - Friday, 8AM - 5PM',
+            current_year: new Date().getFullYear()
+        };
+        
+        const htmlContent = await loadTemplate('estimate-approved.html', templateData);
+        
+        return await sendEmail(
+            approvalData.customerEmail,
+            `Work Authorized - ${approvalData.shopName}`,
+            htmlContent
+        );
+    } catch (error) {
+        console.error('Error sending estimate approved email:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Send parts ordered email
+ */
+async function sendPartsOrdered(partsData) {
+    try {
+        const templateData = {
+            shop_name: partsData.shopName || 'Your Shop',
+            customer_name: partsData.customerName,
+            year: partsData.vehicleYear,
+            make: partsData.vehicleMake,
+            model: partsData.vehicleModel,
+            estimate_id: partsData.estimateId,
+            order_date: partsData.orderDate,
+            expected_arrival_date: partsData.expectedArrivalDate,
+            service_start_date: partsData.serviceStartDate,
+            parts: partsData.parts || [],
+            shop_phone: partsData.shopPhone,
+            shop_email: partsData.shopEmail,
+            shop_address: partsData.shopAddress,
+            business_hours: partsData.businessHours || 'Monday - Friday, 8AM - 5PM',
+            current_year: new Date().getFullYear()
+        };
+        
+        const htmlContent = await loadTemplate('parts-ordered.html', templateData);
+        
+        return await sendEmail(
+            partsData.customerEmail,
+            `Parts Update - ${partsData.shopName}`,
+            htmlContent
+        );
+    } catch (error) {
+        console.error('Error sending parts ordered email:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Send vehicle ready email
+ */
+async function sendVehicleReady(readyData) {
+    try {
+        const templateData = {
+            shop_name: readyData.shopName || 'Your Shop',
+            customer_name: readyData.customerName,
+            year: readyData.vehicleYear,
+            make: readyData.vehicleMake,
+            model: readyData.vehicleModel,
+            estimate_id: readyData.estimateId,
+            completion_date: readyData.completionDate,
+            total_amount: readyData.totalAmount,
+            payment_url: readyData.paymentUrl,
+            shop_phone_url: readyData.phoneUrl,
+            completed_work: readyData.completedWork || [],
+            shop_address: readyData.shopAddress,
+            business_hours: readyData.businessHours || 'Monday - Friday, 8AM - 5PM',
+            shop_phone: readyData.shopPhone,
+            shop_email: readyData.shopEmail,
+            current_year: new Date().getFullYear()
+        };
+        
+        const htmlContent = await loadTemplate('vehicle-ready.html', templateData);
+        
+        return await sendEmail(
+            readyData.customerEmail,
+            `Your Vehicle is Ready! - ${readyData.shopName}`,
+            htmlContent
+        );
+    } catch (error) {
+        console.error('Error sending vehicle ready email:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Send payment confirmation email
+ */
+async function sendPaymentConfirmation(paymentData) {
+    try {
+        const templateData = {
+            shop_name: paymentData.shopName || 'Your Shop',
+            customer_name: paymentData.customerName,
+            year: paymentData.vehicleYear,
+            make: paymentData.vehicleMake,
+            model: paymentData.vehicleModel,
+            estimate_id: paymentData.estimateId,
+            payment_date: paymentData.paymentDate,
+            payment_amount: paymentData.paymentAmount,
+            payment_method: paymentData.paymentMethod,
+            transaction_id: paymentData.transactionId,
+            shop_phone: paymentData.shopPhone,
+            shop_email: paymentData.shopEmail,
+            shop_address: paymentData.shopAddress,
+            business_hours: paymentData.businessHours || 'Monday - Friday, 8AM - 5PM',
+            current_year: new Date().getFullYear()
+        };
+        
+        const htmlContent = await loadTemplate('payment-confirmation.html', templateData);
+        
+        return await sendEmail(
+            paymentData.customerEmail,
+            `Payment Confirmation - ${paymentData.shopName}`,
+            htmlContent
+        );
+    } catch (error) {
+        console.error('Error sending payment confirmation email:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Export all functions
+module.exports = {
+    initializeTransporter,
+    sendEmail,
+    sendCheckinConfirmation,
+    sendEstimateReady,
+    sendEstimateApproved,
+    sendPartsOrdered,
+    sendVehicleReady,
+    sendPaymentConfirmation
+};
