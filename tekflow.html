@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TekFlow - Technician Work Queue</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2em;
+        }
+
+        .tech-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .tech-badge {
+            background: #667eea;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr 300px;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Bay Selection */
+        .bay-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .bay-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .bay-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .bay-card.selected {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+
+        .bay-card.occupied {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .bay-card.available {
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+
+        .bay-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .bay-status {
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+
+        .bay-job {
+            font-size: 0.85em;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        /* Job Queue */
+        .job-queue {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .job-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .job-card:hover {
+            background: #f0f3ff;
+            transform: translateX(5px);
+        }
+
+        .job-card.priority-high {
+            border-left-color: #dc3545;
+        }
+
+        .job-card.priority-medium {
+            border-left-color: #ffc107;
+        }
+
+        .job-card.priority-low {
+            border-left-color: #28a745;
+        }
+
+        .job-card.in-progress {
+            background: #e7f3ff;
+            border-left-color: #007bff;
+        }
+
+        .job-card.completed {
+            background: #f0fff4;
+            border-left-color: #28a745;
+            opacity: 0.7;
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .job-id {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9em;
+        }
+
+        .job-priority {
+            font-size: 0.75em;
+            padding: 3px 10px;
+            border-radius: 10px;
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        .job-priority.high {
+            background: #dc3545;
+            color: white;
+        }
+
+        .job-priority.medium {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .job-priority.low {
+            background: #28a745;
+            color: white;
+        }
+
+        .job-customer {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .job-vehicle {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .job-service {
+            color: #007bff;
+            font-weight: 500;
+        }
+
+        .job-time {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .job-eta {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .job-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        /* Current Job */
+        .current-job {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .current-job h2 {
+            color: white;
+        }
+
+        .current-job-details {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .current-job-info {
+            margin-bottom: 10px;
+        }
+
+        .current-job-label {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .current-job-value {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .job-progress {
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            background: #28a745;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Communication Panel */
+        .communication-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .voice-input {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .voice-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .voice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .voice-btn.recording {
+            background: #dc3545;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .text-input {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.9em;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quick-action {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-action:hover {
+            background: #f0f3ff;
+            border-color: #667eea;
+        }
+
+        .quick-action .icon {
+            font-size: 1.2em;
+        }
+
+        /* Messages Log */
+        .messages-log {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .message.user {
+            background: #e7f3ff;
+            margin-left: 20px;
+        }
+
+        .message.system {
+            background: #f0fff4;
+        }
+
+        .message-time {
+            font-size: 0.75em;
+            color: #6c757d;
+            margin-bottom: 3px;
+        }
+
+        .message-text {
+            font-size: 0.9em;
+            color: #333;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 15px;
+            border: 2px solid #e9ecef;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+
+        .filter-btn:hover {
+            border-color: #667eea;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #6c757d;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1>🔧 TekFlow</h1>
+                <p>Technician Work Queue</p>
+            </div>
+            <div class="tech-info">
+                <div class="tech-badge" id="techName">Tech: John Smith</div>
+                <div class="tech-badge" style="background: #28a745;" id="techBay">Bay: Not Assigned</div>
+                <button class="btn btn-primary" onclick="showSettings()">⚙️ Settings</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="jobsWaiting">0</div>
+                <div class="stat-label">Jobs Waiting</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="jobsInProgress">0</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="jobsCompleted">0</div>
+                <div class="stat-label">Completed Today</div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Column: Bay Selection & Job Queue -->
+            <div class="left-column">
+                <!-- Bay Selection -->
+                <div class="card">
+                    <h2>🏠 Bay Assignment</h2>
+                    <div class="bay-grid" id="bayGrid">
+                        <!-- Bays will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Job Queue -->
+                <div class="card" style="margin-top: 20px;">
+                    <h2>📋 Job Queue</h2>
+                    <div class="filters">
+                        <button class="filter-btn active" onclick="filterJobs('all')">All</button>
+                        <button class="filter-btn" onclick="filterJobs('waiting')">Waiting</button>
+                        <button class="filter-btn" onclick="filterJobs('in-progress')">In Progress</button>
+                        <button class="filter-btn" onclick="filterJobs('completed')">Completed</button>
+                    </div>
+                    <div class="job-queue" id="jobQueue">
+                        <!-- Jobs will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Column: Current Job -->
+            <div class="middle-column">
+                <div class="card current-job" id="currentJobCard">
+                    <h2>🔨 Current Job</h2>
+                    <div id="noJobMessage" style="text-align: center; padding: 40px;">
+                        <p style="font-size: 1.2em; opacity: 0.8;">No job selected</p>
+                        <p style="margin-top: 10px;">Select a job from the queue to start working</p>
+                    </div>
+                    <div id="currentJobContent" style="display: none;">
+                        <div class="current-job-details">
+                            <div class="current-job-info">
+                                <div class="current-job-label">Job ID</div>
+                                <div class="current-job-value" id="currentJobId">-</div>
+                            </div>
+                            <div class="current-job-info">
+                                <div class="current-job-label">Customer</div>
+                                <div class="current-job-value" id="currentCustomer">-</div>
+                            </div>
+                            <div class="current-job-info">
+                                <div class="current-job-label">Vehicle</div>
+                                <div class="current-job-value" id="currentVehicle">-</div>
+                            </div>
+                            <div class="current-job-info">
+                                <div class="current-job-label">Service</div>
+                                <div class="current-job-value" id="currentService">-</div>
+                            </div>
+                            <div class="current-job-info">
+                                <div class="current-job-label">Priority</div>
+                                <div class="current-job-value" id="currentPriority">-</div>
+                            </div>
+                            <div class="current-job-info">
+                                <div class="current-job-label">Estimated Time</div>
+                                <div class="current-job-value" id="currentETA">-</div>
+                            </div>
+                        </div>
+
+                        <div class="job-progress">
+                            <div class="current-job-label">Progress</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="jobProgressBar"></div>
+                            </div>
+                            <div style="margin-top: 5px; font-size: 0.9em;" id="jobProgressText">0%</div>
+                        </div>
+
+                        <div class="job-actions" style="margin-top: 20px;">
+                            <button class="btn btn-success" onclick="updateProgress(25)">25%</button>
+                            <button class="btn btn-success" onclick="updateProgress(50)">50%</button>
+                            <button class="btn btn-success" onclick="updateProgress(75)">75%</button>
+                            <button class="btn btn-primary" onclick="completeJob()">✅ Complete</button>
+                            <button class="btn btn-danger" onclick="pauseJob()">⏸️ Pause</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Notes -->
+                <div class="card" style="margin-top: 20px;">
+                    <h2>📝 Job Notes</h2>
+                    <textarea id="jobNotes" class="message-input" placeholder="Add notes about this job..." style="min-height: 150px;"></textarea>
+                    <button class="btn btn-primary" style="margin-top: 10px; width: 100%;" onclick="saveNotes()">💾 Save Notes</button>
+                </div>
+            </div>
+
+            <!-- Right Column: Communication -->
+            <div class="right-column">
+                <div class="card communication-panel">
+                    <h2>💬 Communicate</h2>
+                    
+                    <!-- Voice Input -->
+                    <div class="voice-input">
+                        <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceRecording()">
+                            🎤 Hold to Speak
+                        </button>
+                        <p style="font-size: 0.85em; color: #6c757d; text-align: center;">
+                            Say things like:<br>
+                            "Start job 123"<br>
+                            "I need parts for brake pads"<br>
+                            "Job is complete"
+                        </p>
+                    </div>
+
+                    <!-- Text Input -->
+                    <div class="text-input">
+                        <textarea id="messageInput" class="message-input" placeholder="Type your message or command..."></textarea>
+                        <button class="btn btn-primary" onclick="sendMessage()">Send Message</button>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <button class="quick-action" onclick="quickAction('parts')">
+                            <span class="icon">🔧</span> Request Parts
+                        </button>
+                        <button class="quick-action" onclick="quickAction('help')">
+                            <span class="icon">❓</span> Need Help
+                        </button>
+                        <button class="quick-action" onclick="quickAction('complete')">
+                            <span class="icon">✅</span> Job Complete
+                        </button>
+                        <button class="quick-action" onclick="quickAction('break')">
+                            <span class="icon">☕</span> Take Break
+                        </button>
+                    </div>
+
+                    <!-- Messages Log -->
+                    <div class="messages-log" id="messagesLog">
+                        <div class="message system">
+                            <div class="message-time">System - Just now</div>
+                            <div class="message-text">Welcome to TekFlow! Select a bay and job to get started.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Parts Request -->
+    <div class="modal" id="partsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Request Parts</h3>
+                <button class="close-btn" onclick="closeModal('partsModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Part Name</label>
+                <input type="text" class="form-input" id="partName" placeholder="e.g., Brake Pads">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Quantity</label>
+                <input type="number" class="form-input" id="partQuantity" value="1">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Urgency</label>
+                <select class="form-input" id="partUrgency">
+                    <option value="low">Low - Can wait</option>
+                    <option value="medium">Medium - Today</option>
+                    <option value="high">High - ASAP</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea class="form-input" id="partNotes" placeholder="Any additional notes..."></textarea>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="submitPartsRequest()">Submit Request</button>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let selectedBay = null;
+        let currentJob = null;
+        let isRecording = false;
+        let currentFilter = 'all';
+
+        // Sample data (will be replaced with API calls)
+        let bays = [
+            { id: 1, status: 'available', job: null },
+            { id: 2, status: 'available', job: null },
+            { id: 3, status: 'occupied', job: { id: 'J001', vehicle: '2018 Honda Accord', service: 'Oil Change' } },
+            { id: 4, status: 'available', job: null },
+            { id: 5, status: 'occupied', job: { id: 'J002', vehicle: '2020 Toyota Camry', service: 'Brake Service' } },
+            { id: 6, status: 'available', job: null }
+        ];
+
+        let jobs = [
+            {
+                id: 'J001',
+                customer: 'John Doe',
+                vehicle: '2018 Honda Accord',
+                service: 'Oil Change',
+                priority: 'high',
+                status: 'in-progress',
+                time: '10:00 AM',
+                eta: '30 min',
+                bay: 3,
+                progress: 50
+            },
+            {
+                id: 'J002',
+                customer: 'Jane Smith',
+                vehicle: '2020 Toyota Camry',
+                service: 'Brake Service',
+                priority: 'medium',
+                status: 'waiting',
+                time: '11:30 AM',
+                eta: '2 hours',
+                bay: null,
+                progress: 0
+            },
+            {
+                id: 'J003',
+                customer: 'Mike Johnson',
+                vehicle: '2019 Ford F-150',
+                service: 'Tire Rotation',
+                priority: 'low',
+                status: 'waiting',
+                time: '2:00 PM',
+                eta: '45 min',
+                bay: null,
+                progress: 0
+            },
+            {
+                id: 'J004',
+                customer: 'Sarah Wilson',
+                vehicle: '2021 Chevy Silverado',
+                service: 'Engine Diagnostic',
+                priority: 'high',
+                status: 'completed',
+                time: '9:00 AM',
+                eta: '1 hour',
+                bay: null,
+                progress: 100
+            }
+        ];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderBays();
+            renderJobs();
+            updateStats();
+            startAutoRefresh();
+        });
+
+        // Render bays
+        function renderBays() {
+            const bayGrid = document.getElementById('bayGrid');
+            bayGrid.innerHTML = '';
+
+            bays.forEach(bay => {
+                const bayCard = document.createElement('div');
+                bayCard.className = `bay-card ${bay.status} ${selectedBay === bay.id ? 'selected' : ''}`;
+                bayCard.onclick = () => selectBay(bay.id);
+
+                bayCard.innerHTML = `
+                    <div class="bay-number">Bay ${bay.id}</div>
+                    <div class="bay-status">${bay.status === 'occupied' ? 'Occupied' : 'Available'}</div>
+                    ${bay.job ? `<div class="bay-job">${bay.job.vehicle}</div>` : ''}
+                `;
+
+                bayGrid.appendChild(bayCard);
+            });
+        }
+
+        // Select bay
+        function selectBay(bayId) {
+            selectedBay = bayId;
+            const bay = bays.find(b => b.id === bayId);
+            document.getElementById('techBay').textContent = `Bay: ${bayId}`;
+            addMessage('system', `You selected Bay ${bayId}`);
+            renderBays();
+            
+            // If bay has a job, select it
+            if (bay.job) {
+                selectJob(bay.job.id);
+            }
+        }
+
+        // Render jobs
+        function renderJobs() {
+            const jobQueue = document.getElementById('jobQueue');
+            jobQueue.innerHTML = '';
+
+            let filteredJobs = jobs;
+            if (currentFilter !== 'all') {
+                filteredJobs = jobs.filter(job => job.status === currentFilter);
+            }
+
+            // Sort: in-progress first, then by priority, then by time
+            const priorityOrder = { high: 0, medium: 1, low: 2 };
+            filteredJobs.sort((a, b) => {
+                if (a.status === 'in-progress' && b.status !== 'in-progress') return -1;
+                if (a.status !== 'in-progress' && b.status === 'in-progress') return 1;
+                if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+                    return priorityOrder[a.priority] - priorityOrder[b.priority];
+                }
+                return a.time.localeCompare(b.time);
+            });
+
+            filteredJobs.forEach(job => {
+                const jobCard = document.createElement('div');
+                jobCard.className = `job-card priority-${job.priority} ${job.status}`;
+                jobCard.onclick = () => selectJob(job.id);
+
+                jobCard.innerHTML = `
+                    <div class="job-header">
+                        <span class="job-id">${job.id}</span>
+                        <span class="job-priority ${job.priority}">${job.priority.toUpperCase()}</span>
+                    </div>
+                    <div class="job-customer">${job.customer}</div>
+                    <div class="job-vehicle">${job.vehicle}</div>
+                    <div class="job-service">${job.service}</div>
+                    <div class="job-time">
+                        <span>⏰ ${job.time}</span>
+                        <span class="job-eta">⏱️ ETA: ${job.eta}</span>
+                    </div>
+                    ${job.status === 'in-progress' ? `
+                        <div style="margin-top: 10px;">
+                            <div class="progress-bar" style="height: 5px; background: #e9ecef;">
+                                <div class="progress-fill" style="width: ${job.progress}%"></div>
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+
+                jobQueue.appendChild(jobCard);
+            });
+        }
+
+        // Filter jobs
+        function filterJobs(filter) {
+            currentFilter = filter;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            renderJobs();
+        }
+
+        // Select job
+        function selectJob(jobId) {
+            currentJob = jobs.find(j => j.id === jobId);
+            
+            if (currentJob) {
+                document.getElementById('noJobMessage').style.display = 'none';
+                document.getElementById('currentJobContent').style.display = 'block';
+                
+                document.getElementById('currentJobId').textContent = currentJob.id;
+                document.getElementById('currentCustomer').textContent = currentJob.customer;
+                document.getElementById('currentVehicle').textContent = currentJob.vehicle;
+                document.getElementById('currentService').textContent = currentJob.service;
+                document.getElementById('currentPriority').textContent = currentJob.priority.toUpperCase();
+                document.getElementById('currentETA').textContent = currentJob.eta;
+                
+                updateJobProgressUI();
+                
+                addMessage('system', `Selected job ${jobId} for ${currentJob.customer} - ${currentJob.vehicle}`);
+                
+                // If job isn't in progress, start it
+                if (currentJob.status === 'waiting') {
+                    startJob();
+                }
+            }
+        }
+
+        // Start job
+        function startJob() {
+            if (!currentJob) return;
+            
+            currentJob.status = 'in-progress';
+            currentJob.progress = 0;
+            
+            // Assign to selected bay
+            if (selectedBay) {
+                currentJob.bay = selectedBay;
+                const bay = bays.find(b => b.id === selectedBay);
+                if (bay) {
+                    bay.status = 'occupied';
+                    bay.job = currentJob;
+                    renderBays();
+                }
+            }
+            
+            renderJobs();
+            updateJobProgressUI();
+            addMessage('system', `Started job ${currentJob.id}`);
+        }
+
+        // Update progress
+        function updateProgress(progress) {
+            if (!currentJob) return;
+            
+            currentJob.progress = progress;
+            renderJobs();
+            updateJobProgressUI();
+            addMessage('system', `Job ${currentJob.id} progress updated to ${progress}%`);
+        }
+
+        // Update job progress UI
+        function updateJobProgressUI() {
+            if (!currentJob) return;
+            
+            document.getElementById('jobProgressBar').style.width = `${currentJob.progress}%`;
+            document.getElementById('jobProgressText').textContent = `${currentJob.progress}%`;
+        }
+
+        // Complete job
+        function completeJob() {
+            if (!currentJob) return;
+            
+            currentJob.status = 'completed';
+            currentJob.progress = 100;
+            
+            // Free up bay
+            if (currentJob.bay) {
+                const bay = bays.find(b => b.id === currentJob.bay);
+                if (bay) {
+                    bay.status = 'available';
+                    bay.job = null;
+                    renderBays();
+                }
+            }
+            
+            renderJobs();
+            updateJobProgressUI();
+            updateStats();
+            addMessage('system', `✅ Job ${currentJob.id} completed!`);
+            
+            // Clear current job
+            currentJob = null;
+            document.getElementById('noJobMessage').style.display = 'block';
+            document.getElementById('currentJobContent').style.display = 'none';
+        }
+
+        // Pause job
+        function pauseJob() {
+            if (!currentJob) return;
+            
+            addMessage('system', `Job ${currentJob.id} paused`);
+            // In production, this would save the pause state
+        }
+
+        // Save notes
+        function saveNotes() {
+            const notes = document.getElementById('jobNotes').value;
+            if (!currentJob) {
+                addMessage('system', 'Select a job first');
+                return;
+            }
+            
+            // In production, save to database
+            addMessage('system', 'Notes saved for job ' + currentJob.id);
+            document.getElementById('jobNotes').value = '';
+        }
+
+        // Update stats
+        function updateStats() {
+            document.getElementById('jobsWaiting').textContent = jobs.filter(j => j.status === 'waiting').length;
+            document.getElementById('jobsInProgress').textContent = jobs.filter(j => j.status === 'in-progress').length;
+            document.getElementById('jobsCompleted').textContent = jobs.filter(j => j.status === 'completed').length;
+        }
+
+        // Voice recording
+        function toggleVoiceRecording() {
+            const btn = document.getElementById('voiceBtn');
+            
+            if (!isRecording) {
+                isRecording = true;
+                btn.classList.add('recording');
+                btn.innerHTML = '🔴 Recording...';
+                addMessage('system', 'Listening... Speak now!');
+                
+                // In production, integrate with Web Speech API
+                setTimeout(() => {
+                    if (isRecording) {
+                        isRecording = false;
+                        btn.classList.remove('recording');
+                        btn.innerHTML = '🎤 Hold to Speak';
+                        addMessage('system', 'Voice command processed');
+                    }
+                }, 3000);
+            } else {
+                isRecording = false;
+                btn.classList.remove('recording');
+                btn.innerHTML = '🎤 Hold to Speak';
+            }
+        }
+
+        // Send message
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addMessage('user', message);
+            input.value = '';
+            
+            // Process command
+            processCommand(message);
+        }
+
+        // Add message to log
+        function addMessage(type, text) {
+            const log = document.getElementById('messagesLog');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const time = new Date().toLocaleTimeString();
+            messageDiv.innerHTML = `
+                <div class="message-time">${type === 'system' ? 'System' : 'You'} - ${time}</div>
+                <div class="message-text">${text}</div>
+            `;
+            
+            log.insertBefore(messageDiv, log.firstChild);
+            
+            // Keep only last 20 messages
+            while (log.children.length > 20) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        // Process command
+        function processCommand(command) {
+            const lowerCommand = command.toLowerCase();
+            
+            if (lowerCommand.includes('start') && lowerCommand.includes('job')) {
+                const jobMatch = command.match(/\d+/);
+                if (jobMatch) {
+                    selectJob('J' + jobMatch[0].padStart(3, '0'));
+                }
+            } else if (lowerCommand.includes('complete')) {
+                completeJob();
+            } else if (lowerCommand.includes('parts')) {
+                showPartsModal();
+            } else if (lowerCommand.includes('help')) {
+                addMessage('system', 'Commands: "Start job #", "Complete job", "Request parts", "Need help"');
+            } else {
+                // Send to service advisor
+                addMessage('system', 'Message sent to service advisor');
+            }
+        }
+
+        // Quick actions
+        function quickAction(action) {
+            switch(action) {
+                case 'parts':
+                    showPartsModal();
+                    break;
+                case 'help':
+                    addMessage('system', 'Service advisor notified you need help');
+                    break;
+                case 'complete':
+                    completeJob();
+                    break;
+                case 'break':
+                    addMessage('system', 'Break time logged');
+                    break;
+            }
+        }
+
+        // Show parts modal
+        function showPartsModal() {
+            document.getElementById('partsModal').classList.add('active');
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Submit parts request
+        function submitPartsRequest() {
+            const partName = document.getElementById('partName').value;
+            const quantity = document.getElementById('partQuantity').value;
+            const urgency = document.getElementById('partUrgency').value;
+            
+            addMessage('system', `Parts request: ${quantity}x ${partName} (${urgency} priority)`);
+            closeModal('partsModal');
+            
+            // Clear form
+            document.getElementById('partName').value = '';
+            document.getElementById('partQuantity').value = '1';
+        }
+
+        // Show settings
+        function showSettings() {
+            addMessage('system', 'Settings panel would open here');
+        }
+
+        // Auto refresh (simulate real-time updates)
+        function startAutoRefresh() {
+            setInterval(() => {
+                // In production, fetch from API
+                updateStats();
+            }, 30000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
