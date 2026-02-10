@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Towing Dashboard - Mark Car Arrived</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tow-request {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: #fafafa;
+        }
+
+        .tow-request.assigned {
+            border-left: 4px solid #3498db;
+        }
+
+        .tow-request.in_progress {
+            border-left: 4px solid #f39c12;
+        }
+
+        .tow-request.arrived {
+            border-left: 4px solid #27ae60;
+            opacity: 0.6;
+        }
+
+        .tow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .tow-id {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .tow-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background: #f39c12; color: white; }
+        .status-assigned { background: #3498db; color: white; }
+        .status-in_progress { background: #e67e22; color: white; }
+        .status-arrived { background: #27ae60; color: white; }
+        .status-completed { background: #95a5a6; color: white; }
+
+        .vehicle-info {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .vehicle-details {
+            flex: 1;
+        }
+
+        .vehicle-details p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .vehicle-details strong {
+            color: #555;
+        }
+
+        .location-info {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .location-info h4 {
+            color: #34495e;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .customer-info {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-success:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .btn-info {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #2980b9;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .notification {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .notification.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+
+        .notification.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .filter-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        @media (max-width: 768px) {
+            .vehicle-info,
+            .customer-info,
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🚚 Towing Dashboard</h1>
+
+        <div class="notification" id="notification"></div>
+
+        <div class="card">
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterTows('all')">All Tows</button>
+                <button class="filter-btn" onclick="filterTows('assigned')">Assigned</button>
+                <button class="filter-btn" onclick="filterTows('in_progress')">In Progress</button>
+                <button class="filter-btn" onclick="filterTows('arrived')">Arrived</button>
+            </div>
+
+            <div id="tow-list">
+                <!-- Tow requests will be loaded here -->
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <h3>No towing requests</h3>
+                    <p>Click "Refresh" to load towing requests</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-info" onclick="loadTowingRequests()">🔄 Refresh</button>
+            <button class="btn btn-info" onclick="autoRefresh()">🔁 Auto Refresh (30s)</button>
+        </div>
+    </div>
+
+    <script>
+        let currentFilter = 'all';
+        let autoRefreshInterval = null;
+
+        // Load towing requests
+        async function loadTowingRequests() {
+            try {
+                showNotification('Loading towing requests...', 'info');
+                
+                // In production, this would fetch from your API
+                const response = await fetch('/api/towing/requests');
+                const data = await response.json();
+                
+                renderTowingRequests(data.requests);
+                showNotification('Towing requests loaded', 'success');
+            } catch (error) {
+                console.error('Error loading towing requests:', error);
+                showNotification('Error loading towing requests', 'error');
+                
+                // Demo data for testing
+                renderDemoData();
+            }
+        }
+
+        // Render demo data
+        function renderDemoData() {
+            const demoRequests = [
+                {
+                    id: 'tow-001',
+                    status: 'in_progress',
+                    customer: {
+                        name: 'John Smith',
+                        phone: '+15551234567'
+                    },
+                    vehicle: {
+                        year: '2020',
+                        color: 'Red',
+                        make: 'Toyota',
+                        model: 'Camry',
+                        licensePlate: 'ABC-1234'
+                    },
+                    pickupLocation: {
+                        address: '123 Main St, Anytown, USA',
+                        landmark: 'Parking lot near McDonald\'s'
+                    },
+                    destination: {
+                        address: '456 Shop Ave, Anytown, USA'
+                    },
+                    providerName: 'Quick Tow Services',
+                    createdAt: new Date(Date.now() - 1800000).toISOString()
+                },
+                {
+                    id: 'tow-002',
+                    status: 'assigned',
+                    customer: {
+                        name: 'Jane Doe',
+                        phone: '+15559876543'
+                    },
+                    vehicle: {
+                        year: '2018',
+                        color: 'Blue',
+                        make: 'Honda',
+                        model: 'Accord',
+                        licensePlate: 'XYZ-5678'
+                    },
+                    pickupLocation: {
+                        address: '789 Oak St, Anytown, USA',
+                        landmark: 'In driveway'
+                    },
+                    destination: {
+                        address: '456 Shop Ave, Anytown, USA'
+                    },
+                    providerName: 'City Tow',
+                    createdAt: new Date(Date.now() - 900000).toISOString()
+                }
+            ];
+            
+            renderTowingRequests(demoRequests);
+        }
+
+        // Render towing requests
+        function renderTowingRequests(requests) {
+            const container = document.getElementById('tow-list');
+            
+            if (!requests || requests.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <h3>No towing requests</h3>
+                    </div>
+                `;
+                return;
+            }
+
+            const filteredRequests = currentFilter === 'all' 
+                ? requests 
+                : requests.filter(req => req.status === currentFilter);
+
+            container.innerHTML = filteredRequests.map(request => `
+                <div class="tow-request ${request.status}" data-status="${request.status}">
+                    <div class="tow-header">
+                        <span class="tow-id">📋 ${request.id}</span>
+                        <span class="tow-status status-${request.status}">${request.status.replace('_', ' ')}</span>
+                    </div>
+
+                    <div class="vehicle-info">
+                        <div class="vehicle-details">
+                            <p><strong>Vehicle:</strong> ${request.vehicle.year} ${request.vehicle.color} ${request.vehicle.make} ${request.vehicle.model}</p>
+                            <p><strong>License Plate:</strong> ${request.vehicle.licensePlate}</p>
+                        </div>
+                    </div>
+
+                    <div class="location-info">
+                        <h4>📍 Pickup Location</h4>
+                        <p>${request.pickupLocation.address}</p>
+                        ${request.pickupLocation.landmark ? `<p><strong>Landmark:</strong> ${request.pickupLocation.landmark}</p>` : ''}
+                    </div>
+
+                    <div class="customer-info">
+                        <div class="vehicle-details">
+                            <p><strong>Customer:</strong> ${request.customer.name}</p>
+                            <p><strong>Phone:</strong> ${request.customer.phone}</p>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        ${request.status !== 'arrived' && request.status !== 'completed' ? `
+                            <button class="btn btn-success" onclick="markCarArrived('${request.id}')">
+                                🚗 Car Arrived
+                            </button>
+                        ` : `
+                            <button class="btn btn-success" disabled>
+                                ✅ ${request.status === 'arrived' ? 'Arrived' : 'Completed'}
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Mark car as arrived
+        async function markCarArrived(towRequestId) {
+            if (!confirm('Mark this car as arrived at the shop?\n\nThis will:\n• Send SMS to customer\n• Start auto-intake (if enabled)\n• Update status')) {
+                return;
+            }
+
+            try {
+                showNotification('Marking car as arrived...', 'info');
+
+                // In production, this would call your API
+                const response = await fetch(`/api/towing/${towRequestId}/arrived`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showNotification('✅ Car marked as arrived! SMS sent to customer.', 'success');
+                    loadTowingRequests();
+                } else {
+                    throw new Error('Failed to mark car as arrived');
+                }
+            } catch (error) {
+                console.error('Error marking car arrived:', error);
+                showNotification('Error marking car arrived: ' + error.message, 'error');
+            }
+        }
+
+        // Filter towing requests
+        function filterTows(filter) {
+            currentFilter = filter;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Reload requests
+            loadTowingRequests();
+        }
+
+        // Auto refresh
+        function autoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+                showNotification('Auto-refresh disabled', 'info');
+            } else {
+                loadTowingRequests();
+                autoRefreshInterval = setInterval(loadTowingRequests, 30000);
+                showNotification('Auto-refresh enabled (30s)', 'success');
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
+        // Load on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTowingRequests();
+        });
+    </script>
+</body>
+</html>
