@@ -15,22 +15,5 @@
     "nodemailer": "^8.0.1",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "twilio": "^4.19.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/fixmycarmike-hash/vhicl-vapi-backend.git"
-  },
-  "keywords": [
-    "vhicl",
-    "auto",
-    "shop",
-    "management",
-    "firebase",
-    "multi-shop"
-  ],
-  "author": "",
-  "license": "ISC",
-  "engines": {
-    "node": ">=14.0.0"
   }
 }
