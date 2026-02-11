@@ -2,4 +2,4 @@
 cmds = ["npm install --production"]
 
 [phases.start]
-cmd = "node server.js"
+cmd = "node server-no-firebase.js"
