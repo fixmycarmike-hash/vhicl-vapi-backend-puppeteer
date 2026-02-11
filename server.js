@@ -1,4 +1,3 @@
-
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -232,6 +231,11 @@ app.post('/api/photos', authenticateRequest, (req, res) => {
 
 // ==================== SYSTEM STATUS ====================
 
+// Health check endpoint (required by Railway)
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'healthy' });
+});
+
 // Get system status
 app.get('/api/status', (req, res) => {
     res.json({
@@ -251,9 +255,9 @@ app.get('/api/status', (req, res) => {
 // ==================== START SERVER ====================
 
 app.listen(PORT, () => {
-    console.log('\ud83d\ude80 Server running on port', PORT);
-    console.log('\ud83d\udcdd Mode: Single-shop (no Firebase)');
-    console.log('\ud83d\udcbe Storage: In-memory (data will reset on restart)');
+    console.log('🚀 Server running on port', PORT);
+    console.log('📝 Mode: Single-shop (no Firebase)');
+    console.log('💾 Storage: In-memory (data will reset on restart)');
     console.log('');
-    console.log('\u2705 Ready for testing!');
+    console.log('✅ Ready for testing!');
 });
