@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Setup Guide - Firebase Environment Variables</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            color: #333;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #764ba2;
+            margin-top: 30px;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            color: #155724;
+        }
+        .info {
+            background: #cce5ff;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            color: #004085;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            color: #856404;
+        }
+        .steps {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .steps ol {
+            margin-left: 25px;
+        }
+        .steps li {
+            margin: 15px 0;
+            line-height: 1.8;
+        }
+        .variable {
+            background: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .variable strong {
+            color: #667eea;
+        }
+        .download-btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 20px 40px;
+            font-size: 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin: 20px 0;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+        .download-btn:hover {
+            transform: scale(1.05);
+            background: #5568d3;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #d63384;
+        }
+        .emoji {
+            font-size: 24px;
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="emoji">🚀</span> SaaS Setup Guide - Firebase Environment Variables</h1>
+        
+        <div class="success">
+            <strong><span class="emoji">✅</span> Your System is Ready for SaaS!</strong><br>
+            All shops will use YOUR Firebase project with one API key. Their data is isolated by unique shop IDs.
+        </div>
+        
+        <div class="info">
+            <strong><span class="emoji">💡</span> How It Works:</strong><br>
+            • One Firebase project for all shops<br>
+            • One API key for everyone<br>
+            • Each shop gets a unique <code>shopId</code><br>
+            • Data is automatically separated<br>
+            • Shops pay monthly subscription fees
+        </div>
+        
+        <h2>Step 1: Get Your Firebase Credentials</h2>
+        
+        <div class="steps">
+            <ol>
+                <li>Go to <a href="https://console.firebase.google.com/" target="_blank"><strong>Firebase Console</strong></a></li>
+                <li>Select your project</li>
+                <li>Click <strong>⚙️ Gear icon</strong> → <strong>Project Settings</strong></li>
+                <li>Scroll down to <strong>"Your apps"</strong> section</li>
+                <li>Click the <strong>Web app</strong> icon (</>)</li>
+                <li>Copy the Firebase configuration (click "Config" radio button first)</li>
+            </ol>
+        </div>
+        
+        <h2>Step 2: Add Environment Variables to Railway</h2>
+        
+        <div class="steps">
+            <ol>
+                <li>Go to your <strong>Railway dashboard</strong></li>
+                <li>Click on your project</li>
+                <li>Click the <strong>"Variables"</strong> tab</li>
+                <li>Add these 3 variables:</li>
+            </ol>
+        </div>
+        
+        <div class="variable">
+            <strong>Variable 1:</strong><br>
+            Name: <code>FIREBASE_API_KEY</code><br>
+            Value: Your Firebase API key (starts with <code>AIzaSy...</code>)
+        </div>
+        
+        <div class="variable">
+            <strong>Variable 2:</strong><br>
+            Name: <code>FIREBASE_DATABASE_URL</code><br>
+            Value: Your Firebase database URL (starts with <code>https://...</code>)
+        </div>
+        
+        <div class="variable">
+            <strong>Variable 3:</strong><br>
+            Name: <code>FIREBASE_STORAGE_BUCKET</code><br>
+            Value: Your Firebase storage bucket (ends with <code>.appspot.com</code>)
+        </div>
+        
+        <div class="warning">
+            <strong><span class="emoji">⚠️</span> Optional - For Admin Operations:</strong><br>
+            If you need admin operations (like creating user accounts), also add:<br>
+            • <code>FIREBASE_PRIVATE_KEY</code> - Get from Firebase Service Account<br>
+            • <code>FIREBASE_CLIENT_EMAIL</code> - Get from Firebase Service Account
+        </div>
+        
+        <h2>Step 3: Update firebase-config.js on GitHub</h2>
+        
+        <div class="steps">
+            <ol>
+                <li><strong>Download</strong> the fixed firebase-config.js below</li>
+                <li>Go to your <strong>GitHub repository</strong></li>
+                <li>Click <code>firebase-config.js</code></li>
+                <li>Click the <strong>pencil icon</strong> (edit)</li>
+                <li><strong>Delete all code</strong> in the editor</li>
+                <li><strong>Copy all code</strong> from the downloaded file</li>
+                <li><strong>Paste</strong> it into the GitHub editor</li>
+                <li>Type "Update Firebase to use environment variables for SaaS model"</li>
+                <li>Click <strong>"Commit changes"</strong></li>
+            </ol>
+        </div>
+        
+        <center>
+            <a href="firebase-saas-config.zip" class="download-btn" download>
+                📥 Download Updated firebase-config.js
+            </a>
+        </center>
+        
+        <h2>Step 4: Deploy!</h2>
+        
+        <div class="success">
+            <strong><span class="emoji">🎉</span> What Happens Next:</strong><br>
+            • Railway will automatically detect the environment variables<br>
+            • Your app will start using them instead of files<br>
+            • Your system is now ready for SaaS!
+        </div>
+        
+        <h2>How to Onboard New Shops (SaaS Model)</h2>
+        
+        <div class="steps">
+            <ol>
+                <li>Create their account in your system</li>
+                <li>Generate a unique <code>shopId</code> (e.g., <code>shop_abc123</code>)</li>
+                <li>Give them login credentials</li>
+                <li>Set up their monthly subscription</li>
+                <li>Their data is automatically isolated in Firebase</li>
+            </ol>
+        </div>
+        
+        <div class="info">
+            <strong><span class="emoji">💰</span> Your Business Model:</strong><br>
+            • One API key for all shops ✅<br>
+            • Recurring monthly revenue ✅<br>
+            • You control all data ✅<br>
+            • Easy to scale ✅<br>
+            • Shops don't need technical setup ✅
+        </div>
+    </div>
+</body>
+</html>
