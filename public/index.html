@@ -1703,27 +1703,44 @@
             if (vapiRecordCallsEl) vapiRecordCallsEl.checked = settings.vapiRecordCalls !== false;
             
             // Populate Twilio settings
-            document.getElementById('twilioAccountSid').value = settings.twilioAccountSid || '';
-            document.getElementById('twilioAuthToken').value = settings.twilioAuthToken || '';
-            document.getElementById('twilioPhoneNumber').value = settings.twilioPhoneNumber || '';
-            document.getElementById('twilioEnabled').checked = settings.twilioEnabled || false;
-            document.getElementById('twilioAutoReminders').checked = settings.twilioAutoReminders !== false;
+            const twilioAccountSidEl = document.getElementById('twilioAccountSid');
+            if (twilioAccountSidEl) twilioAccountSidEl.value = settings.twilioAccountSid || '';
+            const twilioAuthTokenEl = document.getElementById('twilioAuthToken');
+            if (twilioAuthTokenEl) twilioAuthTokenEl.value = settings.twilioAuthToken || '';
+            const twilioPhoneNumberEl = document.getElementById('twilioPhoneNumber');
+            if (twilioPhoneNumberEl) twilioPhoneNumberEl.value = settings.twilioPhoneNumber || '';
+            const twilioEnabledEl = document.getElementById('twilioEnabled');
+            if (twilioEnabledEl) twilioEnabledEl.checked = settings.twilioEnabled || false;
+            const twilioAutoRemindersEl = document.getElementById('twilioAutoReminders');
+            if (twilioAutoRemindersEl) twilioAutoRemindersEl.checked = settings.twilioAutoReminders !== false;
             
             // Populate PayPal settings
-            document.getElementById('paypalClientId').value = settings.paypalClientId || '';
-            document.getElementById('paypalClientSecret').value = settings.paypalClientSecret || '';
-            document.getElementById('paypalEnvironment').value = settings.paypalEnvironment || 'sandbox';
-            document.getElementById('paypalEmail').value = settings.paypalEmail || '';
-            document.getElementById('paypalEnabled').checked = settings.paypalEnabled || false;
-            document.getElementById('paypalAlexBilling').checked = settings.paypalAlexBilling !== false;
+            const paypalClientIdEl = document.getElementById('paypalClientId');
+            if (paypalClientIdEl) paypalClientIdEl.value = settings.paypalClientId || '';
+            const paypalClientSecretEl = document.getElementById('paypalClientSecret');
+            if (paypalClientSecretEl) paypalClientSecretEl.value = settings.paypalClientSecret || '';
+            const paypalEnvironmentEl = document.getElementById('paypalEnvironment');
+            if (paypalEnvironmentEl) paypalEnvironmentEl.value = settings.paypalEnvironment || 'sandbox';
+            const paypalEmailEl = document.getElementById('paypalEmail');
+            if (paypalEmailEl) paypalEmailEl.value = settings.paypalEmail || '';
+            const paypalEnabledEl = document.getElementById('paypalEnabled');
+            if (paypalEnabledEl) paypalEnabledEl.checked = settings.paypalEnabled || false;
+            const paypalAlexBillingEl = document.getElementById('paypalAlexBilling');
+            if (paypalAlexBillingEl) paypalAlexBillingEl.checked = settings.paypalAlexBilling !== false;
             
             // Populate SendGrid settings
-            document.getElementById('sendgridApiKey').value = settings.sendgridApiKey || '';
-            document.getElementById('sendgridFromEmail').value = settings.sendgridFromEmail || '';
-            document.getElementById('sendgridFromName').value = settings.sendgridFromName || 'VHICL Pro Auto Shop';
-            document.getElementById('sendgridEnabled').checked = settings.sendgridEnabled || false;
-            document.getElementById('sendgridAlexEmail').checked = settings.sendgridAlexEmail !== false;
-            document.getElementById('sendgridTemplate').value = settings.sendgridTemplate || 'default';
+            const sendgridApiKeyEl = document.getElementById('sendgridApiKey');
+            if (sendgridApiKeyEl) sendgridApiKeyEl.value = settings.sendgridApiKey || '';
+            const sendgridFromEmailEl = document.getElementById('sendgridFromEmail');
+            if (sendgridFromEmailEl) sendgridFromEmailEl.value = settings.sendgridFromEmail || '';
+            const sendgridFromNameEl = document.getElementById('sendgridFromName');
+            if (sendgridFromNameEl) sendgridFromNameEl.value = settings.sendgridFromName || 'VHICL Pro Auto Shop';
+            const sendgridEnabledEl = document.getElementById('sendgridEnabled');
+            if (sendgridEnabledEl) sendgridEnabledEl.checked = settings.sendgridEnabled || false;
+            const sendgridAlexEmailEl = document.getElementById('sendgridAlexEmail');
+            if (sendgridAlexEmailEl) sendgridAlexEmailEl.checked = settings.sendgridAlexEmail !== false;
+            const sendgridTemplateEl = document.getElementById('sendgridTemplate');
+            if (sendgridTemplateEl) sendgridTemplateEl.value = settings.sendgridTemplate || 'default';
             
             // Update badges
             updateApiBadge();
@@ -1757,14 +1774,23 @@
         }
 
         function saveApiSettings() {
-            settings.apiEndpoint = document.getElementById('apiEndpoint').value;
-            settings.apiKey = document.getElementById('apiKey').value;
-            settings.apiVersion = document.getElementById('apiVersion').value;
-            settings.apiEnvironment = document.getElementById('apiEnvironment').value;
-            settings.apiEnabled = document.getElementById('apiEnabled').checked;
-            settings.apiTimeout = parseInt(document.getElementById('apiTimeout').value) || 30;
-            settings.apiRetries = parseInt(document.getElementById('apiRetries').value) || 3;
-            settings.apiRateLimit = parseInt(document.getElementById('apiRateLimit').value) || 60;
+            const apiEndpointEl = document.getElementById('apiEndpoint');
+            const apiKeyEl = document.getElementById('apiKey');
+            const apiVersionEl = document.getElementById('apiVersion');
+            const apiEnvironmentEl = document.getElementById('apiEnvironment');
+            const apiEnabledEl = document.getElementById('apiEnabled');
+            const apiTimeoutEl = document.getElementById('apiTimeout');
+            const apiRetriesEl = document.getElementById('apiRetries');
+            const apiRateLimitEl = document.getElementById('apiRateLimit');
+            
+            if (apiEndpointEl) settings.apiEndpoint = apiEndpointEl.value;
+            if (apiKeyEl) settings.apiKey = apiKeyEl.value;
+            if (apiVersionEl) settings.apiVersion = apiVersionEl.value;
+            if (apiEnvironmentEl) settings.apiEnvironment = apiEnvironmentEl.value;
+            if (apiEnabledEl) settings.apiEnabled = apiEnabledEl.checked;
+            if (apiTimeoutEl) settings.apiTimeout = parseInt(apiTimeoutEl.value) || 30;
+            if (apiRetriesEl) settings.apiRetries = parseInt(apiRetriesEl.value) || 3;
+            if (apiRateLimitEl) settings.apiRateLimit = parseInt(apiRateLimitEl.value) || 60;
             
             localStorage.setItem('vhicl_settings', JSON.stringify(settings));
             updateApiBadge();
@@ -1805,30 +1831,47 @@
             const indicator = document.getElementById('apiIndicator');
             const indicatorText = document.getElementById('apiIndicatorText');
             
+            if (!badge) return;
+            
             if (settings.apiEnabled && settings.apiKey) {
                 badge.style.background = '#d4edda';
                 badge.style.color = '#155724';
                 badge.textContent = 'Connected';
                 
                 // Show navbar indicator
-                indicator.style.display = 'flex';
-                indicator.style.background = 'rgba(67, 233, 123, 0.2)';
-                indicator.style.color = '#43e97b';
-                indicatorText.textContent = 'API Connected';
+                if (indicator) {
+                    indicator.style.display = 'flex';
+                    indicator.style.background = 'rgba(67, 233, 123, 0.2)';
+                    indicator.style.color = '#43e97b';
+                }
+                if (indicatorText) {
+                    indicatorText.textContent = 'API Connected';
+                }
             } else {
                 badge.style.background = '#f8d7da';
                 badge.style.color = '#721c24';
                 badge.textContent = 'Disconnected';
                 
                 // Hide navbar indicator
-                indicator.style.display = 'none';
+                if (indicator) {
+                    indicator.style.display = 'none';
+                }
             }
         }
 
         function testApiConnection() {
-            const endpoint = document.getElementById('apiEndpoint').value;
-            const apiKey = document.getElementById('apiKey').value;
-            const isEnabled = document.getElementById('apiEnabled').checked;
+            const apiEndpointEl = document.getElementById('apiEndpoint');
+            const apiKeyEl = document.getElementById('apiKey');
+            const apiEnabledEl = document.getElementById('apiEnabled');
+            
+            if (!apiEndpointEl || !apiKeyEl || !apiEnabledEl) {
+                console.error('Required API elements not found');
+                return;
+            }
+            
+            const endpoint = apiEndpointEl.value;
+            const apiKey = apiKeyEl.value;
+            const isEnabled = apiEnabledEl.checked;
             
             if (!endpoint || !apiKey) {
                 alert('Please enter both API endpoint and API key');
@@ -1842,9 +1885,11 @@
             btn.disabled = true;
             
             const statusDiv = document.getElementById('apiStatus');
-            statusDiv.className = 'api-status';
-            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin status-icon"></i> Testing connection...';
-            statusDiv.style.display = 'block';
+            if (statusDiv) {
+                statusDiv.className = 'api-status';
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin status-icon"></i> Testing connection...';
+                statusDiv.style.display = 'block';
+            }
             
             // Simulate API test (in production, this would be a real fetch)
             setTimeout(() => {
@@ -1873,7 +1918,9 @@
         function togglePartsMatrix() {
             const checkbox = document.getElementById('usePartsMatrix');
             const matrixCard = document.getElementById('partsMatrixCard');
-            matrixCard.style.display = checkbox.checked ? 'block' : 'none';
+            if (matrixCard) {
+                matrixCard.style.display = checkbox.checked ? 'block' : 'none';
+            }
         }
 
         document.getElementById('usePartsMatrix')?.addEventListener('change', togglePartsMatrix);
@@ -1898,7 +1945,10 @@
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+            }
         }
 
         // Close modal when clicking outside
@@ -2292,9 +2342,13 @@
             const assigned = towingRequests.filter(t => t.status === 'Assigned').length;
             const arrived = towingRequests.filter(t => t.status === 'Arrived').length;
             
-            document.getElementById('pendingTowing').textContent = pending;
-            document.getElementById('assignedTowing').textContent = assigned;
-            document.getElementById('arrivedTowing').textContent = arrived;
+            const pendingEl = document.getElementById('pendingTowing');
+            const assignedEl = document.getElementById('assignedTowing');
+            const arrivedEl = document.getElementById('arrivedTowing');
+            
+            if (pendingEl) pendingEl.textContent = pending;
+            if (assignedEl) assignedEl.textContent = assigned;
+            if (arrivedEl) arrivedEl.textContent = arrived;
             
             if (towingRequests.length === 0) {
                 list.innerHTML = '<p style="text-align: center; color: #666;">No towing requests yet.</p>';
@@ -2375,8 +2429,10 @@
             }
 
             const resultsDiv = document.getElementById('vinResults');
-            resultsDiv.style.display = 'block';
-            resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Decoding VIN...</div>';
+            if (resultsDiv) {
+                resultsDiv.style.display = 'block';
+                resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Decoding VIN...</div>';
+            }
 
             try {
                 // Check if Techflow API is configured
@@ -2500,8 +2556,10 @@
             }
 
             const resultsDiv = document.getElementById('partsResults');
-            resultsDiv.style.display = 'block';
-            resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Searching parts...</div>';
+            if (resultsDiv) {
+                resultsDiv.style.display = 'block';
+                resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Searching parts...</div>';
+            }
 
             try {
                 // Simulate parts search
@@ -2584,8 +2642,10 @@
             }
 
             const resultsDiv = document.getElementById('scheduleResults');
-            if (!vin) resultsDiv.style.display = 'block';
-            resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading service schedule...</div>';
+            if (resultsDiv) {
+                if (!vin) resultsDiv.style.display = 'block';
+                resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading service schedule...</div>';
+            }
 
             try {
                 const schedule = simulateServiceSchedule(inputVin);
@@ -2645,8 +2705,10 @@
             }
 
             const resultsDiv = document.getElementById('historyResults');
-            if (!vin) resultsDiv.style.display = 'block';
-            resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading vehicle history...</div>';
+            if (resultsDiv) {
+                if (!vin) resultsDiv.style.display = 'block';
+                resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading vehicle history...</div>';
+            }
 
             try {
                 const history = simulateVehicleHistory(inputVin);
@@ -3559,9 +3621,13 @@ ALEX AI Assistant
             const totalValue = inventory.reduce((sum, item) => sum + (item.quantity * item.price), 0);
             const lowStock = inventory.filter(item => item.quantity <= item.reorderPoint).length;
             
-            document.getElementById('totalInventoryItems').textContent = totalItems;
-            document.getElementById('inventoryValue').textContent = `$${totalValue.toFixed(2)}`;
-            document.getElementById('lowStockItems').textContent = lowStock;
+            const totalItemsEl = document.getElementById('totalInventoryItems');
+            const inventoryValueEl = document.getElementById('inventoryValue');
+            const lowStockEl = document.getElementById('lowStockItems');
+            
+            if (totalItemsEl) totalItemsEl.textContent = totalItems;
+            if (inventoryValueEl) inventoryValueEl.textContent = `$${totalValue.toFixed(2)}`;
+            if (lowStockEl) lowStockEl.textContent = lowStock;
             
             if (inventory.length === 0) {
                 list.innerHTML = '<p style="text-align: center; color: #666;">No inventory items yet. Add your first item!</p>';
