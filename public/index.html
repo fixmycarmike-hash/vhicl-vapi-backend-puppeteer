@@ -1615,39 +1615,92 @@
                 apiRateLimit: savedSettings.apiRateLimit || 60
             };
             
-            // Populate form fields
-            document.getElementById('laborRate').value = settings.laborRate;
-            document.getElementById('diagnosticFee').value = settings.diagnosticFee;
-            document.getElementById('envFee').value = settings.envFee;
-            document.getElementById('partsMarkup').value = settings.partsMarkup;
-            document.getElementById('salesTax').value = settings.salesTax;
-            document.getElementById('usePartsMatrix').checked = settings.usePartsMatrix;
-            document.getElementById('markup50').value = settings.markup50;
-            document.getElementById('markup100').value = settings.markup100;
-            document.getElementById('markup500').value = settings.markup500;
-            document.getElementById('markup1000').value = settings.markup1000;
-            document.getElementById('markupOver1000').value = settings.markupOver1000;
-            document.getElementById('shopName').value = settings.shopName;
-            document.getElementById('shopPhone').value = settings.shopPhone;
-            document.getElementById('shopEmail').value = settings.shopEmail;
-            document.getElementById('shopAddress').value = settings.shopAddress;
+            // Populate form fields (with null checks)
+            const laborRateEl = document.getElementById('laborRate');
+            if (laborRateEl) laborRateEl.value = settings.laborRate;
             
-            // Populate API settings
-            document.getElementById('apiEndpoint').value = settings.apiEndpoint;
-            document.getElementById('apiKey').value = settings.apiKey;
-            document.getElementById('apiVersion').value = settings.apiVersion;
-            document.getElementById('apiEnvironment').value = settings.apiEnvironment;
-            document.getElementById('apiEnabled').checked = settings.apiEnabled;
-            document.getElementById('apiTimeout').value = settings.apiTimeout;
-            document.getElementById('apiRetries').value = settings.apiRetries;
-            document.getElementById('apiRateLimit').value = settings.apiRateLimit;
+            const diagnosticFeeEl = document.getElementById('diagnosticFee');
+            if (diagnosticFeeEl) diagnosticFeeEl.value = settings.diagnosticFee;
             
-            // Populate VAPI settings
-            document.getElementById('vapiApiKey').value = settings.vapiApiKey || '';
-            document.getElementById('vapiPhoneNumber').value = settings.vapiPhoneNumber || '';
-            document.getElementById('vapiVoice').value = settings.vapiVoice || 'rachel';
-            document.getElementById('vapiEnabled').checked = settings.vapiEnabled || false;
-            document.getElementById('vapiRecordCalls').checked = settings.vapiRecordCalls !== false;
+            const envFeeEl = document.getElementById('envFee');
+            if (envFeeEl) envFeeEl.value = settings.envFee;
+            
+            const partsMarkupEl = document.getElementById('partsMarkup');
+            if (partsMarkupEl) partsMarkupEl.value = settings.partsMarkup;
+            
+            const salesTaxEl = document.getElementById('salesTax');
+            if (salesTaxEl) salesTaxEl.value = settings.salesTax;
+            
+            const usePartsMatrixEl = document.getElementById('usePartsMatrix');
+            if (usePartsMatrixEl) usePartsMatrixEl.checked = settings.usePartsMatrix;
+            
+            const markup50El = document.getElementById('markup50');
+            if (markup50El) markup50El.value = settings.markup50;
+            
+            const markup100El = document.getElementById('markup100');
+            if (markup100El) markup100El.value = settings.markup100;
+            
+            const markup500El = document.getElementById('markup500');
+            if (markup500El) markup500El.value = settings.markup500;
+            
+            const markup1000El = document.getElementById('markup1000');
+            if (markup1000El) markup1000El.value = settings.markup1000;
+            
+            const markupOver1000El = document.getElementById('markupOver1000');
+            if (markupOver1000El) markupOver1000El.value = settings.markupOver1000;
+            
+            const shopNameEl = document.getElementById('shopName');
+            if (shopNameEl) shopNameEl.value = settings.shopName;
+            
+            const shopPhoneEl = document.getElementById('shopPhone');
+            if (shopPhoneEl) shopPhoneEl.value = settings.shopPhone;
+            
+            const shopEmailEl = document.getElementById('shopEmail');
+            if (shopEmailEl) shopEmailEl.value = settings.shopEmail;
+            
+            const shopAddressEl = document.getElementById('shopAddress');
+            if (shopAddressEl) shopAddressEl.value = settings.shopAddress;
+            
+            // Populate API settings (with null checks)
+            const apiEndpointEl = document.getElementById('apiEndpoint');
+            if (apiEndpointEl) apiEndpointEl.value = settings.apiEndpoint;
+            
+            const apiKeyEl = document.getElementById('apiKey');
+            if (apiKeyEl) apiKeyEl.value = settings.apiKey;
+            
+            const apiVersionEl = document.getElementById('apiVersion');
+            if (apiVersionEl) apiVersionEl.value = settings.apiVersion;
+            
+            const apiEnvironmentEl = document.getElementById('apiEnvironment');
+            if (apiEnvironmentEl) apiEnvironmentEl.value = settings.apiEnvironment;
+            
+            const apiEnabledEl = document.getElementById('apiEnabled');
+            if (apiEnabledEl) apiEnabledEl.checked = settings.apiEnabled;
+            
+            const apiTimeoutEl = document.getElementById('apiTimeout');
+            if (apiTimeoutEl) apiTimeoutEl.value = settings.apiTimeout;
+            
+            const apiRetriesEl = document.getElementById('apiRetries');
+            if (apiRetriesEl) apiRetriesEl.value = settings.apiRetries;
+            
+            const apiRateLimitEl = document.getElementById('apiRateLimit');
+            if (apiRateLimitEl) apiRateLimitEl.value = settings.apiRateLimit;
+            
+            // Populate VAPI settings (with null checks)
+            const vapiApiKeyEl = document.getElementById('vapiApiKey');
+            if (vapiApiKeyEl) vapiApiKeyEl.value = settings.vapiApiKey || '';
+            
+            const vapiPhoneNumberEl = document.getElementById('vapiPhoneNumber');
+            if (vapiPhoneNumberEl) vapiPhoneNumberEl.value = settings.vapiPhoneNumber || '';
+            
+            const vapiVoiceEl = document.getElementById('vapiVoice');
+            if (vapiVoiceEl) vapiVoiceEl.value = settings.vapiVoice || 'rachel';
+            
+            const vapiEnabledEl = document.getElementById('vapiEnabled');
+            if (vapiEnabledEl) vapiEnabledEl.checked = settings.vapiEnabled || false;
+            
+            const vapiRecordCallsEl = document.getElementById('vapiRecordCalls');
+            if (vapiRecordCallsEl) vapiRecordCallsEl.checked = settings.vapiRecordCalls !== false;
             
             // Populate Twilio settings
             document.getElementById('twilioAccountSid').value = settings.twilioAccountSid || '';
