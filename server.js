@@ -3,6 +3,9 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 
+// Firebase integration
+const { firebaseApp, db, auth, ShopRouter, ShopAuth } = require('./firebase-config.js');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -11,253 +14,1060 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// ==================== IN-MEMORY STORAGE (For Testing) ====================
-
-// Local storage for single-shop mode
-const localStorage = {
-    vehicles: [],
-    customers: [],
-    quotes: [],
-    jobs: [],
-    parts: [],
-    staff: [],
-    photos: []
-};
-
-// ==================== AUTHENTICATION (Simplified for Testing) ====================
-
-// Simple authentication - no Firebase required
-function authenticateRequest(req, res, next) {
-    // For now, skip authentication for testing
-    // You can add simple password auth later if needed
-    next();
+// Firebase check
+if (!db) {
+    console.log('⚠️  Firebase not configured - running in single-shop mode (localStorage only)');
 }
 
-// ==================== VEHICLES ====================
+// ==================== AUTHENTICATION MIDDLEWARE ====================
 
-// Get all vehicles
-app.get('/api/vehicles', authenticateRequest, (req, res) => {
-    res.json(localStorage.vehicles);
-});
-
-// Get single vehicle
-app.get('/api/vehicles/:id', authenticateRequest, (req, res) => {
-    const vehicle = localStorage.vehicles.find(v => v.id === req.params.id);
-    if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
-    res.json(vehicle);
-});
-
-// Add vehicle
-app.post('/api/vehicles', authenticateRequest, (req, res) => {
-    const vehicle = {
-        id: req.body.id || `veh_${Date.now()}`,
-        ...req.body,
-        createdAt: new Date().toISOString()
-    };
-    localStorage.vehicles.push(vehicle);
-    res.json(vehicle);
-});
-
-// Update vehicle
-app.put('/api/vehicles/:id', authenticateRequest, (req, res) => {
-    const index = localStorage.vehicles.findIndex(v => v.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Vehicle not found' });
-    localStorage.vehicles[index] = { ...localStorage.vehicles[index], ...req.body };
-    res.json(localStorage.vehicles[index]);
-});
-
-// Delete vehicle
-app.delete('/api/vehicles/:id', authenticateRequest, (req, res) => {
-    const index = localStorage.vehicles.findIndex(v => v.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Vehicle not found' });
-    localStorage.vehicles.splice(index, 1);
-    res.json({ success: true });
-});
-
-// ==================== CUSTOMERS ====================
-
-// Get all customers
-app.get('/api/customers', authenticateRequest, (req, res) => {
-    res.json(localStorage.customers);
-});
-
-// Get single customer
-app.get('/api/customers/:id', authenticateRequest, (req, res) => {
-    const customer = localStorage.customers.find(c => c.id === req.params.id);
-    if (!customer) return res.status(404).json({ error: 'Customer not found' });
-    res.json(customer);
-});
-
-// Add customer
-app.post('/api/customers', authenticateRequest, (req, res) => {
-    const customer = {
-        id: req.body.id || `cust_${Date.now()}`,
-        ...req.body,
-        createdAt: new Date().toISOString()
-    };
-    localStorage.customers.push(customer);
-    res.json(customer);
-});
-
-// Update customer
-app.put('/api/customers/:id', authenticateRequest, (req, res) => {
-    const index = localStorage.customers.findIndex(c => c.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Customer not found' });
-    localStorage.customers[index] = { ...localStorage.customers[index], ...req.body };
-    res.json(localStorage.customers[index]);
-});
-
-// ==================== QUOTES ====================
-
-// Get all quotes
-app.get('/api/quotes', authenticateRequest, (req, res) => {
-    res.json(localStorage.quotes);
-});
-
-// Get single quote
-app.get('/api/quotes/:id', authenticateRequest, (req, res) => {
-    const quote = localStorage.quotes.find(q => q.id === req.params.id);
-    if (!quote) return res.status(404).json({ error: 'Quote not found' });
-    res.json(quote);
-});
-
-// Add quote
-app.post('/api/quotes', authenticateRequest, (req, res) => {
-    const quote = {
-        id: req.body.id || `quote_${Date.now()}`,
-        ...req.body,
-        createdAt: new Date().toISOString(),
-        status: req.body.status || 'draft'
-    };
-    localStorage.quotes.push(quote);
-    res.json(quote);
-});
-
-// Update quote
-app.put('/api/quotes/:id', authenticateRequest, (req, res) => {
-    const index = localStorage.quotes.findIndex(q => q.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Quote not found' });
-    localStorage.quotes[index] = { ...localStorage.quotes[index], ...req.body };
-    res.json(localStorage.quotes[index]);
-});
-
-// ==================== JOBS ====================
-
-// Get all jobs
-app.get('/api/jobs', authenticateRequest, (req, res) => {
-    res.json(localStorage.jobs);
-});
-
-// Get single job
-app.get('/api/jobs/:id', authenticateRequest, (req, res) => {
-    const job = localStorage.jobs.find(j => j.id === req.params.id);
-    if (!job) return res.status(404).json({ error: 'Job not found' });
-    res.json(job);
-});
-
-// Add job
-app.post('/api/jobs', authenticateRequest, (req, res) => {
-    const job = {
-        id: req.body.id || `job_${Date.now()}`,
-        ...req.body,
-        createdAt: new Date().toISOString(),
-        status: req.body.status || 'pending'
-    };
-    localStorage.jobs.push(job);
-    res.json(job);
-});
-
-// Update job
-app.put('/api/jobs/:id', authenticateRequest, (req, res) => {
-    const index = localStorage.jobs.findIndex(j => j.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Job not found' });
-    localStorage.jobs[index] = { ...localStorage.jobs[index], ...req.body };
-    res.json(localStorage.jobs[index]);
-});
-
-// ==================== PARTS ====================
-
-// Get all parts
-app.get('/api/parts', authenticateRequest, (req, res) => {
-    res.json(localStorage.parts);
-});
-
-// Add part
-app.post('/api/parts', authenticateRequest, (req, res) => {
-    const part = {
-        id: req.body.id || `part_${Date.now()}`,
-        ...req.body,
-        createdAt: new Date().toISOString()
-    };
-    localStorage.parts.push(part);
-    res.json(part);
-});
-
-// ==================== STAFF ====================
-
-// Get all staff
-app.get('/api/staff', authenticateRequest, (req, res) => {
-    res.json(localStorage.staff);
-});
-
-// Add staff
-app.post('/api/staff', authenticateRequest, (req, res) => {
-    const staff = {
-        id: req.body.id || `staff_${Date.now()}`,
-        ...req.body,
-        createdAt: new Date().toISOString()
-    };
-    localStorage.staff.push(staff);
-    res.json(staff);
-});
-
-// ==================== PHOTOS ====================
-
-// Get all photos
-app.get('/api/photos', authenticateRequest, (req, res) => {
-    res.json(localStorage.photos);
-});
-
-// Add photo
-app.post('/api/photos', authenticateRequest, (req, res) => {
-    const photo = {
-        id: req.body.id || `photo_${Date.now()}`,
-        ...req.body,
-        createdAt: new Date().toISOString()
-    };
-    localStorage.photos.push(photo);
-    res.json(photo);
-});
-
-// ==================== SYSTEM STATUS ====================
-
-// Health check endpoint (required by Railway)
-app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'healthy' });
-});
-
-// Get system status
-app.get('/api/status', (req, res) => {
-    res.json({
-        status: 'running',
-        mode: 'single-shop (no Firebase)',
-        database: 'in-memory',
-        counts: {
-            vehicles: localStorage.vehicles.length,
-            customers: localStorage.customers.length,
-            quotes: localStorage.quotes.length,
-            jobs: localStorage.jobs.length,
-            parts: localStorage.parts.length
+/**
+ * Verify Firebase token and extract shop info
+ */
+async function authenticateShop(req, res, next) {
+    try {
+        const authHeader = req.headers.authorization;
+        
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ error: 'No authorization token provided' });
         }
+        
+        const idToken = authHeader.split('Bearer ')[1];
+        const userInfo = await ShopAuth.verifyToken(idToken);
+        
+        // Add shop info to request
+        req.shopId = userInfo.shopId;
+        req.userId = userInfo.uid;
+        req.userRole = userInfo.role;
+        
+        next();
+    } catch (error) {
+        console.error('Authentication error:', error);
+        return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+}
+
+/**
+ * Optional authentication - allows public access but adds shop info if token provided
+ */
+async function optionalAuth(req, res, next) {
+    try {
+        const authHeader = req.headers.authorization;
+        
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const idToken = authHeader.split('Bearer ')[1];
+            const userInfo = await ShopAuth.verifyToken(idToken);
+            req.shopId = userInfo.shopId;
+            req.userId = userInfo.uid;
+            req.userRole = userInfo.role;
+        }
+        
+        next();
+    } catch (error) {
+        // Continue without shop info for public endpoints
+        next();
+    }
+}
+
+// ==================== SHOP REGISTRATION & AUTH ====================
+
+/**
+ * Register a new shop
+ * POST /api/shop/register
+ */
+app.post('/api/shop/register', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(500).json({ error: 'Firebase not configured' });
+        }
+        
+        const { shopName, email, password, address, phone, shopDomain } = req.body;
+        
+        if (!shopName || !email || !password) {
+            return res.status(400).json({ error: 'Shop name, email, and password are required' });
+        }
+        
+        // Generate unique shop ID
+        const shopId = `shop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Create admin account for the shop
+        const adminUser = await ShopAuth.createStaffAccount(
+            email,
+            password,
+            shopId,
+            'admin',
+            { name: shopName, phone }
+        );
+        
+        // Create shop document
+        await db.collection('shops').doc(shopId).set({
+            shopId,
+            shopName,
+            address: address || '',
+            phone: phone || '',
+            email: email,
+            shopDomain: shopDomain || '',
+            active: true,
+            createdAt: new Date().toISOString(),
+            createdBy: adminUser.uid,
+            plan: 'trial', // trial, professional, enterprise
+            planExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+            settings: {
+                laborRate: 100,
+                diagnosticFee: 50,
+                taxRate: 7,
+                partsMarkup: 30
+            }
+        });
+        
+        res.json({
+            success: true,
+            shopId,
+            message: 'Shop registered successfully'
+        });
+    } catch (error) {
+        console.error('Shop registration error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Login to shop
+ * POST /api/shop/login
+ */
+app.post('/api/shop/login', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(500).json({ error: 'Firebase not configured' });
+        }
+        
+        const { email, password } = req.body;
+        
+        // Use Firebase Auth REST API for login
+        const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY || 'YOUR_API_KEY'}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, returnSecureToken: true })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            return res.status(401).json({ error: data.error?.message || 'Login failed' });
+        }
+        
+        // Get shop info from custom claims
+        const idToken = data.idToken;
+        const decodedToken = await auth.verifyIdToken(idToken);
+        
+        // Get shop details
+        const shopDoc = await db.collection('shops').doc(decodedToken.shopId).get();
+        const shopData = shopDoc.data();
+        
+        res.json({
+            success: true,
+            token: idToken,
+            refreshToken: data.refreshToken,
+            shopId: decodedToken.shopId,
+            shopName: shopData.shopName,
+            role: decodedToken.role,
+            shop: shopData
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Get shop information
+ * GET /api/shop/info
+ */
+app.get('/api/shop/info', optionalAuth, async (req, res) => {
+    try {
+        if (!db) {
+            // Return default shop info for single-shop mode
+            return res.json({
+                shopId: 'default',
+                shopName: 'VHICL Pro',
+                active: true,
+                mode: 'single-shop'
+            });
+        }
+        
+        const shopId = req.shopId || 'default';
+        const shopDoc = await db.collection('shops').doc(shopId).get();
+        
+        if (!shopDoc.exists) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+        
+        res.json(shopDoc.data());
+    } catch (error) {
+        console.error('Error getting shop info:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ==================== MULTI-SHOP DATA ENDPOINTS ====================
+
+/**
+ * Get appointments for a shop
+ * GET /api/appointments
+ */
+app.get('/api/appointments', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        
+        if (db) {
+            // Get from Firebase
+            const appointmentsSnapshot = await ShopRouter.getShopCollection(shopId, 'appointments').get();
+            const appointments = appointmentsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            res.json(appointments);
+        } else {
+            // Return empty for now (localStorage used in frontend)
+            res.json([]);
+        }
+    } catch (error) {
+        console.error('Error getting appointments:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Create appointment for a shop
+ * POST /api/appointments
+ */
+app.post('/api/appointments', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const appointmentData = {
+            ...req.body,
+            shopId,
+            createdAt: new Date().toISOString(),
+            status: 'scheduled'
+        };
+        
+        if (db) {
+            const docRef = await ShopRouter.getShopCollection(shopId, 'appointments').add(appointmentData);
+            res.json({ id: docRef.id, ...appointmentData });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error creating appointment:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Update appointment for a shop
+ * PUT /api/appointments/:id
+ */
+app.put('/api/appointments/:id', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const { id } = req.params;
+        
+        if (db) {
+            await ShopRouter.getShopDocument(shopId, 'appointments', id).update({
+                ...req.body,
+                updatedAt: new Date().toISOString()
+            });
+            res.json({ success: true, id, ...req.body });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error updating appointment:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Delete appointment for a shop
+ * DELETE /api/appointments/:id
+ */
+app.delete('/api/appointments/:id', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const { id } = req.params;
+        
+        if (db) {
+            await ShopRouter.getShopDocument(shopId, 'appointments', id).delete();
+            res.json({ success: true, id });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error deleting appointment:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Get customers for a shop
+ * GET /api/customers
+ */
+app.get('/api/customers', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        
+        if (db) {
+            const customersSnapshot = await ShopRouter.getShopCollection(shopId, 'customers').get();
+            const customers = customersSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            res.json(customers);
+        } else {
+            res.json([]);
+        }
+    } catch (error) {
+        console.error('Error getting customers:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Create customer for a shop
+ * POST /api/customers
+ */
+app.post('/api/customers', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const customerData = {
+            ...req.body,
+            shopId,
+            createdAt: new Date().toISOString()
+        };
+        
+        if (db) {
+            const docRef = await ShopRouter.getShopCollection(shopId, 'customers').add(customerData);
+            res.json({ id: docRef.id, ...customerData });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error creating customer:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Get vehicles for a shop
+ * GET /api/vehicles
+ */
+app.get('/api/vehicles', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        
+        if (db) {
+            const vehiclesSnapshot = await ShopRouter.getShopCollection(shopId, 'vehicles').get();
+            const vehicles = vehiclesSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            res.json(vehicles);
+        } else {
+            res.json([]);
+        }
+    } catch (error) {
+        console.error('Error getting vehicles:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Create vehicle for a shop
+ * POST /api/vehicles
+ */
+app.post('/api/vehicles', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const vehicleData = {
+            ...req.body,
+            shopId,
+            createdAt: new Date().toISOString()
+        };
+        
+        if (db) {
+            const docRef = await ShopRouter.getShopCollection(shopId, 'vehicles').add(vehicleData);
+            res.json({ id: docRef.id, ...vehicleData });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error creating vehicle:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Get shop settings
+ * GET /api/shop/settings
+ */
+app.get('/api/shop/settings', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        
+        if (db) {
+            const shopDoc = await db.collection('shops').doc(shopId).get();
+            
+            if (!shopDoc.exists) {
+                return res.status(404).json({ error: 'Shop not found' });
+            }
+            
+            const shopData = shopDoc.data();
+            res.json(shopData.settings || {});
+        } else {
+            // Default settings for single-shop mode
+            res.json({
+                laborRate: 100,
+                diagnosticFee: 50,
+                taxRate: 7,
+                partsMarkup: 30
+            });
+        }
+    } catch (error) {
+        console.error('Error getting shop settings:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Update shop settings
+ * POST /api/shop/settings
+ */
+app.post('/api/shop/settings', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        
+        if (db) {
+            await db.collection('shops').doc(shopId).update({
+                settings: req.body,
+                updatedAt: new Date().toISOString()
+            });
+            res.json({ success: true, ...req.body });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error updating shop settings:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Get maintenance jobs for a shop
+ * GET /api/maintenance
+ */
+app.get('/api/maintenance', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        
+        if (db) {
+            const maintenanceSnapshot = await ShopRouter.getShopCollection(shopId, 'maintenance').get();
+            const maintenance = maintenanceSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            res.json(maintenance);
+        } else {
+            res.json([]);
+        }
+    } catch (error) {
+        console.error('Error getting maintenance:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Create maintenance job for a shop
+ * POST /api/maintenance
+ */
+app.post('/api/maintenance', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const maintenanceData = {
+            ...req.body,
+            shopId,
+            createdAt: new Date().toISOString(),
+            status: 'in-progress'
+        };
+        
+        if (db) {
+            const docRef = await ShopRouter.getShopCollection(shopId, 'maintenance').add(maintenanceData);
+            res.json({ id: docRef.id, ...maintenanceData });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error creating maintenance job:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Get inventory for a shop
+ * GET /api/inventory
+ */
+app.get('/api/inventory', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        
+        if (db) {
+            const inventorySnapshot = await ShopRouter.getShopCollection(shopId, 'inventory').get();
+            const inventory = inventorySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            res.json(inventory);
+        } else {
+            res.json([]);
+        }
+    } catch (error) {
+        console.error('Error getting inventory:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Create inventory item for a shop
+ * POST /api/inventory
+ */
+app.post('/api/inventory', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const inventoryData = {
+            ...req.body,
+            shopId,
+            createdAt: new Date().toISOString()
+        };
+        
+        if (db) {
+            const docRef = await ShopRouter.getShopCollection(shopId, 'inventory').add(inventoryData);
+            res.json({ id: docRef.id, ...inventoryData });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error creating inventory item:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Get towing requests for a shop
+ * GET /api/towing
+ */
+app.get('/api/towing', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        
+        if (db) {
+            const towingSnapshot = await ShopRouter.getShopCollection(shopId, 'towing').get();
+            const towing = towingSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            res.json(towing);
+        } else {
+            res.json([]);
+        }
+    } catch (error) {
+        console.error('Error getting towing requests:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Create towing request for a shop
+ * POST /api/towing
+ */
+app.post('/api/towing', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const towingData = {
+            ...req.body,
+            shopId,
+            createdAt: new Date().toISOString(),
+            status: 'pending'
+        };
+        
+        if (db) {
+            const docRef = await ShopRouter.getShopCollection(shopId, 'towing').add(towingData);
+            res.json({ id: docRef.id, ...towingData });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error creating towing request:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ==================== TEKFLOW ENDPOINTS ====================
+
+/**
+ * Get bays for a shop
+ * GET /api/tekflow/bays
+ */
+app.get('/api/tekflow/bays', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        
+        if (db) {
+            const baysDoc = await db.collection('shops').doc(shopId).collection('settings').doc('bays').get();
+            
+            if (baysDoc.exists) {
+                res.json(baysDoc.data());
+            } else {
+                // Default bays
+                const defaultBays = Array.from({ length: 8 }, (_, i) => ({
+                    id: i + 1,
+                    status: 'available',
+                    jobId: null
+                }));
+                res.json(defaultBays);
+            }
+        } else {
+            res.json([]);
+        }
+    } catch (error) {
+        console.error('Error getting bays:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Update bay status
+ * PUT /api/tekflow/bays/:bayId
+ */
+app.put('/api/tekflow/bays/:bayId', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const { bayId } = req.params;
+        const { status, jobId } = req.body;
+        
+        if (db) {
+            const baysDoc = await db.collection('shops').doc(shopId).collection('settings').doc('bays').get();
+            let bays = [];
+            
+            if (baysDoc.exists) {
+                bays = baysDoc.data();
+            } else {
+                bays = Array.from({ length: 8 }, (_, i) => ({
+                    id: i + 1,
+                    status: 'available',
+                    jobId: null
+                }));
+            }
+            
+            // Update the bay
+            const bayIndex = bays.findIndex(b => b.id === parseInt(bayId));
+            if (bayIndex !== -1) {
+                bays[bayIndex] = {
+                    ...bays[bayIndex],
+                    status,
+                    jobId: jobId || null
+                };
+                
+                await db.collection('shops').doc(shopId).collection('settings').doc('bays').set(bays);
+            }
+            
+            res.json(bays);
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error updating bay:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Get TekFlow jobs for a shop
+ * GET /api/tekflow/jobs
+ */
+app.get('/api/tekflow/jobs', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const { status, technicianId } = req.query;
+        
+        if (db) {
+            let query = ShopRouter.getShopCollection(shopId, 'jobs');
+            
+            if (status) {
+                query = query.where('status', '==', status);
+            }
+            
+            if (technicianId) {
+                query = query.where('technicianId', '==', technicianId);
+            }
+            
+            const jobsSnapshot = await query.get();
+            const jobs = jobsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            // Sort by priority and time
+            const priorityOrder = { high: 0, medium: 1, low: 2 };
+            jobs.sort((a, b) => {
+                if (a.status === 'in-progress' && b.status !== 'in-progress') return -1;
+                if (a.status !== 'in-progress' && b.status === 'in-progress') return 1;
+                if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+                    return priorityOrder[a.priority] - priorityOrder[b.priority];
+                }
+                return new Date(a.scheduledTime) - new Date(b.scheduledTime);
+            });
+            
+            res.json(jobs);
+        } else {
+            res.json([]);
+        }
+    } catch (error) {
+        console.error('Error getting TekFlow jobs:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Create TekFlow job
+ * POST /api/tekflow/jobs
+ */
+app.post('/api/tekflow/jobs', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const jobData = {
+            ...req.body,
+            shopId,
+            status: 'waiting',
+            progress: 0,
+            createdAt: new Date().toISOString(),
+            createdBy: req.userId || 'system'
+        };
+        
+        if (db) {
+            const docRef = await ShopRouter.getShopCollection(shopId, 'jobs').add(jobData);
+            res.json({ id: docRef.id, ...jobData });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error creating TekFlow job:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Update TekFlow job
+ * PUT /api/tekflow/jobs/:jobId
+ */
+app.put('/api/tekflow/jobs/:jobId', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const { jobId } = req.params;
+        const updates = req.body;
+        
+        if (db) {
+            const jobRef = ShopRouter.getShopDocument(shopId, 'jobs', jobId);
+            
+            // Add updated timestamp
+            updates.updatedAt = new Date().toISOString();
+            updates.updatedBy = req.userId || 'system';
+            
+            await jobRef.update(updates);
+            
+            // Get updated document
+            const updatedDoc = await jobRef.get();
+            res.json({ id: jobId, ...updatedDoc.data() });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error updating TekFlow job:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Start job (assign to bay and technician)
+ * POST /api/tekflow/jobs/:jobId/start
+ */
+app.post('/api/tekflow/jobs/:jobId/start', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const { jobId } = req.params;
+        const { bayId, technicianId } = req.body;
+        
+        if (db) {
+            const jobRef = ShopRouter.getShopDocument(shopId, 'jobs', jobId);
+            
+            await jobRef.update({
+                status: 'in-progress',
+                bayId: parseInt(bayId),
+                technicianId: technicianId || req.userId,
+                startedAt: new Date().toISOString(),
+                progress: 0
+            });
+            
+            // Update bay status
+            const baysDoc = await db.collection('shops').doc(shopId).collection('settings').doc('bays').get();
+            if (baysDoc.exists) {
+                let bays = baysDoc.data();
+                const bayIndex = bays.findIndex(b => b.id === parseInt(bayId));
+                if (bayIndex !== -1) {
+                    bays[bayIndex] = {
+                        ...bays[bayIndex],
+                        status: 'occupied',
+                        jobId: jobId
+                    };
+                    await db.collection('shops').doc(shopId).collection('settings').doc('bays').set(bays);
+                }
+            }
+            
+            res.json({ success: true });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error starting job:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Update job progress
+ * PUT /api/tekflow/jobs/:jobId/progress
+ */
+app.put('/api/tekflow/jobs/:jobId/progress', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const { jobId } = req.params;
+        const { progress } = req.body;
+        
+        if (db) {
+            await ShopRouter.getShopDocument(shopId, 'jobs', jobId).update({
+                progress: parseInt(progress),
+                progressUpdatedAt: new Date().toISOString()
+            });
+            
+            res.json({ success: true, progress });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error updating job progress:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Complete job
+ * POST /api/tekflow/jobs/:jobId/complete
+ */
+app.post('/api/tekflow/jobs/:jobId/complete', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const { jobId } = req.params;
+        const { notes, completedBy } = req.body;
+        
+        if (db) {
+            const jobRef = ShopRouter.getShopDocument(shopId, 'jobs', jobId);
+            const jobDoc = await jobRef.get();
+            
+            if (!jobDoc.exists) {
+                return res.status(404).json({ error: 'Job not found' });
+            }
+            
+            const jobData = jobDoc.data();
+            
+            // Update job status
+            await jobRef.update({
+                status: 'completed',
+                progress: 100,
+                completedAt: new Date().toISOString(),
+                completedBy: completedBy || req.userId,
+                notes: notes
+            });
+            
+            // Free up the bay
+            if (jobData.bayId) {
+                const baysDoc = await db.collection('shops').doc(shopId).collection('settings').doc('bays').get();
+                if (baysDoc.exists) {
+                    let bays = baysDoc.data();
+                    const bayIndex = bays.findIndex(b => b.id === jobData.bayId);
+                    if (bayIndex !== -1) {
+                        bays[bayIndex] = {
+                            ...bays[bayIndex],
+                            status: 'available',
+                            jobId: null
+                        };
+                        await db.collection('shops').doc(shopId).collection('settings').doc('bays').set(bays);
+                    }
+                }
+            }
+            
+            res.json({ success: true });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error completing job:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Request parts for a job
+ * POST /api/tekflow/jobs/:jobId/parts
+ */
+app.post('/api/tekflow/jobs/:jobId/parts', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const { jobId } = req.params;
+        const { parts } = req.body; // Array of { partName, quantity, urgency, notes }
+        
+        if (db) {
+            // Add parts request to job
+            await ShopRouter.getShopDocument(shopId, 'jobs', jobId).update({
+                partsRequested: admin.firestore.FieldValue.arrayUnion(...parts),
+                partsRequestedAt: new Date().toISOString()
+            });
+            
+            // Create parts order record
+            const partsOrderRef = await ShopRouter.getShopCollection(shopId, 'parts_orders').add({
+                jobId,
+                parts,
+                requestedBy: req.userId,
+                requestedAt: new Date().toISOString(),
+                status: 'pending'
+            });
+            
+            res.json({ success: true, partsOrderId: partsOrderRef.id });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error requesting parts:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Add technician message
+ * POST /api/tekflow/messages
+ */
+app.post('/api/tekflow/messages', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const { type, text, jobId } = req.body; // type: 'technician', 'system', 'advisor'
+        
+        if (db) {
+            const messageData = {
+                type,
+                text,
+                shopId,
+                jobId: jobId || null,
+                userId: req.userId,
+                createdAt: new Date().toISOString()
+            };
+            
+            const docRef = await ShopRouter.getShopCollection(shopId, 'tekflow_messages').add(messageData);
+            res.json({ id: docRef.id, ...messageData });
+        } else {
+            res.status(501).json({ error: 'Firebase not configured' });
+        }
+    } catch (error) {
+        console.error('Error adding message:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Get TekFlow messages
+ * GET /api/tekflow/messages
+ */
+app.get('/api/tekflow/messages', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const { limit = 20 } = req.query;
+        
+        if (db) {
+            const messagesSnapshot = await ShopRouter.getShopCollection(shopId, 'tekflow_messages')
+                .orderBy('createdAt', 'desc')
+                .limit(parseInt(limit))
+                .get();
+            
+            const messages = messagesSnapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .reverse(); // Show oldest first
+            
+            res.json(messages);
+        } else {
+            res.json([]);
+        }
+    } catch (error) {
+        console.error('Error getting messages:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Get TekFlow stats
+ * GET /api/tekflow/stats
+ */
+app.get('/api/tekflow/stats', optionalAuth, async (req, res) => {
+    try {
+        const shopId = req.shopId || 'default';
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (db) {
+            const jobsSnapshot = await ShopRouter.getShopCollection(shopId, 'jobs').get();
+            const jobs = jobsSnapshot.docs.map(doc => doc.data());
+            
+            const stats = {
+                waiting: jobs.filter(j => j.status === 'waiting').length,
+                inProgress: jobs.filter(j => j.status === 'in-progress').length,
+                completed: jobs.filter(j => {
+                    if (j.status !== 'completed') return false;
+                    const completedAt = new Date(j.completedAt);
+                    return completedAt >= today;
+                }).length,
+                totalJobs: jobs.length
+            };
+            
+            res.json(stats);
+        } else {
+            res.json({ waiting: 0, inProgress: 0, completed: 0, totalJobs: 0 });
+        }
+    } catch (error) {
+        console.error('Error getting stats:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ==================== HEALTH CHECK ====================
+
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        firebase: db ? 'connected' : 'not configured',
+        mode: db ? 'multi-shop' : 'single-shop'
     });
 });
 
 // ==================== START SERVER ====================
 
 app.listen(PORT, () => {
-    console.log('🚀 Server running on port', PORT);
-    console.log('📝 Mode: Single-shop (no Firebase)');
-    console.log('💾 Storage: In-memory (data will reset on restart)');
-    console.log('');
-    console.log('✅ Ready for testing!');
+    console.log(`🚀 VHICL Pro Backend with Firebase running on port ${PORT}`);
+    console.log(`📊 Health check: http://localhost:${PORT}/health`);
+    console.log(`🔥 Firebase: ${db ? '✅ Connected' : '⚠️  Not configured (single-shop mode)'}`);
 });
