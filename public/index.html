@@ -381,6 +381,8 @@
             <button class="nav-btn" onclick="showScreen('appointments')">📅 Appointments</button>
             <button class="nav-btn" onclick="showScreen('maintenance')">🔧 Maintenance</button>
             <button class="nav-btn" onclick="showScreen('techflow')">🔬 TechFlow</button>
+            <button class="nav-btn" onclick="window.open('tech-management.html', '_blank')">👷 Tech Mgmt</button>
+            <button class="nav-btn" onclick="window.open('vehicle-dropoff-manager.html', '_blank')">🚗 Drop-offs</button>
             <button class="nav-btn" onclick="showScreen('estimates')">📋 Estimates</button>
             <button class="nav-btn" onclick="showScreen('invoices')">💰 Invoices</button>
             <button class="nav-btn" onclick="showScreen('towing')">🚗 Towing</button>
@@ -3626,8 +3628,8 @@ ALEX AI Assistant
                 {
                     id: 7,
                     name: 'Alex - Tow Dispatch',
-                    description: 'Alex calls tow service to schedule pickup',
-                    script: 'Hello, this is Alex from [SHOP_NAME]. We need to schedule a tow for a customer. The pickup location is [LOCATION], and the vehicle is a [YEAR] [MAKE] [MODEL]. When can you have a truck available?',
+                    description: 'Alex calls towing company to arrange pickup with all details',
+                    script: 'Hello, this is Alex calling from [SHOP_NAME]. I need to arrange a tow for one of our customers. Customer Information: Name: [CUSTOMER_NAME], Phone: [CUSTOMER_PHONE], Meeting at vehicle: [CUSTOMER_MEETING_VEHICLE]. Vehicle Details: Year/Make/Model: [VEHICLE_YEAR] [VEHICLE_MAKE] [VEHICLE_MODEL], Tag/Plate Number: [VEHICLE_TAG], Color: [VEHICLE_COLOR]. Pickup Location: Address: [PICKUP_ADDRESS], Key Location: [KEY_LOCATION], Landmarks: [LANDMARKS]. Dropoff Destination: [DROP_OFF_TYPE]Address: [DROP_OFF_ADDRESS]. Additional Notes: [ADDITIONAL_NOTES]. Urgency Level: [URGENCY]. Can you confirm you can handle this tow? What is your estimated arrival time? What is the estimated cost? Thank you for your help. We appreciate your prompt service.',
                     voice: 'alex'
                 },
                 {
@@ -3635,6 +3637,81 @@ ALEX AI Assistant
                     name: 'Alex - Survey Call',
                     description: 'Alex calls customer for feedback after service',
                     script: 'Hello [CUSTOMER_NAME], this is Alex from [SHOP_NAME]. Thank you for choosing us for your recent service on your [YEAR] [MAKE] [MODEL]. We\'d love to hear your feedback. How was your experience with our service today?',
+                    voice: 'alex'
+                },
+                {
+                    id: 9,
+                    name: 'Alex - Inbound Phone (Main Greeting)',
+                    description: 'Alex answers incoming calls and directs to appropriate service',
+                    script: 'Thank you for calling [SHOP_NAME]. This is Alex. How can I help you today? I can assist you with scheduling an appointment, getting an estimate for repairs, arranging a tow, checking on your vehicle status, or general questions. What can I help you with?',
+                    voice: 'alex'
+                },
+                {
+                    id: 10,
+                    name: 'Alex - Inbound (Towing Request)',
+                    description: 'Alex handles towing requests from incoming calls',
+                    script: 'I can definitely help you arrange a tow. I\'ll need some information. About You: What\'s your name? What\'s the best phone number to reach you? About Your Vehicle: What year, make, and model is it? What\'s the license plate number? What color is the vehicle? Pickup Location: Where is the vehicle located right now? Please give me the exact address. Where are the keys? Are there any nearby landmarks to help the tow truck find it? Will you be there to meet the tow truck? Destination: Do you want it towed to our shop, or somewhere else? Urgency: Is this an emergency, or can it wait? Thank you. Let me get that arranged for you right away.',
+                    voice: 'alex'
+                },
+                {
+                    id: 11,
+                    name: 'Alex - Inbound (Schedule Appointment)',
+                    description: 'Alex schedules appointments from incoming calls',
+                    script: 'I\'d be happy to schedule an appointment for you. Let me get some details: What\'s your name? What\'s your phone number? What year, make, and model is your vehicle? What type of service do you need? Do you have any specific concerns or symptoms with the vehicle? When would you like to bring it in? Let me check our availability... I have openings on [AVAILABLE_DATES]. Which day works best for you? And what time would you prefer? Morning or afternoon? Great! I\'ve scheduled your appointment for [DATE] at [TIME]. Please arrive a few minutes early so we can get started right away. Our address is [SHOP_ADDRESS]. Is there anything else I should know about your vehicle or the service you need?',
+                    voice: 'alex'
+                },
+                {
+                    id: 12,
+                    name: 'Alex - Inbound (Request Estimate)',
+                    description: 'Alex handles estimate requests from incoming calls',
+                    script: 'I can help you with an estimate. There are a couple of options. Option 1: Quick Estimate. If you tell me what\'s wrong, I can give you a general price range based on common repairs. Option 2: Diagnostic Estimate. For an accurate estimate, we\'ll need to diagnose the vehicle first. This costs $[DIAGNOSTIC_FEE] and takes about [DIAGNOSTIC_TIME]. For a quick estimate, I\'ll need: What year, make, and model is your vehicle? What\'s the issue or what service do you need? For a diagnostic estimate: Would you like to schedule a diagnostic appointment? Which option would you prefer?',
+                    voice: 'alex'
+                },
+                {
+                    id: 13,
+                    name: 'Alex - Inbound (Check Status)',
+                    description: 'Alex checks vehicle status for incoming calls',
+                    script: 'I can check on your vehicle status for you. Could you tell me: Your name? Your phone number? Or your vehicle\'s license plate? [LOOKS UP RECORD]. I found your record. You have a [VEHICLE_YEAR] [VEHICLE_MAKE] [VEHICLE_MODEL]. Current Status: [VEHICLE_STATUS]. [IF_WAITING_FOR_PARTS] We\'re waiting for parts to arrive. Expected delivery is [PARTS_EXPECTED_DATE]. [IF_IN_PROGRESS] Your vehicle is currently being worked on. We expect to complete it by [EXPECTED_COMPLETION]. [IF_READY] Great news! Your vehicle is ready for pickup! [IF_NOT_STARTED] We\'re scheduled to start on [SCHEDULED_START_DATE]. Would you like me to provide more details, or is there anything else I can help you with?',
+                    voice: 'alex'
+                },
+                {
+                    id: 14,
+                    name: 'Alex - Inbound (Emergency)',
+                    description: 'Alex handles emergency calls',
+                    script: 'I understand this is an emergency. Let me help you right away. Are you: Stranded with a broken-down vehicle? In a dangerous location? Need immediate towing? [IF_STRANDED] Are you in a safe location? If you\'re in immediate danger, please call 911 first. [IF_SAFE] Let me arrange emergency towing for you right now. I\'ll need: Your current location (address or cross streets), Your phone number, What\'s happening with the vehicle. I\'ll get a tow truck dispatched immediately. Are you able to stay with the vehicle, or do you need to go somewhere?',
+                    voice: 'alex'
+                },
+                {
+                    id: 15,
+                    name: 'Alex - Inbound (Vehicle Drop-off)',
+                    description: 'Alex handles customer vehicle drop-off calls, instructs key drop box',
+                    script: 'Thank you for calling [SHOP_NAME]. I can help you with dropping off your vehicle. Please follow these instructions:
+
+**Key Drop Box Instructions:**
+• Please park your vehicle in our customer parking area
+• Place your keys in the secure key drop box located [DROP_BOX_LOCATION]
+• The drop box is clearly marked and checked regularly throughout the day
+
+**Information I\'ll Need:**
+
+**Customer Information:**
+• What is your full name?
+• What is your phone number?
+• What is your email address?
+
+**Vehicle Information:**
+• What is the year, make, and model of your vehicle?
+• What is the license plate number?
+
+**Service Information:**
+• What service do you need, or what issues are you experiencing?
+• Have you been here before, or is this your first visit?
+
+**For Reference:**
+• If you have an appointment, please let me know your appointment time
+• If you need a ride, let me know and I can help arrange transportation
+
+Thank you for choosing [SHOP_NAME]. We\'ll contact you once we\'ve had a chance to review your vehicle. Is there anything else I can help you with?',
                     voice: 'alex'
                 }
             ];
