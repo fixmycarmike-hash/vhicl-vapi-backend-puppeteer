@@ -1357,6 +1357,53 @@
         </div>
     </div>
 
+    <div id="estimateModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>Create New Estimate</h2>
+                <button class="close-btn" onclick="closeModal('estimateModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Customer</label>
+                <select id="estimateCustomerSelect">
+                    <option value="">Select Customer</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Vehicle</label>
+                <input type="text" id="estimateVehicle" placeholder="e.g., 2018 Honda Accord">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="estimateDescription" rows="3" placeholder="Describe the work needed..."></textarea>
+            </div>
+            
+            <h3>Parts</h3>
+            <div id="estimatePartsList"></div>
+            <button class="btn btn-secondary" onclick="addEstimatePart()">Add Part</button>
+            
+            <h3 style="margin-top: 1rem;">Labor</h3>
+            <div id="estimateLaborList"></div>
+            <button class="btn btn-secondary" onclick="addEstimateLabor()">Add Labor</button>
+            
+            <div style="margin-top: 1rem; padding: 1rem; background: #f5f5f5; border-radius: 8px;">
+                <h3>Total: $<span id="estimateTotal">0.00</span></h3>
+            </div>
+            
+            <div class="form-group" style="margin-top: 1rem;">
+                <label>Status</label>
+                <select id="estimateStatus">
+                    <option value="Draft">Draft</option>
+                    <option value="Sent">Sent</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-primary" onclick="saveEstimate()">Save Estimate</button>
+        </div>
+    </div>
+
     <div id="appointmentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -2109,8 +2156,164 @@
         }
 
         // ============ ESTIMATE FUNCTIONS ============
+        let estimateParts = [];
+        let estimateLabor = [];
+
         function openEstimateModal() {
-            alert('Estimate creation modal will open here. For now, view sample estimates below.');
+            estimateParts = [];
+            estimateLabor = [];
+            updateEstimateTotal();
+            
+            // Populate customer select
+            const customerSelect = document.getElementById('estimateCustomerSelect');
+            if (customerSelect) {
+                customerSelect.innerHTML = '<option value="">Select Customer</option>' +
+                    customers.map(c => `<option value="${c.id}">${c.name} - ${c.vehicle}</option>`).join('');
+            }
+            
+            // Clear form fields
+            const vehicleInput = document.getElementById('estimateVehicle');
+            const descInput = document.getElementById('estimateDescription');
+            const statusSelect = document.getElementById('estimateStatus');
+            const partsList = document.getElementById('estimatePartsList');
+            const laborList = document.getElementById('estimateLaborList');
+            
+            if (vehicleInput) vehicleInput.value = '';
+            if (descInput) descInput.value = '';
+            if (statusSelect) statusSelect.value = 'Draft';
+            if (partsList) partsList.innerHTML = '';
+            if (laborList) laborList.innerHTML = '';
+            
+            // Open modal
+            const modal = document.getElementById('estimateModal');
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        function addEstimatePart() {
+            const name = prompt('Part name:');
+            if (!name) return;
+            const price = parseFloat(prompt('Part price:', '0')) || 0;
+            const quantity = parseInt(prompt('Quantity:', '1')) || 1;
+            
+            estimateParts.push({ name, price, quantity });
+            renderEstimateParts();
+            updateEstimateTotal();
+        }
+
+        function addEstimateLabor() {
+            const description = prompt('Labor description:');
+            if (!description) return;
+            const hours = parseFloat(prompt('Hours:', '1')) || 1;
+            const rate = parseFloat(prompt('Hourly rate:', '100')) || 100;
+            
+            estimateLabor.push({ description, hours, rate, total: hours * rate });
+            renderEstimateLabor();
+            updateEstimateTotal();
+        }
+
+        function renderEstimateParts() {
+            const partsList = document.getElementById('estimatePartsList');
+            if (!partsList) return;
+            
+            if (estimateParts.length === 0) {
+                partsList.innerHTML = '<p style="color: #666;">No parts added yet</p>';
+                return;
+            }
+            
+            partsList.innerHTML = estimateParts.map((part, index) => `
+                <div style="padding: 0.5rem; background: #f5f5f5; margin: 0.5rem 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${part.name}</strong><br>
+                        <small>Qty: ${part.quantity} x $${part.price.toFixed(2)}</small>
+                    </div>
+                    <div>
+                        <strong>$${(part.quantity * part.price).toFixed(2)}</strong>
+                        <button class="btn btn-danger" style="margin-left: 0.5rem;" onclick="removeEstimatePart(${index})">X</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderEstimateLabor() {
+            const laborList = document.getElementById('estimateLaborList');
+            if (!laborList) return;
+            
+            if (estimateLabor.length === 0) {
+                laborList.innerHTML = '<p style="color: #666;">No labor added yet</p>';
+                return;
+            }
+            
+            laborList.innerHTML = estimateLabor.map((item, index) => `
+                <div style="padding: 0.5rem; background: #f5f5f5; margin: 0.5rem 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${item.description}</strong><br>
+                        <small>${item.hours} hrs x $${item.rate.toFixed(2)}/hr</small>
+                    </div>
+                    <div>
+                        <strong>$${item.total.toFixed(2)}</strong>
+                        <button class="btn btn-danger" style="margin-left: 0.5rem;" onclick="removeEstimateLabor(${index})">X</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeEstimatePart(index) {
+            estimateParts.splice(index, 1);
+            renderEstimateParts();
+            updateEstimateTotal();
+        }
+
+        function removeEstimateLabor(index) {
+            estimateLabor.splice(index, 1);
+            renderEstimateLabor();
+            updateEstimateTotal();
+        }
+
+        function updateEstimateTotal() {
+            const totalEl = document.getElementById('estimateTotal');
+            if (!totalEl) return;
+            
+            const partsTotal = estimateParts.reduce((sum, part) => sum + (part.quantity * part.price), 0);
+            const laborTotal = estimateLabor.reduce((sum, item) => sum + item.total, 0);
+            const total = partsTotal + laborTotal;
+            
+            totalEl.textContent = total.toFixed(2);
+        }
+
+        function saveEstimate() {
+            const customerId = document.getElementById('estimateCustomerSelect').value;
+            const vehicle = document.getElementById('estimateVehicle').value.trim();
+            const description = document.getElementById('estimateDescription').value.trim();
+            const status = document.getElementById('estimateStatus').value;
+            
+            if (!customerId || !vehicle) {
+                alert('Please select a customer and enter vehicle information');
+                return;
+            }
+            
+            const customer = customers.find(c => c.id === parseInt(customerId));
+            const partsTotal = estimateParts.reduce((sum, part) => sum + (part.quantity * part.price), 0);
+            const laborTotal = estimateLabor.reduce((sum, item) => sum + item.total, 0);
+            
+            const estimate = {
+                id: Date.now(),
+                customerName: customer ? customer.name : 'Unknown',
+                vehicle: vehicle,
+                description: description,
+                date: new Date().toISOString().split('T')[0],
+                parts: estimateParts,
+                labor: estimateLabor,
+                total: partsTotal + laborTotal,
+                status: status
+            };
+            
+            estimates.push(estimate);
+            saveToStorage();
+            renderEstimates();
+            closeModal('estimateModal');
+            alert('Estimate saved successfully!');
         }
 
         function initSampleEstimates() {
@@ -2147,6 +2350,8 @@
 
         function renderEstimates() {
             const list = document.getElementById('estimateList');
+            if (!list) return;
+            
             if (estimates.length === 0) {
                 list.innerHTML = '<p style="text-align: center; color: #666;">No estimates yet.</p>';
                 return;
