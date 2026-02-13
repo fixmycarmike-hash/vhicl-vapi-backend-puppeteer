@@ -380,6 +380,7 @@
             <button class="nav-btn" onclick="showScreen('customers')">👥 Customers</button>
             <button class="nav-btn" onclick="showScreen('appointments')">📅 Appointments</button>
             <button class="nav-btn" onclick="showScreen('maintenance')">🔧 Maintenance</button>
+            <button class="nav-btn" onclick="showScreen('techflow')">🔬 TechFlow</button>
             <button class="nav-btn" onclick="showScreen('estimates')">📋 Estimates</button>
             <button class="nav-btn" onclick="showScreen('invoices')">💰 Invoices</button>
             <button class="nav-btn" onclick="showScreen('towing')">🚗 Towing</button>
@@ -507,6 +508,15 @@
         <!-- Estimates Screen -->
         <div id="estimates" class="screen">
             <h1 style="color: white; margin-bottom: 1.5rem;">📋 Estimates</h1>
+            
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h2 class="card-title">⚠️ Pending Shop Approval</h2>
+                    <small style="color: #666;">These estimates need shop review before Alex calls customer</small>
+                </div>
+                <div id="pendingApprovalList" class="loading">Loading pending estimates...</div>
+            </div>
+            
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">Estimate List</h2>
@@ -755,6 +765,115 @@
             </div>
         </div>
 
+        <!-- TechFlow Screen -->
+        <div id="techflow" class="screen">
+            <h1 style="color: white; margin-bottom: 1.5rem;">🔬 TechFlow - Technician Workboard</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Active Jobs</div>
+                    <div class="stat-value">5</div>
+                    <div class="stat-label"><i class="fas fa-wrench"></i> In progress</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-label">Completed Today</div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-label"><i class="fas fa-check"></i> Ready for review</div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-label">Bay Utilization</div>
+                    <div class="stat-value">83%</div>
+                    <div class="stat-label"><i class="fas fa-car"></i> 5 of 6 bays occupied</div>
+                </div>
+                <div class="stat-card revenue">
+                    <div class="stat-label">Tech Hours Today</div>
+                    <div class="stat-value">24.5</div>
+                    <div class="stat-label"><i class="fas fa-clock"></i> Hours logged</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Bay Balancing</h2>
+                    <button class="btn btn-primary" onclick="autoBalanceBays()">
+                        <i class="fas fa-balance-scale"></i> Auto-Balance Bays
+                    </button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div style="padding: 1rem; background: #d4edda; border-radius: 8px; text-align: center;">
+                        <h3>Bay 1</h3>
+                        <p>2018 Honda Accord</p>
+                        <p>Brake Service - 2.5 hrs</p>
+                        <span class="status-badge status-approved">Optimal</span>
+                    </div>
+                    <div style="padding: 1rem; background: #d4edda; border-radius: 8px; text-align: center;">
+                        <h3>Bay 2</h3>
+                        <p>2020 Toyota Camry</p>
+                        <p>Oil Change - 0.5 hrs</p>
+                        <span class="status-badge status-approved">Optimal</span>
+                    </div>
+                    <div style="padding: 1rem; background: #fff3cd; border-radius: 8px; text-align: center;">
+                        <h3>Bay 3</h3>
+                        <p>2019 Ford F-150</p>
+                        <p>Transmission - 6.0 hrs</p>
+                        <span class="status-badge status-scheduled">Heavy Load</span>
+                    </div>
+                    <div style="padding: 1rem; background: #d4edda; border-radius: 8px; text-align: center;">
+                        <h3>Bay 4</h3>
+                        <p>2021 Nissan Altima</p>
+                        <p>A/C Service - 1.5 hrs</p>
+                        <span class="status-badge status-approved">Optimal</span>
+                    </div>
+                    <div style="padding: 1rem; background: #fff3cd; border-radius: 8px; text-align: center;">
+                        <h3>Bay 5</h3>
+                        <p>2017 Chevy Silverado</p>
+                        <p>Engine Rebuild - 8.0 hrs</p>
+                        <span class="status-badge status-scheduled">Heavy Load</span>
+                    </div>
+                    <div style="padding: 1rem; background: #f8d7da; border-radius: 8px; text-align: center;">
+                        <h3>Bay 6</h3>
+                        <p>Available</p>
+                        <p>Ready for assignment</p>
+                        <span class="status-badge status-pending">Empty</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Technician Work Queue</h2>
+                </div>
+                <div id="techWorkQueue">
+                    <div class="card" style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3>2018 Honda Accord</h3>
+                                <p style="color: #666;">Mike Johnson | Bay 1</p>
+                                <p style="color: #666;">Brake Service - 2.5 hrs</p>
+                            </div>
+                            <div>
+                                <span class="status-badge status-in-progress">In Progress</span>
+                                <button class="btn btn-success" onclick="completeJob(1)">Complete</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card" style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3>2020 Toyota Camry</h3>
+                                <p style="color: #666;">Sarah Williams | Bay 2</p>
+                                <p style="color: #666;">Oil Change - 0.5 hrs</p>
+                            </div>
+                            <div>
+                                <span class="status-badge status-in-progress">In Progress</span>
+                                <button class="btn btn-success" onclick="completeJob(2)">Complete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- VAPI Screen -->
         <div id="vapi" class="screen">
             <h1 style="color: white; margin-bottom: 1.5rem;">📞 VAPI Phone System</h1>
@@ -806,8 +925,8 @@
                     <button class="btn btn-primary" onclick="makeVapiCall('tow')">
                         <i class="fas fa-truck"></i> Call Tow Provider
                     </button>
-                    <button class="btn btn-primary" onclick="makeVapiCall('billing')">
-                        <i class="fas fa-credit-card"></i> Call for Payment
+                    <button class="btn btn-success" onclick="sendInvoiceEmail()">
+                        <i class="fas fa-envelope"></i> Email Invoice
                     </button>
                     <button class="btn btn-primary" onclick="makeVapiCall('reminder')">
                         <i class="fas fa-bell"></i> Send Reminder
@@ -1593,6 +1712,7 @@
             renderCustomers();
             renderAppointments();
             renderEstimates();
+            renderPendingApprovalEstimates();
             renderInvoices();
             renderTowing();
             renderInventory();
@@ -2307,14 +2427,15 @@
                 parts: estimateParts,
                 labor: estimateLabor,
                 total: partsTotal + laborTotal,
-                status: status
+                status: 'Draft'  // Always start as Draft for shop approval
             };
             
             estimates.push(estimate);
             saveToStorage();
             renderEstimates();
+            renderPendingApprovalEstimates();
             closeModal('estimateModal');
-            alert('Estimate saved successfully!');
+            alert('Estimate saved and submitted for shop approval!\n\nShop manager will review and approve before Alex calls the customer.');
         }
 
         function initSampleEstimates() {
@@ -3484,8 +3605,8 @@ ALEX AI Assistant
                 {
                     id: 4,
                     name: 'Alex - Vehicle Ready Notification',
-                    description: 'Alex calls customer when repairs are complete',
-                    script: 'Hello [CUSTOMER_NAME], this is Alex from [SHOP_NAME]. Great news! Your [YEAR] [MAKE] [MODEL] is ready for pickup. All repairs have been completed successfully. The total is $[AMOUNT]. When would you like to come pick up your vehicle?',
+                    description: 'Alex calls customer when repairs are complete and informs about email invoice',
+                    script: 'Hello [CUSTOMER_NAME], this is Alex from [SHOP_NAME]. Great news! Your [YEAR] [MAKE] [MODEL] is ready for pickup. All repairs have been completed successfully. I\'ve just sent you an email with the invoice for $[AMOUNT]. The invoice includes PayPal and credit card payment options for your convenience. When would you like to come pick up your vehicle?',
                     voice: 'alex'
                 },
                 {
@@ -3497,23 +3618,23 @@ ALEX AI Assistant
                 },
                 {
                     id: 6,
-                    name: 'Customer Reminder',
-                    description: 'Remind customer about upcoming appointment',
-                    script: 'Hello [CUSTOMER_NAME], this is [SHOP_NAME]. This is a reminder that your appointment for [SERVICE] on your [YEAR] [MAKE] [MODEL] is scheduled for [DATE] at [TIME]. Please call us if you need to reschedule.',
+                    name: 'Alex - Appointment Reminder',
+                    description: 'Alex reminds customer about upcoming appointment',
+                    script: 'Hello [CUSTOMER_NAME], this is Alex from [SHOP_NAME]. This is a reminder that your appointment for [SERVICE] on your [YEAR] [MAKE] [MODEL] is scheduled for [DATE] at [TIME]. Please call us if you need to reschedule.',
                     voice: 'alex'
                 },
                 {
                     id: 7,
-                    name: 'Alex - Payment Request',
-                    description: 'Alex calls customer for payment',
-                    script: 'Hello [CUSTOMER_NAME], this is Alex from [SHOP_NAME]. Your vehicle [YEAR] [MAKE] [MODEL] is ready for pickup. The total for [SERVICE] is $[AMOUNT]. You can pay via PayPal using the link sent to your email, or by phone. Would you like to make a payment now?',
+                    name: 'Alex - Tow Dispatch',
+                    description: 'Alex calls tow service to schedule pickup',
+                    script: 'Hello, this is Alex from [SHOP_NAME]. We need to schedule a tow for a customer. The pickup location is [LOCATION], and the vehicle is a [YEAR] [MAKE] [MODEL]. When can you have a truck available?',
                     voice: 'alex'
                 },
                 {
                     id: 8,
-                    name: 'Alex - Tow Dispatch',
-                    description: 'Alex calls tow service to schedule pickup',
-                    script: 'Hello, this is Alex from [SHOP_NAME]. We need to schedule a tow for a customer. The pickup location is [LOCATION], and the vehicle is a [YEAR] [MAKE] [MODEL]. When can you have a truck available?',
+                    name: 'Alex - Survey Call',
+                    description: 'Alex calls customer for feedback after service',
+                    script: 'Hello [CUSTOMER_NAME], this is Alex from [SHOP_NAME]. Thank you for choosing us for your recent service on your [YEAR] [MAKE] [MODEL]. We\'d love to hear your feedback. How was your experience with our service today?',
                     voice: 'alex'
                 }
             ];
@@ -3690,6 +3811,107 @@ ALEX AI Assistant
             }
         }
 
+        // ============ TECHFLOW FUNCTIONS ============
+        function autoBalanceBays() {
+            alert('Bay balancing algorithm will optimize workload distribution across bays based on:\n- Job duration\n- Technician skills\n- Parts availability\n- Priority level\n\nThis will help maintain even bay utilization and maximize shop efficiency.');
+        }
+
+        function completeJob(jobId) {
+            if (confirm('Is this job complete and ready for estimate creation?')) {
+                alert(`Job ${jobId} marked as complete!\n\nTechnician can now:\n1. Create estimate\n2. Wait for shop approval\n3. Alex will call customer with approved estimate`);
+            }
+        }
+
+        function renderPendingApprovalEstimates() {
+            const list = document.getElementById('pendingApprovalList');
+            if (!list) return;
+            
+            const pendingEstimates = estimates.filter(e => e.status === 'Draft');
+            
+            if (pendingEstimates.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666;">No estimates pending approval</p>';
+                return;
+            }
+            
+            list.innerHTML = pendingEstimates.map(est => `
+                <div class="card" style="margin-bottom: 1rem; border-left: 4px solid #ffc107;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3 style="color: #0a2540; margin-bottom: 0.5rem;">${est.customerName} - ${est.vehicle}</h3>
+                            <p style="color: #666; margin: 0.25rem 0;"><i class="fas fa-calendar"></i> ${est.date}</p>
+                            <p style="color: #666; margin: 0.25rem 0;"><i class="fas fa-car"></i> ${est.vehicle}</p>
+                            <p style="font-weight: bold; color: #0a2540; margin-top: 0.5rem;">Total: $${est.total.toFixed(2)}</p>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span class="status-badge" style="background: #ffc107; color: #000;">Pending Approval</span>
+                            <button class="btn btn-success" onclick="approveEstimate(${est.id})">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button class="btn btn-danger" onclick="rejectEstimate(${est.id})">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                            <button class="btn btn-secondary" onclick="viewEstimate(${est.id})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function approveEstimate(estimateId) {
+            const estimate = estimates.find(e => e.id === estimateId);
+            if (!estimate) return;
+            
+            if (confirm(`Approve this estimate for ${estimate.customerName}?\n\nTotal: $${estimate.total.toFixed(2)}\n\nOnce approved, Alex will call the customer.`)) {
+                estimate.status = 'Approved';
+                saveToStorage();
+                renderEstimates();
+                renderPendingApprovalEstimates();
+                alert(`Estimate approved!\n\nAlex is ready to call ${estimate.customerName} with the estimate details.`);
+            }
+        }
+
+        function rejectEstimate(estimateId) {
+            const estimate = estimates.find(e => e.id === estimateId);
+            if (!estimate) return;
+            
+            const reason = prompt('Reason for rejection (optional):');
+            
+            if (confirm(`Reject this estimate for ${estimate.customerName}?`)) {
+                estimate.status = 'Rejected';
+                estimate.rejectionReason = reason || '';
+                saveToStorage();
+                renderEstimates();
+                renderPendingApprovalEstimates();
+                alert(`Estimate rejected.\n\nTechnician should revise the estimate or prepare vehicle for pickup.`);
+            }
+        }
+
+        function viewEstimate(estimateId) {
+            const estimate = estimates.find(e => e.id === estimateId);
+            if (!estimate) return;
+            
+            alert(`ESTIMATE DETAILS\n\nCustomer: ${estimate.customerName}\nVehicle: ${estimate.vehicle}\nDate: ${estimate.date}\n\nDescription: ${estimate.description}\n\nParts:\n${estimate.parts ? estimate.parts.map(p => `- ${p.name}: $${(p.quantity * p.price).toFixed(2)}`).join('\n') : 'No parts'}\n\nLabor:\n${estimate.labor ? estimate.labor.map(l => `- ${l.description}: $${l.total.toFixed(2)}`).join('\n') : 'No labor'}\n\nTOTAL: $${estimate.total.toFixed(2)}`);
+        }
+
+        function sendInvoiceEmail() {
+            const sendgridEnabled = settings.sendgridEnabled || false;
+            if (!sendgridEnabled) {
+                alert('Please enable SendGrid in Settings first to send invoices via email.');
+                showScreen('settings');
+                return;
+            }
+            
+            const customerEmail = prompt('Enter customer email address:');
+            if (!customerEmail) return;
+            
+            const invoiceAmount = prompt('Enter invoice amount ($):');
+            if (!invoiceAmount) return;
+            
+            alert(`Invoice email will be sent to: ${customerEmail}\n\nAmount: $${invoiceAmount}\n\nPayment Options:\n- PayPal\n- Credit Card\n\nInvoice will include:\n- Detailed breakdown of services\n- Total amount\n- PayPal payment link\n- Credit card payment options\n\nEmail will be sent via SendGrid using template: ${settings.sendgridTemplate || 'default'}`);
+        }
+
         function makeVapiCall(type) {
             const vapiEnabled = settings.vapiEnabled || false;
             if (!vapiEnabled) {
@@ -3702,7 +3924,6 @@ ALEX AI Assistant
                 'parts': { script: 'Parts Store Call', prompt: 'Enter parts store phone number' },
                 'customer': { script: 'Customer Call', prompt: 'Enter customer phone number' },
                 'tow': { script: 'Tow Dispatch', prompt: 'Enter tow provider phone number' },
-                'billing': { script: 'Payment Request', prompt: 'Enter customer phone number' },
                 'reminder': { script: 'Customer Reminder', prompt: 'Enter customer phone number' },
                 'survey': { script: 'Survey Call', prompt: 'Enter customer phone number' }
             };
@@ -3711,7 +3932,7 @@ ALEX AI Assistant
             const phoneNumber = prompt(callInfo.prompt);
             
             if (phoneNumber) {
-                alert(`VAPI is initiating call to ${phoneNumber}...\n\nUsing script: ${callInfo.script}\nVoice: ${settings.vapiVoice || 'rachel'}\n\nIn production, this would make an actual call.`);
+                alert(`VAPI is initiating call to ${phoneNumber}...\n\nUsing script: ${callInfo.script}\nVoice: ${settings.vapiVoice || 'alex'}\n\nIn production, this would make an actual call.`);
             }
         }
 
