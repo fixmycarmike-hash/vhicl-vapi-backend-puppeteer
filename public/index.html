@@ -1287,7 +1287,7 @@
     <div id="vapiScriptModal" class="modal">
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
-                <h2>Create VAPI Script</h2>
+                <h2 id="vapiScriptModalTitle">Create VAPI Script</h2>
                 <button class="close-btn" onclick="closeModal('vapiScriptModal')">&times;</button>
             </div>
             <div class="form-group">
@@ -1301,6 +1301,7 @@
             <div class="form-group">
                 <label>Voice</label>
                 <select id="vapiScriptVoice">
+                    <option value="alex">Alex (Male Service Advisor)</option>
                     <option value="rachel">Rachel (Female)</option>
                     <option value="drew">Drew (Male)</option>
                     <option value="cleo">Cleo (Female)</option>
@@ -3461,31 +3462,59 @@ ALEX AI Assistant
             vapiScripts = [
                 {
                     id: 1,
-                    name: 'Parts Store Call',
-                    description: 'Call parts store to check availability and place order',
-                    script: 'Hello, this is [SHOP_NAME]. I need to check availability for [PART_NAME] for a [YEAR] [MAKE] [MODEL]. Can you tell me if it\'s in stock and the price?',
-                    voice: 'rachel'
+                    name: 'Alex - Estimate Approval Call',
+                    description: 'Alex calls customer with estimate for approval',
+                    script: 'Hello [CUSTOMER_NAME], this is Alex from [SHOP_NAME]. I\'m calling about your [YEAR] [MAKE] [MODEL]. We\'ve completed our diagnosis and the estimated total for [SERVICE] is $[AMOUNT]. This includes parts and labor. Would you like me to proceed with the repairs? If approved, I\'ll order the parts and get your vehicle back in the work queue.',
+                    voice: 'alex'
                 },
                 {
                     id: 2,
-                    name: 'Customer Reminder',
-                    description: 'Remind customer about upcoming appointment',
-                    script: 'Hello [CUSTOMER_NAME], this is [SHOP_NAME]. This is a reminder that your appointment for [SERVICE] on your [YEAR] [MAKE] [MODEL] is scheduled for [DATE] at [TIME]. Please call us if you need to reschedule.',
-                    voice: 'rachel'
+                    name: 'Alex - Parts Order Call',
+                    description: 'Alex calls parts store to order approved parts',
+                    script: 'Hello, this is Alex from [SHOP_NAME]. I need to order [PART_NAME] for a [YEAR] [MAKE] [MODEL]. The part number is [PART_NUMBER]. Can you confirm availability and delivery time?',
+                    voice: 'alex'
                 },
                 {
                     id: 3,
-                    name: 'Payment Request',
-                    description: 'Call customer for payment',
-                    script: 'Hello [CUSTOMER_NAME], this is [SHOP_NAME]. Your vehicle [YEAR] [MAKE] [MODEL] is ready for pickup. The total for [SERVICE] is $[AMOUNT]. You can pay via PayPal using the link sent to your email, or by phone. Would you like to make a payment now?',
-                    voice: 'drew'
+                    name: 'Alex - Rejected Estimate Follow-up',
+                    description: 'Alex prepares paperwork for customer pickup when estimate is rejected',
+                    script: 'Hello [CUSTOMER_NAME], this is Alex from [SHOP_NAME]. I understand you\'ve decided not to proceed with the repairs at this time. I\'m preparing your vehicle for pickup. There will be a diagnostic fee of $[AMOUNT]. Would you like to schedule a pickup time?',
+                    voice: 'alex'
                 },
                 {
                     id: 4,
-                    name: 'Tow Dispatch',
-                    description: 'Call tow service to schedule pickup',
-                    script: 'Hello, this is [SHOP_NAME]. We need to schedule a tow for a customer. The pickup location is [LOCATION], and the vehicle is a [YEAR] [MAKE] [MODEL]. When can you have a truck available?',
-                    voice: 'drew'
+                    name: 'Alex - Vehicle Ready Notification',
+                    description: 'Alex calls customer when repairs are complete',
+                    script: 'Hello [CUSTOMER_NAME], this is Alex from [SHOP_NAME]. Great news! Your [YEAR] [MAKE] [MODEL] is ready for pickup. All repairs have been completed successfully. The total is $[AMOUNT]. When would you like to come pick up your vehicle?',
+                    voice: 'alex'
+                },
+                {
+                    id: 5,
+                    name: 'Alex - Parts Store Call',
+                    description: 'Alex calls parts store to check availability and place order',
+                    script: 'Hello, this is Alex from [SHOP_NAME]. I need to check availability for [PART_NAME] for a [YEAR] [MAKE] [MODEL]. Can you tell me if it\'s in stock and the price?',
+                    voice: 'alex'
+                },
+                {
+                    id: 6,
+                    name: 'Customer Reminder',
+                    description: 'Remind customer about upcoming appointment',
+                    script: 'Hello [CUSTOMER_NAME], this is [SHOP_NAME]. This is a reminder that your appointment for [SERVICE] on your [YEAR] [MAKE] [MODEL] is scheduled for [DATE] at [TIME]. Please call us if you need to reschedule.',
+                    voice: 'alex'
+                },
+                {
+                    id: 7,
+                    name: 'Alex - Payment Request',
+                    description: 'Alex calls customer for payment',
+                    script: 'Hello [CUSTOMER_NAME], this is Alex from [SHOP_NAME]. Your vehicle [YEAR] [MAKE] [MODEL] is ready for pickup. The total for [SERVICE] is $[AMOUNT]. You can pay via PayPal using the link sent to your email, or by phone. Would you like to make a payment now?',
+                    voice: 'alex'
+                },
+                {
+                    id: 8,
+                    name: 'Alex - Tow Dispatch',
+                    description: 'Alex calls tow service to schedule pickup',
+                    script: 'Hello, this is Alex from [SHOP_NAME]. We need to schedule a tow for a customer. The pickup location is [LOCATION], and the vehicle is a [YEAR] [MAKE] [MODEL]. When can you have a truck available?',
+                    voice: 'alex'
                 }
             ];
         }
@@ -3529,34 +3558,89 @@ ALEX AI Assistant
         }
 
         function openVapiScriptModal() {
-            document.getElementById('vapiScriptModal').classList.add('active');
+            editingScriptId = null;
+            
+            // Clear form fields
+            const nameInput = document.getElementById('vapiScriptName');
+            const descInput = document.getElementById('vapiScriptDescription');
+            const voiceSelect = document.getElementById('vapiScriptVoice');
+            const textArea = document.getElementById('vapiScriptText');
+            const modalTitle = document.getElementById('vapiScriptModalTitle');
+            
+            if (nameInput) nameInput.value = '';
+            if (descInput) descInput.value = '';
+            if (voiceSelect) voiceSelect.value = 'alex';
+            if (textArea) textArea.value = '';
+            if (modalTitle) modalTitle.textContent = 'Create VAPI Script';
+            
+            // Open modal
+            const modal = document.getElementById('vapiScriptModal');
+            if (modal) {
+                modal.classList.add('active');
+            }
         }
 
         function saveVapiScript() {
-            const script = {
-                id: Date.now(),
-                name: document.getElementById('vapiScriptName').value,
-                description: document.getElementById('vapiScriptDescription').value,
-                voice: document.getElementById('vapiScriptVoice').value,
-                script: document.getElementById('vapiScriptText').value
-            };
+            const nameInput = document.getElementById('vapiScriptName');
+            const descInput = document.getElementById('vapiScriptDescription');
+            const voiceSelect = document.getElementById('vapiScriptVoice');
+            const textArea = document.getElementById('vapiScriptText');
             
-            if (!script.name || !script.script) {
+            if (!nameInput || !textArea) {
+                alert('Required form elements not found');
+                return;
+            }
+            
+            const name = nameInput.value;
+            const description = descInput ? descInput.value : '';
+            const voice = voiceSelect ? voiceSelect.value : 'alex';
+            const scriptText = textArea.value;
+            
+            if (!name || !scriptText) {
                 alert('Please enter script name and script text');
                 return;
             }
             
-            vapiScripts.push(script);
+            if (editingScriptId) {
+                // Update existing script
+                const index = vapiScripts.findIndex(s => s.id === editingScriptId);
+                if (index !== -1) {
+                    vapiScripts[index] = {
+                        ...vapiScripts[index],
+                        name: name,
+                        description: description,
+                        voice: voice,
+                        text: scriptText
+                    };
+                    alert('Script updated successfully!');
+                }
+                editingScriptId = null;
+            } else {
+                // Create new script
+                const script = {
+                    id: Date.now(),
+                    name: name,
+                    description: description,
+                    voice: voice,
+                    text: scriptText
+                };
+                vapiScripts.push(script);
+                alert('VAPI script saved successfully!');
+            }
+            
             saveToStorage();
             renderVapiScripts();
             closeModal('vapiScriptModal');
             
-            // Clear form
-            document.getElementById('vapiScriptName').value = '';
-            document.getElementById('vapiScriptDescription').value = '';
-            document.getElementById('vapiScriptText').value = '';
+            // Clear form and reset title
+            nameInput.value = '';
+            if (descInput) descInput.value = '';
+            if (voiceSelect) voiceSelect.value = 'alex';
+            textArea.value = '';
             
-            alert('VAPI script saved successfully!');
+            // Reset modal title
+            const modalTitle = document.getElementById('vapiScriptModalTitle');
+            if (modalTitle) modalTitle.textContent = 'Create VAPI Script';
         }
 
         function useVapiScript(id) {
@@ -3566,8 +3650,37 @@ ALEX AI Assistant
             }
         }
 
+        let editingScriptId = null;
+
         function editVapiScript(id) {
-            alert('Edit VAPI Script modal will open');
+            const script = vapiScripts.find(s => s.id === id);
+            if (!script) {
+                alert('Script not found');
+                return;
+            }
+            
+            editingScriptId = id;
+            
+            // Populate modal with script data
+            const nameInput = document.getElementById('vapiScriptName');
+            const descInput = document.getElementById('vapiScriptDescription');
+            const voiceSelect = document.getElementById('vapiScriptVoice');
+            const textArea = document.getElementById('vapiScriptText');
+            const modalTitle = document.querySelector('#vapiScriptModal .card-title');
+            
+            if (nameInput) nameInput.value = script.name || '';
+            if (descInput) descInput.value = script.description || '';
+            if (voiceSelect) voiceSelect.value = script.voice || 'alex';
+            if (textArea) textArea.value = script.text || '';
+            
+            // Change modal title
+            if (modalTitle) modalTitle.textContent = 'Edit VAPI Script';
+            
+            // Open modal
+            const modal = document.getElementById('vapiScriptModal');
+            if (modal) {
+                modal.classList.add('active');
+            }
         }
 
         function deleteVapiScript(id) {
