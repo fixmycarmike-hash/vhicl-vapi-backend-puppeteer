@@ -2616,8 +2616,24 @@
             estimateParts = estimate.parts || [];
             renderEstimateParts();
 
-            // Load labor
-            estimateLabor = estimate.labor || [];
+            // Load labor - handle both old (object) and new (array) formats
+            if (estimate.labor) {
+                if (Array.isArray(estimate.labor)) {
+                    // New format: array of labor items
+                    estimateLabor = estimate.labor;
+                } else {
+                    // Old format: object with hours and rate
+                    const oldLabor = estimate.labor;
+                    estimateLabor = [{
+                        name: 'Labor',
+                        hours: oldLabor.hours || 0,
+                        rate: oldLabor.rate || 0,
+                        total: (oldLabor.hours || 0) * (oldLabor.rate || 0)
+                    }];
+                }
+            } else {
+                estimateLabor = [];
+            }
             renderEstimateLabor();
 
             // Update total
