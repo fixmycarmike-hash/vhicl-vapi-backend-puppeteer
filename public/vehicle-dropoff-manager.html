@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Drop-off Manager - VHICL Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #1a202c;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            color: #718096;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #edf2f7;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+
+        .stat-card .label {
+            color: #718096;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel h2 {
+            color: #1a202c;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .dropoff-queue {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dropoff-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dropoff-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .dropoff-card.selected {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .dropoff-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .dropoff-card-header h3 {
+            color: #1a202c;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .priority-emergency {
+            background: #fc8181;
+            color: white;
+        }
+
+        .priority-high {
+            background: #ecc94b;
+            color: #744210;
+        }
+
+        .priority-normal {
+            background: #48bb78;
+            color: white;
+        }
+
+        .dropoff-card-info {
+            color: #4a5568;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .dropoff-card-info p {
+            margin: 4px 0;
+        }
+
+        .time-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #edf2f7;
+            color: #4a5568;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+        }
+
+        .dropoff-detail {
+            display: none;
+        }
+
+        .dropoff-detail.active {
+            display: block;
+        }
+
+        .detail-section {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .detail-section:last-child {
+            border-bottom: none;
+        }
+
+        .detail-section h3 {
+            color: #2d3748;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-section p {
+            color: #4a5568;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 4px 0;
+        }
+
+        .detail-section .value {
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #feebc8;
+            color: #744210;
+        }
+
+        .status-review {
+            background: #bee3f8;
+            color: #2a4365;
+        }
+
+        .status-diagnosed {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .status-approved {
+            background: #d6bcfa;
+            color: #553c9a;
+        }
+
+        .status-progress {
+            background: #fbd38d;
+            color: #744210;
+        }
+
+        .status-ready {
+            background: #48bb78;
+            color: white;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>🚗 Vehicle Drop-off Manager</h1>
+                <div class="subtitle">Manage vehicles dropped off via key drop box</div>
+            </div>
+            <div>
+                <a href="index.html" class="btn btn-secondary">← Back to Dashboard</a>
+                <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh</button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="value" id="statPending">0</div>
+                <div class="label">Pending Review</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="statToday">0</div>
+                <div class="label">Today's Drop-offs</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="statQueue">0</div>
+                <div class="label">In Queue</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="statReady">0</div>
+                <div class="label">Ready for Pickup</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <h2>📋 Drop-off Queue</h2>
+                <div class="dropoff-queue" id="dropoffQueue">
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                        </svg>
+                        <p>No vehicles in the drop-off queue</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel" id="dropoffDetailPanel">
+                <div class="empty-state">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p>Select a drop-off to view details</p>
+                </div>
+            </div>
+        </div>
+    <script src="./js/vehicle-dropoff-service.js"></script>
+    <script>
+        const dropoffService = new VehicleDropoffService();
+        let selectedDropoffId = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadDropoffs();
+            updateStats();
+        });
+
+        function loadDropoffs() {
+            const queue = dropoffService.getDropoffQueue();
+            const queueContainer = document.getElementById('dropoffQueue');
+
+            if (queue.length === 0) {
+                queueContainer.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                        </svg>
+                        <p>No vehicles in the drop-off queue</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort by priority (emergency first, then high, then normal)
+            const priorityOrder = { 'emergency': 0, 'high': 1, 'normal': 2 };
+            queue.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
+            queueContainer.innerHTML = queue.map(dropoff => {
+                const timeAgo = getTimeAgo(dropoff.timestamp);
+                return `
+                    <div class="dropoff-card ${selectedDropoffId === dropoff.id ? 'selected' : ''}" 
+                         onclick="selectDropoff('${dropoff.id}')">
+                        <div class="dropoff-card-header">
+                            <h3>${dropoff.customer.name}</h3>
+                            <span class="priority-badge priority-${dropoff.priority}">${dropoff.priority}</span>
+                        </div>
+                        <div class="dropoff-card-info">
+                            <p><strong>Vehicle:</strong> ${dropoff.vehicle.year} ${dropoff.vehicle.make} ${dropoff.vehicle.model}</p>
+                            <p><strong>Phone:</strong> ${dropoff.customer.phone}</p>
+                            <p><strong>Service:</strong> ${dropoff.service.requested || 'General inspection'}</p>
+                            <p><span class="time-badge">${timeAgo}</span></p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectDropoff(dropoffId) {
+            selectedDropoffId = dropoffId;
+            loadDropoffs();
+            showDropoffDetail(dropoffId);
+        }
+
+        function showDropoffDetail(dropoffId) {
+            const dropoff = dropoffService.getDropoffById(dropoffId);
+            if (!dropoff) return;
+
+            const panel = document.getElementById('dropoffDetailPanel');
+            const timeAgo = getTimeAgo(dropoff.timestamp);
+
+            panel.innerHTML = `
+                <h2>
+                    Drop-off Details
+                    <span class="status-badge status-${dropoff.status}">${dropoff.status.replace('_', ' ')}</span>
+                </h2>
+
+                <div class="detail-section">
+                    <h3>Customer Information</h3>
+                    <p><strong>Name:</strong> <span class="value">${dropoff.customer.name}</span></p>
+                    <p><strong>Phone:</strong> <span class="value">${dropoff.customer.phone}</span></p>
+                    <p><strong>Email:</strong> <span class="value">${dropoff.customer.email || 'N/A'}</span></p>
+                    <p><strong>Customer Type:</strong> <span class="value">${dropoff.customer.isReturningCustomer ? 'Returning' : 'New'}</span></p>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Vehicle Information</h3>
+                    <p><strong>Year/Make/Model:</strong> <span class="value">${dropoff.vehicle.year} ${dropoff.vehicle.make} ${dropoff.vehicle.model}</span></p>
+                    <p><strong>License Plate:</strong> <span class="value">${dropoff.vehicle.plate || 'Not provided'}</span></p>
+                    <p><strong>VIN:</strong> <span class="value">${dropoff.vehicle.vin || 'To be added'}</span></p>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Service Information</h3>
+                    <p><strong>Requested Service:</strong> <span class="value">${dropoff.service.requested || 'Not specified'}</span></p>
+                    <p><strong>Issues/Concerns:</strong> <span class="value">${dropoff.service.issues || 'None specified'}</span></p>
+                    <p><strong>Appointment:</strong> <span class="value">${dropoff.service.appointmentTime || 'Walk-in'}</span></p>
+                    <p><strong>Needs Ride:</strong> <span class="value">${dropoff.service.needsRide ? 'Yes' : 'No'}</span></p>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Drop-off Details</h3>
+                    <p><strong>Method:</strong> <span class="value">Key Drop Box</span></p>
+                    <p><strong>Location:</strong> <span class="value">${dropoff.dropoff.location || 'Main entrance'}</span></p>
+                    <p><strong>Dropped Off:</strong> <span class="value">${timeAgo}</span></p>
+                    <p><strong>Priority:</strong> <span class="value">${dropoff.priority.toUpperCase()}</span></p>
+                </div>
+
+                ${dropoff.status === 'pending_review' ? `
+                <div class="detail-section">
+                    <h3>Assign Technician & Bay</h3>
+                    <div class="form-group">
+                        <label>Assign Technician:</label>
+                        <select id="assignTech">
+                            <option value="">Select technician...</option>
+                            <!-- Technicians would be loaded here -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Assign Bay:</label>
+                        <select id="assignBay">
+                            <option value="">Select bay...</option>
+                            <!-- Bays would be loaded here -->
+                        </select>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="assignTechAndBay('${dropoff.id}')">
+                            Assign & Start Review
+                        </button>
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="window.printDetails('${dropoff.id}')">
+                        🖨️ Print Details
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.callCustomer('${dropoff.id}')">
+                        📞 Call Customer
+                    </button>
+                </div>
+            `;
+        }
+
+        function getTimeAgo(timestamp) {
+            const now = new Date();
+            const then = new Date(timestamp);
+            const diffMs = now - then;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+
+            if (diffMins < 5) return 'Just now';
+            if (diffMins < 60) return `${diffMins} minutes ago`;
+            if (diffHours < 24) return `${diffHours} hours ago`;
+            return `${Math.floor(diffHours / 24)} days ago`;
+        }
+
+        function updateStats() {
+            const stats = dropoffService.getDropoffStats('today');
+            document.getElementById('statPending').textContent = stats.pending;
+            document.getElementById('statToday').textContent = stats.total;
+            document.getElementById('statQueue').textContent = stats.inReview + stats.pending;
+            document.getElementById('statReady').textContent = stats.ready;
+        }
+
+        function refreshData() {
+            loadDropoffs();
+            updateStats();
+            if (selectedDropoffId) {
+                showDropoffDetail(selectedDropoffId);
+            }
+        }
+
+        // Make functions available globally
+        window.selectDropoff = selectDropoff;
+        window.refreshData = refreshData;
+        window.printDetails = (id) => {
+            window.print();
+        };
+        window.callCustomer = (id) => {
+            const dropoff = dropoffService.getDropoffById(id);
+            if (dropoff) {
+                window.open(`tel:${dropoff.customer.phone}`);
+            }
+        };
+        window.assignTechAndBay = (id) => {
+            const tech = document.getElementById('assignTech').value;
+            const bay = document.getElementById('assignBay').value;
+            if (tech && bay) {
+                alert(`Would assign technician ${tech} to bay ${bay}`);
+                // This would integrate with the tech management service
+            } else {
+                alert('Please select both technician and bay');
+            }
+        };
+    </script>
+</body>
+</html>
