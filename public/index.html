@@ -3595,7 +3595,6 @@
 
             document.body.insertAdjacentHTML('beforeend', modalHTML);
         }
-        }
 
         // ============ TOWING FUNCTIONS ============
         function initSampleTowing() {
@@ -4147,7 +4146,7 @@
                 const vinResults = document.getElementById('vinResults');
                 if (vinResults.style.display !== 'none') {
                     const vehicleText = vinResults.textContent;
-                    const match = vehicleText.match(/(\d{4})\s+(\w+)\s+(\w+)/);
+                    const match = vehicleText.match(/(\d{4})s+(\w+)s+(\w+)/);
                     if (match) {
                         document.getElementById('alexVehicle').value = `${match[1]} ${match[2]} ${match[3]}`;
                     }
