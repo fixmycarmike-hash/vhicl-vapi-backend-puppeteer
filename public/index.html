@@ -2371,6 +2371,11 @@
             const partsList = document.getElementById('estimatePartsList');
             if (!partsList) return;
             
+            // Ensure estimateParts is an array
+            if (!Array.isArray(estimateParts)) {
+                estimateParts = [];
+            }
+            
             if (estimateParts.length === 0) {
                 partsList.innerHTML = '<p style="color: #666;">No parts added yet</p>';
                 return;
@@ -2379,11 +2384,11 @@
             partsList.innerHTML = estimateParts.map((part, index) => `
                 <div style="padding: 0.5rem; background: #f5f5f5; margin: 0.5rem 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <strong>${part.name}</strong><br>
-                        <small>Qty: ${part.quantity} x $${part.price.toFixed(2)}</small>
+                        <strong>${part.name || 'Part'}</strong><br>
+                        <small>Qty: ${part.quantity || 0} x $${(part.price || 0).toFixed(2)}</small>
                     </div>
                     <div>
-                        <strong>$${(part.quantity * part.price).toFixed(2)}</strong>
+                        <strong>$${((part.quantity || 0) * (part.price || 0)).toFixed(2)}</strong>
                         <button class="btn btn-danger" style="margin-left: 0.5rem;" onclick="removeEstimatePart(${index})">X</button>
                     </div>
                 </div>
@@ -2394,6 +2399,11 @@
             const laborList = document.getElementById('estimateLaborList');
             if (!laborList) return;
             
+            // Ensure estimateLabor is an array
+            if (!Array.isArray(estimateLabor)) {
+                estimateLabor = [];
+            }
+            
             if (estimateLabor.length === 0) {
                 laborList.innerHTML = '<p style="color: #666;">No labor added yet</p>';
                 return;
@@ -2402,11 +2412,11 @@
             laborList.innerHTML = estimateLabor.map((item, index) => `
                 <div style="padding: 0.5rem; background: #f5f5f5; margin: 0.5rem 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <strong>${item.description}</strong><br>
-                        <small>${item.hours} hrs x $${item.rate.toFixed(2)}/hr</small>
+                        <strong>${item.description || 'Labor'}</strong><br>
+                        <small>${item.hours || 0} hrs x $${(item.rate || 0).toFixed(2)}/hr</small>
                     </div>
                     <div>
-                        <strong>$${item.total.toFixed(2)}</strong>
+                        <strong>$${(item.total || 0).toFixed(2)}</strong>
                         <button class="btn btn-danger" style="margin-left: 0.5rem;" onclick="removeEstimateLabor(${index})">X</button>
                     </div>
                 </div>
@@ -2429,8 +2439,26 @@
             const totalEl = document.getElementById('estimateTotal');
             if (!totalEl) return;
             
-            const partsTotal = estimateParts.reduce((sum, part) => sum + (part.quantity * part.price), 0);
-            const laborTotal = estimateLabor.reduce((sum, item) => sum + item.total, 0);
+            // Ensure arrays are properly initialized
+            if (!Array.isArray(estimateParts)) {
+                estimateParts = [];
+            }
+            if (!Array.isArray(estimateLabor)) {
+                estimateLabor = [];
+            }
+            
+            // Calculate parts total with safety checks
+            const partsTotal = estimateParts.reduce((sum, part) => {
+                const qty = part.quantity || 0;
+                const price = part.price || 0;
+                return sum + (qty * price);
+            }, 0);
+            
+            // Calculate labor total with safety checks
+            const laborTotal = estimateLabor.reduce((sum, item) => {
+                return sum + (item.total || 0);
+            }, 0);
+            
             const total = partsTotal + laborTotal;
             
             totalEl.textContent = total.toFixed(2);
@@ -2600,53 +2628,77 @@
         }
 
         function editEstimate(id) {
-            const estimate = estimates.find(e => e.id === id);
-            if (!estimate) return;
-
-            // Store the estimate being edited
-            window.editingEstimateId = id;
-
-            // Populate form with existing data
-            document.getElementById('estimateCustomerSelect').value = estimate.customerId || estimate.customerName;
-            document.getElementById('estimateVehicle').value = estimate.vehicle;
-            document.getElementById('estimateDescription').value = estimate.description || '';
-            document.getElementById('estimateStatus').value = estimate.status;
-
-            // Load parts
-            estimateParts = estimate.parts || [];
-            renderEstimateParts();
-
-            // Load labor - handle both old (object) and new (array) formats
-            if (estimate.labor) {
-                if (Array.isArray(estimate.labor)) {
-                    // New format: array of labor items
-                    estimateLabor = estimate.labor;
-                } else {
-                    // Old format: object with hours and rate
-                    const oldLabor = estimate.labor;
-                    estimateLabor = [{
-                        name: 'Labor',
-                        hours: oldLabor.hours || 0,
-                        rate: oldLabor.rate || 0,
-                        total: (oldLabor.hours || 0) * (oldLabor.rate || 0)
-                    }];
+            try {
+                const estimate = estimates.find(e => e.id === id);
+                if (!estimate) {
+                    console.error('Estimate not found:', id);
+                    alert('Estimate not found');
+                    return;
                 }
-            } else {
-                estimateLabor = [];
+
+                // Store the estimate being edited
+                window.editingEstimateId = id;
+
+                // Populate form with existing data
+                const customerSelect = document.getElementById('estimateCustomerSelect');
+                if (customerSelect) {
+                    customerSelect.value = estimate.customerId || estimate.customerName || '';
+                }
+                
+                const vehicleInput = document.getElementById('estimateVehicle');
+                if (vehicleInput) {
+                    vehicleInput.value = estimate.vehicle || '';
+                }
+                
+                const descInput = document.getElementById('estimateDescription');
+                if (descInput) {
+                    descInput.value = estimate.description || '';
+                }
+                
+                const statusSelect = document.getElementById('estimateStatus');
+                if (statusSelect) {
+                    statusSelect.value = estimate.status || 'Draft';
+                }
+
+                // Load parts - ensure it's an array
+                estimateParts = Array.isArray(estimate.parts) ? estimate.parts : [];
+                renderEstimateParts();
+
+                // Load labor - handle both old (object) and new (array) formats
+                if (estimate.labor) {
+                    if (Array.isArray(estimate.labor)) {
+                        // New format: array of labor items
+                        estimateLabor = estimate.labor;
+                    } else {
+                        // Old format: object with hours and rate
+                        const oldLabor = estimate.labor;
+                        estimateLabor = [{
+                            description: 'Labor',
+                            hours: oldLabor.hours || 0,
+                            rate: oldLabor.rate || 0,
+                            total: (oldLabor.hours || 0) * (oldLabor.rate || 0)
+                        }];
+                    }
+                } else {
+                    estimateLabor = [];
+                }
+                renderEstimateLabor();
+
+                // Update total
+                updateEstimateTotal();
+
+                // Change button text
+                const submitBtn = document.querySelector('#estimateModal .btn-primary');
+                if (submitBtn) {
+                    submitBtn.textContent = 'Update Estimate';
+                }
+
+                // Open modal
+                openModal('estimateModal');
+            } catch (error) {
+                console.error('Error editing estimate:', error);
+                alert('Error opening estimate for editing. Please check console for details.');
             }
-            renderEstimateLabor();
-
-            // Update total
-            updateEstimateTotal();
-
-            // Change button text
-            const submitBtn = document.querySelector('#estimateModal .btn-primary');
-            if (submitBtn) {
-                submitBtn.textContent = 'Update Estimate';
-            }
-
-            // Open modal
-            openModal('estimateModal');
         }
 
         // ============ INVOICE FUNCTIONS ============
