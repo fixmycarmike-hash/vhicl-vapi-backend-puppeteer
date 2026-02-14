@@ -1062,6 +1062,7 @@
                 <div class="form-group">
                     <label>Default Voice</label>
                     <select id="vapiVoice">
+                        <option value="alex" selected>Alex (AI Assistant)</option>
                         <option value="rachel">Rachel (Female)</option>
                         <option value="drew">Drew (Male)</option>
                         <option value="cleo">Cleo (Female)</option>
@@ -1096,6 +1097,35 @@
                     </button>
                     <button class="btn btn-success" onclick="testVapiConnection()">
                         <i class="fas fa-phone"></i> Test Call
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shop Services & Parts Configuration -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🔧 Shop Services & Local Parts</h2>
+                </div>
+                
+                <div class="form-group">
+                    <label>Services Not Performed (one per line)</label>
+                    <textarea id="servicesNotPerformed" rows="6" placeholder="Engine rebuild&#10;Transmission rebuild&#10;Body work&#10;Painting&#10;Glass replacement"></textarea>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        List services your shop does NOT perform. These will be excluded from ALEX estimates and recommendations.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label>Local Parts Numbers Reference</label>
+                    <textarea id="localPartsNumbers" rows="8" placeholder="Part Name | OEM Number | Local Part Number | Supplier&#10;Brake Pads (Front) | 45022-SE0-A01 | BP-001-F | AutoZone&#10;Oil Filter | 15400-PLM-A01 | OF-005 | O'Reilly&#10;Air Filter | 17220-5VA-A01 | AF-012 | NAPA"></textarea>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        Map OEM part numbers to your local supplier's part numbers. Format: Part Name | OEM Number | Local Part Number | Supplier
+                    </small>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="saveShopServicesSettings()">
+                        <i class="fas fa-save"></i> Save Services & Parts
                     </button>
                 </div>
             </div>
@@ -1864,13 +1894,26 @@
             if (vapiPhoneNumberEl) vapiPhoneNumberEl.value = settings.vapiPhoneNumber || '';
             
             const vapiVoiceEl = document.getElementById('vapiVoice');
-            if (vapiVoiceEl) vapiVoiceEl.value = settings.vapiVoice || 'rachel';
+            if (vapiVoiceEl) vapiVoiceEl.value = settings.vapiVoice || 'alex';
             
             const vapiEnabledEl = document.getElementById('vapiEnabled');
             if (vapiEnabledEl) vapiEnabledEl.checked = settings.vapiEnabled || false;
             
             const vapiRecordCallsEl = document.getElementById('vapiRecordCalls');
             if (vapiRecordCallsEl) vapiRecordCallsEl.checked = settings.vapiRecordCalls !== false;
+            
+            // Populate shop services and local parts settings
+            const servicesNotPerformedEl = document.getElementById('servicesNotPerformed');
+            if (servicesNotPerformedEl && settings.servicesNotPerformed) {
+                servicesNotPerformedEl.value = settings.servicesNotPerformed.join('\n');
+            }
+            
+            const localPartsNumbersEl = document.getElementById('localPartsNumbers');
+            if (localPartsNumbersEl && settings.localPartsNumbers) {
+                localPartsNumbersEl.value = settings.localPartsNumbers
+                    .map(part => `${part.partName} | ${part.oemNumber} | ${part.localPartNumber} | ${part.supplier}`)
+                    .join('\n');
+            }
             
             // Populate Twilio settings
             const twilioAccountSidEl = document.getElementById('twilioAccountSid');
@@ -4193,6 +4236,35 @@ Thank you for choosing [SHOP_NAME]. We'll contact you once we've had a chance to
             localStorage.setItem('vhicl_settings', JSON.stringify(settings));
             updateIntegrationBadges();
             alert('VAPI settings saved successfully!');
+        }
+
+        function saveShopServicesSettings() {
+            const servicesNotPerformed = document.getElementById('servicesNotPerformed').value;
+            const localPartsNumbers = document.getElementById('localPartsNumbers').value;
+            
+            // Parse services not performed (split by lines, remove empty lines)
+            settings.servicesNotPerformed = servicesNotPerformed
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+            
+            // Parse local parts numbers (split by lines, then by |)
+            settings.localPartsNumbers = localPartsNumbers
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0)
+                .map(line => {
+                    const parts = line.split('|').map(p => p.trim());
+                    return {
+                        partName: parts[0] || '',
+                        oemNumber: parts[1] || '',
+                        localPartNumber: parts[2] || '',
+                        supplier: parts[3] || ''
+                    };
+                });
+            
+            localStorage.setItem('vhicl_settings', JSON.stringify(settings));
+            alert('Shop services and local parts settings saved successfully!');
         }
 
         function saveTwilioSettings() {
