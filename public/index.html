@@ -2694,7 +2694,10 @@
                 }
 
                 // Open modal
-                openModal('estimateModal');
+                const modal = document.getElementById('estimateModal');
+                if (modal) {
+                    modal.classList.add('active');
+                }
             } catch (error) {
                 console.error('Error editing estimate:', error);
                 alert('Error opening estimate for editing. Please check console for details.');
