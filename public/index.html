@@ -366,6 +366,53 @@
         .api-status .status-icon {
             margin-right: 0.5rem;
         }
+
+        /* Social Media Styles */
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .social-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .social-link:hover {
+            color: #0a2540;
+            transform: translateY(-2px);
+        }
+
+        .social-link.facebook:hover { color: #1877f2; }
+        .social-link.instagram:hover { color: #e4405f; }
+        .social-link.twitter:hover { color: #1da1f2; }
+        .social-link.linkedin:hover { color: #0a66c2; }
+        .social-link.youtube:hover { color: #ff0000; }
+        .social-link.tiktok:hover { color: #000000; }
+        .social-link.google:hover { color: #4285f4; }
+
+        /* Print Styles for Invoices */
+        @media print {
+            .social-links {
+                background: white;
+                border: 1px solid #ddd;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
     </style>
 <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
@@ -385,6 +432,7 @@
             <button class="nav-btn" onclick="window.open('vehicle-dropoff-manager.html', '_blank')">🚗 Drop-offs</button>
             <button class="nav-btn" onclick="showScreen('estimates')">📋 Estimates</button>
             <button class="nav-btn" onclick="showScreen('invoices')">💰 Invoices</button>
+            <button class="nav-btn" onclick="showScreen('social')">📱 Social Media</button>
             <button class="nav-btn" onclick="showScreen('towing')">🚗 Towing</button>
             <button class="nav-btn" onclick="showScreen('inventory')">📦 Inventory</button>
             <button class="nav-btn" onclick="showScreen('vapi')">📞 VAPI</button>
@@ -546,6 +594,141 @@
                     </button>
                 </div>
                 <div id="invoiceList" class="loading">Loading invoices...</div>
+            </div>
+        </div>
+
+        <!-- Social Media Marketing Screen -->
+        <div id="social" class="screen">
+            <h1 style="color: white; margin-bottom: 1.5rem;">📱 Social Media Marketing</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="stat-label">Active Campaigns</div>
+                    <div class="stat-value" id="activeCampaigns">0</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-label">Total Posts</div>
+                    <div class="stat-value" id="totalPosts">0</div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-label">Scheduled</div>
+                    <div class="stat-value" id="scheduledPosts">0</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-label">Engagement Rate</div>
+                    <div class="stat-value" id="engagementRate">0%</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                <!-- Create New Post -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">✨ Create New Post</h2>
+                    </div>
+                    <div class="form-group">
+                        <label>Post Type</label>
+                        <select id="postType">
+                            <option value="promotion">🎉 Special Offer/Promotion</option>
+                            <option value="service">🔧 Service Highlight</option>
+                            <option value="testimonial">⭐ Customer Testimonial</option>
+                            <option value="tip">💡 Auto Tips/Educational</option>
+                            <option value="news">📢 Shop News</option>
+                            <option value="holiday">🎄 Holiday Special</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Headline</label>
+                        <input type="text" id="postHeadline" placeholder="e.g., 20% Off Brake Service This Week!">
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="postMessage" rows="4" placeholder="Write your promotional message here..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Image URL (Optional)</label>
+                        <input type="url" id="postImage" placeholder="https://example.com/image.jpg">
+                        <small style="color: #666;">Add an eye-catching image for better engagement</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Platforms</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <label><input type="checkbox" id="postFacebook" checked> Facebook</label>
+                            <label><input type="checkbox" id="postInstagram" checked> Instagram</label>
+                            <label><input type="checkbox" id="postTwitter"> Twitter/X</label>
+                            <label><input type="checkbox" id="postLinkedIn"> LinkedIn</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Publish Options</label>
+                        <select id="publishOption">
+                            <option value="now">📤 Post Now</option>
+                            <option value="schedule">📅 Schedule for Later</option>
+                            <option value="draft">📝 Save as Draft</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="scheduleDateGroup" style="display: none;">
+                        <label>Schedule Date & Time</label>
+                        <input type="datetime-local" id="scheduleDateTime">
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="createPost()">
+                            <i class="fas fa-plus"></i> Create Post
+                        </button>
+                        <button class="btn btn-info" onclick="previewPost()">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Post Templates -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">📋 Quick Templates</h2>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <div class="card" style="margin-bottom: 1rem; cursor: pointer; border-left: 4px solid #0a2540;" onclick="useTemplate('brake')">
+                            <h4 style="color: #0a2540; margin: 0 0 0.5rem 0;">🔧 Brake Service Special</h4>
+                            <p style="color: #666; margin: 0; font-size: 0.9rem;">Promote brake inspection and service with discount offer</p>
+                        </div>
+                        <div class="card" style="margin-bottom: 1rem; cursor: pointer; border-left: 4px solid #28a745;" onclick="useTemplate('oil')">
+                            <h4 style="color: #28a745; margin: 0 0 0.5rem 0;">🛢️ Oil Change Reminder</h4>
+                            <p style="color: #666; margin: 0; font-size: 0.9rem;">Regular maintenance reminder with seasonal tips</p>
+                        </div>
+                        <div class="card" style="margin-bottom: 1rem; cursor: pointer; border-left: 4px solid #ffc107;" onclick="useTemplate('ac')">
+                            <h4 style="color: #ffc107; margin: 0 0 0.5rem 0;">❄️ AC Service Promo</h4>
+                            <p style="color: #666; margin: 0; font-size: 0.9rem;">Air conditioning check and service advertisement</p>
+                        </div>
+                        <div class="card" style="margin-bottom: 1rem; cursor: pointer; border-left: 4px solid #dc3545;" onclick="useTemplate('emergency')">
+                            <h4 style="color: #dc3545; margin: 0 0 0.5rem 0;">🚨 Emergency Services</h4>
+                            <p style="color: #666; margin: 0; font-size: 0.9rem;">24/7 emergency roadside assistance promotion</p>
+                        </div>
+                        <div class="card" style="margin-bottom: 1rem; cursor: pointer; border-left: 4px solid #6f42c1;" onclick="useTemplate('review')">
+                            <h4 style="color: #6f42c1; margin: 0 0 0.5rem 0;">⭐ Customer Appreciation</h4>
+                            <p style="color: #666; margin: 0; font-size: 0.9rem;">Thank customers and ask for reviews</p>
+                        </div>
+                        <div class="card" style="margin-bottom: 1rem; cursor: pointer; border-left: 4px solid #17a2b8;" onclick="useTemplate('seasonal')">
+                            <h4 style="color: #17a2b8; margin: 0 0 0.5rem 0;">🌤️ Seasonal Maintenance</h4>
+                            <p style="color: #666; margin: 0; font-size: 0.9rem;">Season-specific vehicle care tips and offers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campaign History -->
+            <div class="card" style="margin-top: 1.5rem;">
+                <div class="card-header">
+                    <h2 class="card-title">📊 Post History & Campaigns</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <select id="postFilter" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
+                            <option value="all">All Posts</option>
+                            <option value="published">Published</option>
+                            <option value="scheduled">Scheduled</option>
+                            <option value="draft">Drafts</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="socialPostList" class="loading">Loading posts...</div>
             </div>
         </div>
 
@@ -1376,6 +1559,83 @@
 
             <div class="card">
                 <div class="card-header">
+                    <h2 class="card-title">📱 Social Media Integration</h2>
+                    <span class="status-badge" id="socialBadge" style="background: #f8d7da; color: #721c24;">Not Configured</span>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="socialEnabled">
+                        <strong>Enable Social Media Features</strong>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        Share invoices, updates, and promotions on social platforms
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>Facebook Page URL</label>
+                    <input type="url" id="facebookUrl" placeholder="https://www.facebook.com/yourshop">
+                    <small style="color: #666;">Link to your Facebook business page</small>
+                </div>
+                <div class="form-group">
+                    <label>Instagram URL</label>
+                    <input type="url" id="instagramUrl" placeholder="https://www.instagram.com/yourshop">
+                    <small style="color: #666;">Link to your Instagram business account</small>
+                </div>
+                <div class="form-group">
+                    <label>Twitter/X URL</label>
+                    <input type="url" id="twitterUrl" placeholder="https://www.twitter.com/yourshop">
+                    <small style="color: #666;">Link to your Twitter/X profile</small>
+                </div>
+                <div class="form-group">
+                    <label>LinkedIn Company Page</label>
+                    <input type="url" id="linkedinUrl" placeholder="https://www.linkedin.com/company/yourshop">
+                    <small style="color: #666;">Link to your LinkedIn company page</small>
+                </div>
+                <div class="form-group">
+                    <label>YouTube Channel</label>
+                    <input type="url" id="youtubeUrl" placeholder="https://www.youtube.com/@yourshop">
+                    <small style="color: #666;">Link to your YouTube channel (optional)</small>
+                </div>
+                <div class="form-group">
+                    <label>TikTok URL</label>
+                    <input type="url" id="tiktokUrl" placeholder="https://www.tiktok.com/@yourshop">
+                    <small style="color: #666;">Link to your TikTok profile (optional)</small>
+                </div>
+                <div class="form-group">
+                    <label>Google Business Profile</label>
+                    <input type="url" id="googleBusinessUrl" placeholder="https://maps.google.com/?cid=xxxxx">
+                    <small style="color: #666;">Link to your Google Business listing</small>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="autoShareInvoices">
+                        <strong>Auto-Share Completed Invoices</strong>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        Automatically share completed invoices with customers via direct message
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="showSocialLinksInvoices">
+                        <strong>Show Social Links on Invoices</strong>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        Display social media icons and links on invoice printouts and emails
+                    </small>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="saveSocialMediaSettings()">
+                        <i class="fas fa-save"></i> Save Social Media Settings
+                    </button>
+                    <button class="btn btn-info" onclick="previewSocialLinks()">
+                        <i class="fas fa-eye"></i> Preview Links
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
                     <h2 class="card-title">Shop Information</h2>
                 </div>
                 <div class="form-group">
@@ -1820,6 +2080,9 @@
             if (maintenanceJobs.length === 0) initSampleMaintenance();
             if (vapiScripts.length === 0) initSampleVapiScripts();
             
+            // Initialize social media
+            initSocialMedia();
+            
             // Render all screens
             renderCustomers();
             renderAppointments();
@@ -1892,7 +2155,18 @@
                 apiEnabled: savedSettings.apiEnabled || false,
                 apiTimeout: savedSettings.apiTimeout || 30,
                 apiRetries: savedSettings.apiRetries || 3,
-                apiRateLimit: savedSettings.apiRateLimit || 60
+                apiRateLimit: savedSettings.apiRateLimit || 60,
+                // Social Media Settings
+                socialEnabled: savedSettings.socialEnabled || false,
+                facebookUrl: savedSettings.facebookUrl || '',
+                instagramUrl: savedSettings.instagramUrl || '',
+                twitterUrl: savedSettings.twitterUrl || '',
+                linkedinUrl: savedSettings.linkedinUrl || '',
+                youtubeUrl: savedSettings.youtubeUrl || '',
+                tiktokUrl: savedSettings.tiktokUrl || '',
+                googleBusinessUrl: savedSettings.googleBusinessUrl || '',
+                autoShareInvoices: savedSettings.autoShareInvoices || false,
+                showSocialLinksInvoices: savedSettings.showSocialLinksInvoices || false
             };
             
             // Populate form fields (with null checks)
@@ -2059,7 +2333,29 @@
             if (sendgridAlexEmailEl) sendgridAlexEmailEl.checked = settings.sendgridAlexEmail !== false;
             const sendgridTemplateEl = document.getElementById('sendgridTemplate');
             if (sendgridTemplateEl) sendgridTemplateEl.value = settings.sendgridTemplate || 'default';
-            
+
+            // Populate Social Media settings
+            const socialEnabledEl = document.getElementById('socialEnabled');
+            if (socialEnabledEl) socialEnabledEl.checked = settings.socialEnabled || false;
+            const facebookUrlEl = document.getElementById('facebookUrl');
+            if (facebookUrlEl) facebookUrlEl.value = settings.facebookUrl || '';
+            const instagramUrlEl = document.getElementById('instagramUrl');
+            if (instagramUrlEl) instagramUrlEl.value = settings.instagramUrl || '';
+            const twitterUrlEl = document.getElementById('twitterUrl');
+            if (twitterUrlEl) twitterUrlEl.value = settings.twitterUrl || '';
+            const linkedinUrlEl = document.getElementById('linkedinUrl');
+            if (linkedinUrlEl) linkedinUrlEl.value = settings.linkedinUrl || '';
+            const youtubeUrlEl = document.getElementById('youtubeUrl');
+            if (youtubeUrlEl) youtubeUrlEl.value = settings.youtubeUrl || '';
+            const tiktokUrlEl = document.getElementById('tiktokUrl');
+            if (tiktokUrlEl) tiktokUrlEl.value = settings.tiktokUrl || '';
+            const googleBusinessUrlEl = document.getElementById('googleBusinessUrl');
+            if (googleBusinessUrlEl) googleBusinessUrlEl.value = settings.googleBusinessUrl || '';
+            const autoShareInvoicesEl = document.getElementById('autoShareInvoices');
+            if (autoShareInvoicesEl) autoShareInvoicesEl.checked = settings.autoShareInvoices || false;
+            const showSocialLinksInvoicesEl = document.getElementById('showSocialLinksInvoices');
+            if (showSocialLinksInvoicesEl) showSocialLinksInvoicesEl.checked = settings.showSocialLinksInvoices || false;
+
             // Update badges
             updateApiBadge();
             updateIntegrationBadges();
@@ -2892,6 +3188,9 @@
                         </div>
                         <div style="display: flex; gap: 0.5rem; align-items: center;">
                             <span class="status-badge status-${inv.status.toLowerCase()}">${inv.status}</span>
+                            <button class="btn btn-info" onclick="shareInvoice(${inv.id})" title="Share on Social Media">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
                             ${inv.status === 'Unpaid' ? `
                                 <button class="btn btn-success" onclick="markAsPaid(${inv.id})">
                                     <i class="fas fa-check"></i> Paid
@@ -2923,6 +3222,107 @@
                 saveToStorage();
                 renderInvoices();
             }
+        }
+
+        function shareInvoice(id) {
+            const invoice = invoices.find(i => i.id === id);
+            if (!invoice) return;
+
+            if (!settings.socialEnabled) {
+                alert('Social Media is not enabled. Please configure your social media links in Settings first.');
+                return;
+            }
+
+            const shopName = settings.shopName || 'VHICL Pro Auto Shop';
+            const shareText = `🚗 ${shopName} - Invoice for ${invoice.customerName}\n🚙 Vehicle: ${invoice.vehicle}\n💰 Total: $${invoice.total.toFixed(2)}\n\nThank you for your business!`;
+            
+            // Create share options
+            let shareOptions = 'Share this invoice via:\n\n';
+            if (settings.facebookUrl) shareOptions += '1. Facebook\n';
+            if (settings.instagramUrl) shareOptions += '2. Instagram\n';
+            if (settings.twitterUrl) shareOptions += '3. Twitter/X\n';
+            if (settings.linkedinUrl) shareOptions += '4. LinkedIn\n';
+            shareOptions += '5. Copy Link\n6. Copy Text\n';
+            
+            const choice = prompt(shareOptions + '\nEnter your choice (1-6):');
+            
+            if (choice === '1' && settings.facebookUrl) {
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(settings.facebookUrl)}`, '_blank');
+            } else if (choice === '2' && settings.instagramUrl) {
+                alert('Instagram sharing requires the mobile app. The invoice text has been copied to your clipboard for manual posting.');
+                navigator.clipboard.writeText(shareText);
+            } else if (choice === '3' && settings.twitterUrl) {
+                const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(settings.twitterUrl)}`;
+                window.open(twitterUrl, '_blank');
+            } else if (choice === '4' && settings.linkedinUrl) {
+                const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(settings.linkedinUrl)}`;
+                window.open(linkedinUrl, '_blank');
+            } else if (choice === '5') {
+                const invoiceUrl = `${window.location.origin}?invoice=${invoice.id}`;
+                navigator.clipboard.writeText(invoiceUrl);
+                alert('Invoice link copied to clipboard!');
+            } else if (choice === '6') {
+                navigator.clipboard.writeText(shareText);
+                alert('Invoice text copied to clipboard!');
+            } else {
+                alert('Invalid choice or platform not configured.');
+            }
+        }
+
+        function viewInvoiceDetails(id) {
+            const invoice = invoices.find(i => i.id === id);
+            if (!invoice) return;
+
+            const shopName = settings.shopName || 'VHICL Pro Auto Shop';
+            const shopPhone = settings.shopPhone || '(555) 123-4567';
+            const shopEmail = settings.shopEmail || 'info@vhiclpro.com';
+
+            let socialLinksHTML = '';
+            if (settings.showSocialLinksInvoices && settings.socialEnabled) {
+                socialLinksHTML = '<div class="social-links">';
+                if (settings.facebookUrl) socialLinksHTML += `<a href="${settings.facebookUrl}" target="_blank" class="social-link facebook"><i class="fab fa-facebook"></i></a>`;
+                if (settings.instagramUrl) socialLinksHTML += `<a href="${settings.instagramUrl}" target="_blank" class="social-link instagram"><i class="fab fa-instagram"></i></a>`;
+                if (settings.twitterUrl) socialLinksHTML += `<a href="${settings.twitterUrl}" target="_blank" class="social-link twitter"><i class="fab fa-twitter"></i></a>`;
+                if (settings.linkedinUrl) socialLinksHTML += `<a href="${settings.linkedinUrl}" target="_blank" class="social-link linkedin"><i class="fab fa-linkedin"></i></a>`;
+                if (settings.youtubeUrl) socialLinksHTML += `<a href="${settings.youtubeUrl}" target="_blank" class="social-link youtube"><i class="fab fa-youtube"></i></a>`;
+                if (settings.tiktokUrl) socialLinksHTML += `<a href="${settings.tiktokUrl}" target="_blank" class="social-link tiktok"><i class="fab fa-tiktok"></i></a>`;
+                if (settings.googleBusinessUrl) socialLinksHTML += `<a href="${settings.googleBusinessUrl}" target="_blank" class="social-link google"><i class="fab fa-google"></i></a>`;
+                socialLinksHTML += '</div>';
+            }
+
+            const modalHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+                    <div style="background: white; padding: 2rem; border-radius: 8px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <h2 style="color: #0a2540; margin-bottom: 0.5rem;">${shopName}</h2>
+                            <p style="color: #666; margin: 0.25rem 0;">${shopPhone} | ${shopEmail}</p>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+                            <h3 style="color: #0a2540; margin-bottom: 0.5rem;">Invoice Details</h3>
+                            <p><strong>Customer:</strong> ${invoice.customerName}</p>
+                            <p><strong>Vehicle:</strong> ${invoice.vehicle}</p>
+                            <p><strong>Date:</strong> ${invoice.date}</p>
+                            <p><strong>Status:</strong> <span class="status-badge status-${invoice.status.toLowerCase()}">${invoice.status}</span></p>
+                        </div>
+                        
+                        ${socialLinksHTML}
+                        
+                        <div style="margin-top: 1.5rem; text-align: right;">
+                            <h3 style="color: #0a2540;">Total: $${invoice.total.toFixed(2)}</h3>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                            <button class="btn btn-primary" onclick="window.print()">🖨️ Print</button>
+                            <button class="btn btn-success" onclick="shareInvoice(${invoice.id})">📱 Share</button>
+                            <button class="btn btn-secondary" onclick="this.closest('div').parentElement.remove()">✖️ Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
         }
 
         // ============ TOWING FUNCTIONS ============
@@ -4518,6 +4918,18 @@ Thank you for choosing [SHOP_NAME]. We'll contact you once we've had a chance to
                 sendgridBadge.style.color = '#721c24';
                 sendgridBadge.textContent = 'Disconnected';
             }
+
+            // Update Social Media badge
+            const socialBadge = document.getElementById('socialBadge');
+            if (settings.socialEnabled && (settings.facebookUrl || settings.instagramUrl || settings.twitterUrl || settings.linkedinUrl)) {
+                socialBadge.style.background = '#d4edda';
+                socialBadge.style.color = '#155724';
+                socialBadge.textContent = 'Configured';
+            } else {
+                socialBadge.style.background = '#f8d7da';
+                socialBadge.style.color = '#721c24';
+                socialBadge.textContent = 'Not Configured';
+            }
         }
 
         function testVapiConnection() {
@@ -4541,6 +4953,358 @@ Thank you for choosing [SHOP_NAME]. We'll contact you once we've had a chance to
                 alert(`Test email sent to ${emailAddress}!\n\nThis would send an actual email via SendGrid in production.`);
             }
         }
+
+        function saveSocialMediaSettings() {
+            settings.socialEnabled = document.getElementById('socialEnabled').checked;
+            settings.facebookUrl = document.getElementById('facebookUrl').value;
+            settings.instagramUrl = document.getElementById('instagramUrl').value;
+            settings.twitterUrl = document.getElementById('twitterUrl').value;
+            settings.linkedinUrl = document.getElementById('linkedinUrl').value;
+            settings.youtubeUrl = document.getElementById('youtubeUrl').value;
+            settings.tiktokUrl = document.getElementById('tiktokUrl').value;
+            settings.googleBusinessUrl = document.getElementById('googleBusinessUrl').value;
+            settings.autoShareInvoices = document.getElementById('autoShareInvoices').checked;
+            settings.showSocialLinksInvoices = document.getElementById('showSocialLinksInvoices').checked;
+
+            localStorage.setItem('vhicl_settings', JSON.stringify(settings));
+            updateIntegrationBadges();
+            alert('Social Media settings saved successfully!');
+        }
+
+        function previewSocialLinks() {
+            let preview = 'Your Social Media Links:\n\n';
+            if (settings.facebookUrl) preview += `📘 Facebook: ${settings.facebookUrl}\n`;
+            if (settings.instagramUrl) preview += `📷 Instagram: ${settings.instagramUrl}\n`;
+            if (settings.twitterUrl) preview += `🐦 Twitter/X: ${settings.twitterUrl}\n`;
+            if (settings.linkedinUrl) preview += `💼 LinkedIn: ${settings.linkedinUrl}\n`;
+            if (settings.youtubeUrl) preview += `▶️ YouTube: ${settings.youtubeUrl}\n`;
+            if (settings.tiktokUrl) preview += `🎵 TikTok: ${settings.tiktokUrl}\n`;
+            if (settings.googleBusinessUrl) preview += `📍 Google Business: ${settings.googleBusinessUrl}\n`;
+            
+            if (!settings.facebookUrl && !settings.instagramUrl && !settings.twitterUrl && !settings.linkedinUrl && !settings.youtubeUrl && !settings.tiktokUrl && !settings.googleBusinessUrl) {
+                preview += 'No social media links configured yet.';
+            }
+            
+            alert(preview);
+        }
+
+        // ============ SOCIAL MEDIA MARKETING FUNCTIONS ============
+        let socialPosts = [];
+
+        function initSocialMedia() {
+            const savedPosts = JSON.parse(localStorage.getItem('vhicl_social_posts') || '[]');
+            socialPosts = savedPosts;
+            renderSocialPosts();
+            updateSocialStats();
+        }
+
+        function createPost() {
+            const postType = document.getElementById('postType').value;
+            const headline = document.getElementById('postHeadline').value;
+            const message = document.getElementById('postMessage').value;
+            const image = document.getElementById('postImage').value;
+            const platforms = [];
+            if (document.getElementById('postFacebook').checked) platforms.push('Facebook');
+            if (document.getElementById('postInstagram').checked) platforms.push('Instagram');
+            if (document.getElementById('postTwitter').checked) platforms.push('Twitter');
+            if (document.getElementById('postLinkedIn').checked) platforms.push('LinkedIn');
+            
+            const publishOption = document.getElementById('publishOption').value;
+            const scheduleDateTime = document.getElementById('scheduleDateTime').value;
+
+            if (!headline || !message) {
+                alert('Please enter both a headline and message.');
+                return;
+            }
+
+            if (platforms.length === 0) {
+                alert('Please select at least one platform.');
+                return;
+            }
+
+            const post = {
+                id: Date.now(),
+                type: postType,
+                headline: headline,
+                message: message,
+                image: image,
+                platforms: platforms,
+                status: publishOption === 'now' ? 'published' : (publishOption === 'schedule' ? 'scheduled' : 'draft'),
+                scheduledFor: scheduleDateTime,
+                createdAt: new Date().toISOString(),
+                publishedAt: publishOption === 'now' ? new Date().toISOString() : null,
+                engagement: { likes: 0, shares: 0, comments: 0 }
+            };
+
+            socialPosts.unshift(post);
+            saveSocialPosts();
+            renderSocialPosts();
+            updateSocialStats();
+            clearPostForm();
+
+            if (publishOption === 'now') {
+                alert('✅ Post published successfully to: ' + platforms.join(', '));
+            } else if (publishOption === 'schedule') {
+                alert('📅 Post scheduled for: ' + new Date(scheduleDateTime).toLocaleString());
+            } else {
+                alert('📝 Post saved as draft');
+            }
+        }
+
+        function useTemplate(templateType) {
+            const templates = {
+                'brake': {
+                    type: 'promotion',
+                    headline: '🔧 Brake Service Special - 20% OFF!',
+                    message: `🚗 Is it time for a brake check? 
+
+🔧 Complete Brake Inspection - FREE
+🛑 Brake Pad Replacement - 20% OFF
+💯 Brake Rotor Resurfacing - Discounted
+
+⚠️ Don't wait until it's too late! Squealing brakes mean it's time for service.
+
+📞 Call us today: ${settings.shopPhone || '(555) 123-4567'}
+📍 Visit us: ${settings.shopAddress || '123 Main St, Anytown, USA'}
+
+#BrakeService #AutoRepair #SafeDriving #${settings.shopName?.replace(/\s+/g, '') || 'VHICLPro'}`,
+                    image: ''
+                },
+                'oil': {
+                    type: 'service',
+                    headline: '🛢️ Oil Change Reminder - Stay Protected!',
+                    message: `⏰ Time for an oil change? Regular maintenance keeps your engine running smooth!
+
+✅ Full Synthetic Oil Change
+✅ Filter Replacement
+✅ Multi-Point Inspection
+✅ Fluid Top-Off
+
+🎉 Mention this post for a $10 discount!
+
+📅 Schedule your appointment today!
+
+#OilChange #CarMaintenance #AutoCare #${settings.shopName?.replace(/\s+/g, '') || 'VHICLPro'}`,
+                    image: ''
+                },
+                'ac': {
+                    type: 'promotion',
+                    headline: '❄️ Stay Cool - AC Service Special!',
+                    message: `☀️ Hot outside? Keep cool inside with our AC service special!
+
+❄️ AC System Check - FREE
+🔧 AC Recharge & Repair - 15% OFF
+💨 Cabin Air Filter - 10% OFF
+
+Beat the heat! Schedule your AC service today and stay comfortable all summer long.
+
+📞 Call: ${settings.shopPhone || '(555) 123-4567'}
+
+#ACRepair #SummerReady #AutoAC #${settings.shopName?.replace(/\s+/g, '') || 'VHICLPro'}`,
+                    image: ''
+                },
+                'emergency': {
+                    type: 'service',
+                    headline: '🚨 24/7 Emergency Roadside Assistance!',
+                    message: `🚗 Broke down? We're here to help!
+
+✅ 24/7 Emergency Towing
+✅ Roadside Assistance
+✅ Battery Jump Start
+✅ Flat Tire Repair
+✅ Fuel Delivery
+
+📍 Serving the greater Anytown area
+📞 Emergency Line: ${settings.shopPhone || '(555) 123-4567'}
+
+Save our number - you never know when you'll need it!
+
+#RoadsideAssistance #EmergencyTowing #AutoHelp #${settings.shopName?.replace(/\s+/g, '') || 'VHICLPro'}`,
+                    image: ''
+                },
+                'review': {
+                    type: 'testimonial',
+                    headline: '⭐ We Love Our Customers!',
+                    message: `❤️ Thank you for choosing ${settings.shopName || 'VHICL Pro Auto Shop'}!
+
+Your trust means everything to us. We're committed to providing the best auto service experience.
+
+📝 Had a great experience? Leave us a review!
+📍 Google, Yelp, or Facebook
+
+⭐⭐⭐⭐⭐
+
+#CustomerAppreciation #AutoRepair #ThankYou #${settings.shopName?.replace(/\s+/g, '') || 'VHICLPro'}`,
+                    image: ''
+                },
+                'seasonal': {
+                    type: 'tip',
+                    headline: '🌤️ Seasonal Vehicle Care Tips!',
+                    message: `🍂 Fall/Winter Vehicle Care Checklist:
+
+❄️ Check Antifreeze Levels
+🔋 Test Battery Health
+🛞 Inspect Tire Tread & Pressure
+💡 Replace Worn Wiper Blades
+🔧 Check Brakes & Heating System
+
+📅 Schedule your seasonal inspection today!
+
+📞 ${settings.shopPhone || '(555) 123-4567'}
+
+#SeasonalMaintenance #AutoCare #VehicleSafety #${settings.shopName?.replace(/\s+/g, '') || 'VHICLPro'}`,
+                    image: ''
+                }
+            };
+
+            const template = templates[templateType];
+            if (template) {
+                document.getElementById('postType').value = template.type;
+                document.getElementById('postHeadline').value = template.headline;
+                document.getElementById('postMessage').value = template.message;
+                document.getElementById('postImage').value = template.image;
+            }
+        }
+
+        function previewPost() {
+            const headline = document.getElementById('postHeadline').value;
+            const message = document.getElementById('postMessage').value;
+            const image = document.getElementById('postImage').value;
+            
+            let preview = `📱 POST PREVIEW\n\n`;
+            preview += `${headline || '(No headline)'}\n\n`;
+            preview += `${message || '(No message)'}\n\n`;
+            if (image) preview += `🖼️ Image: ${image}\n`;
+            preview += `\n━━━━━━━━━━━━━━━━\n`;
+            preview += `Posted by: ${settings.shopName || 'VHICL Pro Auto Shop'}\n`;
+            preview += `📞 ${settings.shopPhone || '(555) 123-4567'}`;
+            
+            alert(preview);
+        }
+
+        function renderSocialPosts() {
+            const list = document.getElementById('socialPostList');
+            const filter = document.getElementById('postFilter').value;
+
+            let filteredPosts = socialPosts;
+            if (filter !== 'all') {
+                filteredPosts = socialPosts.filter(post => post.status === filter);
+            }
+
+            if (filteredPosts.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666;">No posts found.</p>';
+                return;
+            }
+
+            list.innerHTML = filteredPosts.map(post => `
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span class="status-badge status-${post.status === 'published' ? 'active' : (post.status === 'scheduled' ? 'pending' : 'inactive')}">${post.status}</span>
+                                <span style="font-size: 0.8rem; color: #666;">${new Date(post.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <h4 style="color: #0a2540; margin: 0 0 0.5rem 0;">${post.headline}</h4>
+                            <p style="color: #666; margin: 0.5rem 0; font-size: 0.9rem;">${post.message.substring(0, 150)}${post.message.length > 150 ? '...' : ''}</p>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                                ${post.platforms.map(p => `<span style="background: #e9ecef; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">${p}</span>`).join('')}
+                            </div>
+                            ${post.scheduledFor ? `<p style="color: #ffc107; margin: 0.5rem 0 0; font-size: 0.85rem;">📅 Scheduled: ${new Date(post.scheduledFor).toLocaleString()}</p>` : ''}
+                            ${post.status === 'published' ? `
+                                <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
+                                    👍 ${post.engagement.likes} | 🔄 ${post.engagement.shares} | 💬 ${post.engagement.comments}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; margin-left: 1rem;">
+                            ${post.status === 'draft' ? `
+                                <button class="btn btn-success" onclick="publishPost(${post.id})" title="Publish Now">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-danger" onclick="deleteSocialPost(${post.id})" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function publishPost(postId) {
+            const post = socialPosts.find(p => p.id === postId);
+            if (post) {
+                post.status = 'published';
+                post.publishedAt = new Date().toISOString();
+                saveSocialPosts();
+                renderSocialPosts();
+                updateSocialStats();
+                alert('✅ Post published successfully!');
+            }
+        }
+
+        function deleteSocialPost(postId) {
+            if (confirm('Are you sure you want to delete this post?')) {
+                socialPosts = socialPosts.filter(p => p.id !== postId);
+                saveSocialPosts();
+                renderSocialPosts();
+                updateSocialStats();
+            }
+        }
+
+        function updateSocialStats() {
+            const activeCampaigns = socialPosts.filter(p => p.status === 'published').length;
+            const scheduledPosts = socialPosts.filter(p => p.status === 'scheduled').length;
+            const totalPosts = socialPosts.length;
+            
+            // Calculate engagement rate (simulated)
+            const publishedPosts = socialPosts.filter(p => p.status === 'published');
+            const totalEngagement = publishedPosts.reduce((sum, p) => 
+                sum + p.engagement.likes + p.engagement.shares + p.engagement.comments, 0);
+            const engagementRate = publishedPosts.length > 0 ? 
+                ((totalEngagement / (publishedPosts.length * 100)) * 100).toFixed(1) : 0;
+
+            document.getElementById('activeCampaigns').textContent = activeCampaigns;
+            document.getElementById('totalPosts').textContent = totalPosts;
+            document.getElementById('scheduledPosts').textContent = scheduledPosts;
+            document.getElementById('engagementRate').textContent = engagementRate + '%';
+        }
+
+        function saveSocialPosts() {
+            localStorage.setItem('vhicl_social_posts', JSON.stringify(socialPosts));
+        }
+
+        function clearPostForm() {
+            document.getElementById('postHeadline').value = '';
+            document.getElementById('postMessage').value = '';
+            document.getElementById('postImage').value = '';
+            document.getElementById('postType').value = 'promotion';
+            document.getElementById('publishOption').value = 'now';
+            document.getElementById('scheduleDateTime').value = '';
+            document.getElementById('postFacebook').checked = true;
+            document.getElementById('postInstagram').checked = true;
+            document.getElementById('postTwitter').checked = false;
+            document.getElementById('postLinkedIn').checked = false;
+            document.getElementById('scheduleDateGroup').style.display = 'none';
+        }
+
+        // Schedule date visibility toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const publishOption = document.getElementById('publishOption');
+            if (publishOption) {
+                publishOption.addEventListener('change', function() {
+                    const scheduleGroup = document.getElementById('scheduleDateGroup');
+                    if (scheduleGroup) {
+                        scheduleGroup.style.display = this.value === 'schedule' ? 'block' : 'none';
+                    }
+                });
+            }
+
+            const postFilter = document.getElementById('postFilter');
+            if (postFilter) {
+                postFilter.addEventListener('change', renderSocialPosts);
+            }
+        });
 
         // ============ INVENTORY FUNCTIONS ============
         function initSampleInventory() {
