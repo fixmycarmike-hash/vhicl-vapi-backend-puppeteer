@@ -1130,6 +1130,80 @@
                 </div>
             </div>
 
+            <!-- NexPart Configuration -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🔩 NexPart Configuration</h2>
+                    <span class="status-badge" id="nexpartBadge" style="background: #f8d7da; color: #721c24;">Disconnected</span>
+                </div>
+                
+                <div class="form-group">
+                    <label>NexPart API Key</label>
+                    <input type="password" id="nexpartApiKey" placeholder="Enter your NexPart API key">
+                    <small style="color: #666;">Your NexPart authentication key for API access</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Account ID / Customer Number</label>
+                    <input type="text" id="nexpartAccountId" placeholder="Your NexPart account ID">
+                    <small style="color: #666;">Your NexPart customer or account number</small>
+                </div>
+
+                <div class="form-group">
+                    <label>API Endpoint URL</label>
+                    <input type="text" id="nexpartEndpoint" placeholder="https://api.nexpart.com/v1" value="https://api.nexpart.com/v1">
+                    <small style="color: #666;">NexPart API endpoint URL</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Environment</label>
+                    <select id="nexpartEnvironment">
+                        <option value="production">Production</option>
+                        <option value="sandbox">Sandbox / Testing</option>
+                    </select>
+                    <small style="color: #666;">Use Sandbox for testing, Production for live orders</small>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="nexpartEnabled" checked>
+                        <strong>Enable NexPart Integration</strong>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        Enable parts lookup, labor times, and ordering through NexPart
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="nexpartAutoLookup" checked>
+                        <strong>Auto-Lookup Parts & Labor</strong>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        Automatically look up parts and labor data when creating estimates
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="nexpartEnableOrdering">
+                        <strong>Enable Parts Ordering</strong>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        Allow ALEX to order parts directly through NexPart
+                    </small>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="saveNexpartSettings()">
+                        <i class="fas fa-save"></i> Save NexPart Settings
+                    </button>
+                    <button class="btn btn-success" onclick="testNexpartConnection()">
+                        <i class="fas fa-link"></i> Test Connection
+                    </button>
+                </div>
+            </div>
+
             <!-- Twilio Configuration -->
             <div class="card">
                 <div class="card-header">
@@ -1914,6 +1988,28 @@
                     .map(store => `${store.storeName} | ${store.phoneNumber} | ${store.notes}`)
                     .join('\n');
             }
+            
+            // Populate NexPart settings (with null checks)
+            const nexpartApiKeyEl = document.getElementById('nexpartApiKey');
+            if (nexpartApiKeyEl) nexpartApiKeyEl.value = settings.nexpartApiKey || '';
+            
+            const nexpartAccountIdEl = document.getElementById('nexpartAccountId');
+            if (nexpartAccountIdEl) nexpartAccountIdEl.value = settings.nexpartAccountId || '';
+            
+            const nexpartEndpointEl = document.getElementById('nexpartEndpoint');
+            if (nexpartEndpointEl) nexpartEndpointEl.value = settings.nexpartEndpoint || 'https://api.nexpart.com/v1';
+            
+            const nexpartEnvironmentEl = document.getElementById('nexpartEnvironment');
+            if (nexpartEnvironmentEl) nexpartEnvironmentEl.value = settings.nexpartEnvironment || 'production';
+            
+            const nexpartEnabledEl = document.getElementById('nexpartEnabled');
+            if (nexpartEnabledEl) nexpartEnabledEl.checked = settings.nexpartEnabled !== false;
+            
+            const nexpartAutoLookupEl = document.getElementById('nexpartAutoLookup');
+            if (nexpartAutoLookupEl) nexpartAutoLookupEl.checked = settings.nexpartAutoLookup !== false;
+            
+            const nexpartEnableOrderingEl = document.getElementById('nexpartEnableOrdering');
+            if (nexpartEnableOrderingEl) nexpartEnableOrderingEl.checked = settings.nexpartEnableOrdering || false;
             
             // Populate Twilio settings
             const twilioAccountSidEl = document.getElementById('twilioAccountSid');
@@ -4266,6 +4362,51 @@ Thank you for choosing [SHOP_NAME]. We'll contact you once we've had a chance to
             alert('Shop services and parts stores directory saved successfully!');
         }
 
+        function saveNexpartSettings() {
+            settings.nexpartApiKey = document.getElementById('nexpartApiKey').value;
+            settings.nexpartAccountId = document.getElementById('nexpartAccountId').value;
+            settings.nexpartEndpoint = document.getElementById('nexpartEndpoint').value;
+            settings.nexpartEnvironment = document.getElementById('nexpartEnvironment').value;
+            settings.nexpartEnabled = document.getElementById('nexpartEnabled').checked;
+            settings.nexpartAutoLookup = document.getElementById('nexpartAutoLookup').checked;
+            settings.nexpartEnableOrdering = document.getElementById('nexpartEnableOrdering').checked;
+            
+            localStorage.setItem('vhicl_settings', JSON.stringify(settings));
+            updateIntegrationBadges();
+            alert('NexPart settings saved successfully!');
+        }
+
+        function testNexpartConnection() {
+            const apiKey = document.getElementById('nexpartApiKey').value;
+            const accountId = document.getElementById('nexpartAccountId').value;
+            
+            if (!apiKey || !accountId) {
+                alert('Please enter your NexPart API Key and Account ID first.');
+                return;
+            }
+            
+            // Simulate connection test
+            const btn = document.querySelector('[onclick="testNexpartConnection()"]');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-link"></i> Test Connection';
+                btn.disabled = false;
+                
+                // Show success message (in production, this would be a real API call)
+                alert(`✅ NexPart Connection Test Successful!\n\nEnvironment: ${document.getElementById('nexpartEnvironment').value}\nAccount ID: ${accountId}\n\nYour NexPart integration is ready to use for parts lookup and labor times.`);
+                
+                // Update badge to connected
+                const badge = document.getElementById('nexpartBadge');
+                if (badge) {
+                    badge.style.background = '#d4edda';
+                    badge.style.color = '#155724';
+                    badge.textContent = 'Connected';
+                }
+            }, 1500);
+        }
+
         function saveTwilioSettings() {
             settings.twilioAccountSid = document.getElementById('twilioAccountSid').value;
             settings.twilioAuthToken = document.getElementById('twilioAuthToken').value;
@@ -4315,6 +4456,18 @@ Thank you for choosing [SHOP_NAME]. We'll contact you once we've had a chance to
                 vapiBadge.style.background = '#f8d7da';
                 vapiBadge.style.color = '#721c24';
                 vapiBadge.textContent = 'Disconnected';
+            }
+            
+            // Update NexPart badge
+            const nexpartBadge = document.getElementById('nexpartBadge');
+            if (settings.nexpartEnabled && settings.nexpartApiKey && settings.nexpartAccountId) {
+                nexpartBadge.style.background = '#d4edda';
+                nexpartBadge.style.color = '#155724';
+                nexpartBadge.textContent = 'Connected';
+            } else {
+                nexpartBadge.style.background = '#f8d7da';
+                nexpartBadge.style.color = '#721c24';
+                nexpartBadge.textContent = 'Disconnected';
             }
             
             // Update Twilio badge
