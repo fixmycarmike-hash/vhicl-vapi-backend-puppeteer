@@ -1104,7 +1104,7 @@
             <!-- Shop Services & Parts Configuration -->
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">🔧 Shop Services & Local Parts</h2>
+                    <h2 class="card-title">🔧 Shop Services & Parts Stores Directory</h2>
                 </div>
                 
                 <div class="form-group">
@@ -1116,10 +1116,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Local Parts Numbers Reference</label>
-                    <textarea id="localPartsNumbers" rows="8" placeholder="Part Name | OEM Number | Local Part Number | Supplier&#10;Brake Pads (Front) | 45022-SE0-A01 | BP-001-F | AutoZone&#10;Oil Filter | 15400-PLM-A01 | OF-005 | O'Reilly&#10;Air Filter | 17220-5VA-A01 | AF-012 | NAPA"></textarea>
+                    <label>Local Parts Store Directory</label>
+                    <textarea id="localPartsNumbers" rows="8" placeholder="AutoZone | (555) 123-4567 | Open 7am-9pm, carries common parts&#10;O'Reilly Auto Parts | (555) 234-5678 | Open 7am-10pm, fast delivery&#10;NAPA Auto Parts | (555) 345-6789 | Open 7am-8pm, specialty parts&#10;CarQuest | (555) 456-7890 | Open 7am-9pm, wholesale pricing&#10;Advance Auto Parts | (555) 567-8901 | Open 8am-9pm, online ordering available"></textarea>
                     <small style="color: #666; display: block; margin-top: 0.25rem;">
-                        Map OEM part numbers to your local supplier's part numbers. Format: Part Name | OEM Number | Local Part Number | Supplier
+                        List local parts stores with phone numbers for Alex to call. Format: Store Name | Phone Number | Notes/Services
                     </small>
                 </div>
 
@@ -1909,9 +1909,9 @@
             }
             
             const localPartsNumbersEl = document.getElementById('localPartsNumbers');
-            if (localPartsNumbersEl && settings.localPartsNumbers) {
-                localPartsNumbersEl.value = settings.localPartsNumbers
-                    .map(part => `${part.partName} | ${part.oemNumber} | ${part.localPartNumber} | ${part.supplier}`)
+            if (localPartsNumbersEl && settings.partsStores) {
+                localPartsNumbersEl.value = settings.partsStores
+                    .map(store => `${store.storeName} | ${store.phoneNumber} | ${store.notes}`)
                     .join('\n');
             }
             
@@ -4248,23 +4248,22 @@ Thank you for choosing [SHOP_NAME]. We'll contact you once we've had a chance to
                 .map(line => line.trim())
                 .filter(line => line.length > 0);
             
-            // Parse local parts numbers (split by lines, then by |)
-            settings.localPartsNumbers = localPartsNumbers
+            // Parse parts store directory (split by lines, then by |)
+            settings.partsStores = localPartsNumbers
                 .split('\n')
                 .map(line => line.trim())
                 .filter(line => line.length > 0)
                 .map(line => {
                     const parts = line.split('|').map(p => p.trim());
                     return {
-                        partName: parts[0] || '',
-                        oemNumber: parts[1] || '',
-                        localPartNumber: parts[2] || '',
-                        supplier: parts[3] || ''
+                        storeName: parts[0] || '',
+                        phoneNumber: parts[1] || '',
+                        notes: parts[2] || ''
                     };
                 });
             
             localStorage.setItem('vhicl_settings', JSON.stringify(settings));
-            alert('Shop services and local parts settings saved successfully!');
+            alert('Shop services and parts stores directory saved successfully!');
         }
 
         function saveTwilioSettings() {
