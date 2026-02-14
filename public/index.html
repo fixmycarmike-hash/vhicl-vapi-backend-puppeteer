@@ -2118,6 +2118,33 @@
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.remove('active');
+                
+                // Reset estimate form if closing estimate modal
+                if (modalId === 'estimateModal') {
+                    window.editingEstimateId = null;
+                    estimateParts = [];
+                    estimateLabor = [];
+                    
+                    // Reset button text
+                    const submitBtn = document.querySelector('#estimateModal .btn-primary');
+                    if (submitBtn) {
+                        submitBtn.textContent = 'Create Estimate';
+                    }
+                    
+                    // Clear form fields
+                    const vehicleInput = document.getElementById('estimateVehicle');
+                    const descInput = document.getElementById('estimateDescription');
+                    const statusSelect = document.getElementById('estimateStatus');
+                    
+                    if (vehicleInput) vehicleInput.value = '';
+                    if (descInput) descInput.value = '';
+                    if (statusSelect) statusSelect.value = 'Draft';
+                    
+                    // Clear parts and labor lists
+                    renderEstimateParts();
+                    renderEstimateLabor();
+                    updateEstimateTotal();
+                }
             }
         }
 
@@ -2283,6 +2310,10 @@
         let estimateLabor = [];
 
         function openEstimateModal() {
+            // Clear edit mode
+            window.editingEstimateId = null;
+            
+            // Reset parts and labor
             estimateParts = [];
             estimateLabor = [];
             updateEstimateTotal();
@@ -2420,24 +2451,54 @@
             const partsTotal = estimateParts.reduce((sum, part) => sum + (part.quantity * part.price), 0);
             const laborTotal = estimateLabor.reduce((sum, item) => sum + item.total, 0);
             
-            const estimate = {
-                id: Date.now(),
-                customerName: customer ? customer.name : 'Unknown',
-                vehicle: vehicle,
-                description: description,
-                date: new Date().toISOString().split('T')[0],
-                parts: estimateParts,
-                labor: estimateLabor,
-                total: partsTotal + laborTotal,
-                status: 'Draft'  // Always start as Draft for shop approval
-            };
-            
-            estimates.push(estimate);
-            saveToStorage();
-            renderEstimates();
-            renderPendingApprovalEstimates();
-            closeModal('estimateModal');
-            alert('Estimate saved and submitted for shop approval!\n\nShop manager will review and approve before Alex calls the customer.');
+            // Check if editing existing estimate
+            if (window.editingEstimateId) {
+                // Update existing estimate
+                const index = estimates.findIndex(e => e.id === window.editingEstimateId);
+                if (index !== -1) {
+                    estimates[index] = {
+                        ...estimates[index],
+                        customerName: customer ? customer.name : 'Unknown',
+                        customerId: customerId,
+                        vehicle: vehicle,
+                        description: description,
+                        parts: estimateParts,
+                        labor: estimateLabor,
+                        total: partsTotal + laborTotal,
+                        status: status
+                    };
+                }
+                
+                // Clear edit mode
+                window.editingEstimateId = null;
+                
+                saveToStorage();
+                renderEstimates();
+                renderPendingApprovalEstimates();
+                closeModal('estimateModal');
+                alert('Estimate updated successfully!');
+            } else {
+                // Create new estimate
+                const estimate = {
+                    id: Date.now(),
+                    customerName: customer ? customer.name : 'Unknown',
+                    customerId: customerId,
+                    vehicle: vehicle,
+                    description: description,
+                    date: new Date().toISOString().split('T')[0],
+                    parts: estimateParts,
+                    labor: estimateLabor,
+                    total: partsTotal + laborTotal,
+                    status: 'Draft'  // Always start as Draft for shop approval
+                };
+                
+                estimates.push(estimate);
+                saveToStorage();
+                renderEstimates();
+                renderPendingApprovalEstimates();
+                closeModal('estimateModal');
+                alert('Estimate saved and submitted for shop approval!\n\nShop manager will review and approve before Alex calls the customer.');
+            }
         }
 
         function initSampleEstimates() {
@@ -2492,6 +2553,9 @@
                         </div>
                         <div style="display: flex; gap: 0.5rem; align-items: center;">
                             <span class="status-badge status-${est.status.toLowerCase()}">${est.status}</span>
+                            <button class="btn" style="background: #667eea; color: white;" onclick="editEstimate(${est.id})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
                             <button class="btn btn-primary" onclick="convertToInvoice(${est.id})">
                                 <i class="fas fa-file-invoice"></i> Convert
                             </button>
@@ -2533,6 +2597,40 @@
                 saveToStorage();
                 renderEstimates();
             }
+        }
+
+        function editEstimate(id) {
+            const estimate = estimates.find(e => e.id === id);
+            if (!estimate) return;
+
+            // Store the estimate being edited
+            window.editingEstimateId = id;
+
+            // Populate form with existing data
+            document.getElementById('estimateCustomerSelect').value = estimate.customerId || estimate.customerName;
+            document.getElementById('estimateVehicle').value = estimate.vehicle;
+            document.getElementById('estimateDescription').value = estimate.description || '';
+            document.getElementById('estimateStatus').value = estimate.status;
+
+            // Load parts
+            estimateParts = estimate.parts || [];
+            renderEstimateParts();
+
+            // Load labor
+            estimateLabor = estimate.labor || [];
+            renderEstimateLabor();
+
+            // Update total
+            updateEstimateTotal();
+
+            // Change button text
+            const submitBtn = document.querySelector('#estimateModal .btn-primary');
+            if (submitBtn) {
+                submitBtn.textContent = 'Update Estimate';
+            }
+
+            // Open modal
+            openModal('estimateModal');
         }
 
         // ============ INVOICE FUNCTIONS ============
