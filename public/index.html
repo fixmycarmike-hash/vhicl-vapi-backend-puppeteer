@@ -413,6 +413,262 @@
                 display: none !important;
             }
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                font-size: 14px;
+                padding: 0;
+                margin: 0;
+            }
+
+            .container {
+                padding: 10px;
+                max-width: 100%;
+            }
+
+            .nav-btn {
+                font-size: 12px;
+                padding: 8px 12px;
+                flex: 1 0 auto;
+                min-width: 60px;
+            }
+
+            .nav-btn span {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                margin-bottom: 15px;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .card-title {
+                font-size: 1.1rem;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group label {
+                font-size: 13px;
+            }
+
+            input, select, textarea {
+                font-size: 16px; /* Prevents iOS zoom */
+                padding: 12px;
+            }
+
+            .btn {
+                font-size: 14px;
+                padding: 10px 15px;
+                flex: 1;
+                margin: 5px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px 5px;
+            }
+
+            /* Stack grid layouts on mobile */
+            [style*="grid-template-columns: 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            [style*="display: grid; grid-template-columns: repeat(3, 1fr)"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            [style*="display: grid; grid-template-columns: repeat(4, 1fr)"] {
+                grid-template-columns: 1fr 1fr !important;
+            }
+
+            /* Touch-friendly navigation */
+            .screen h1 {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+
+            /* Make status badges readable on mobile */
+            .status-badge {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+
+            /* Responsive search bar */
+            [style*="display: flex; gap: 10px; margin-bottom: 1rem;"] {
+                flex-direction: column;
+            }
+
+            [style*="display: flex; gap: 10px; margin-bottom: 1rem;"] input {
+                width: 100%;
+            }
+
+            /* Mobile-optimized dropdowns */
+            .card-header button {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            /* Hide non-essential elements on mobile */
+            .desktop-only {
+                display: none !important;
+            }
+
+            /* Mobile-specific adjustments */
+            .screen {
+                padding: 10px;
+                max-height: none;
+                overflow-y: visible;
+            }
+
+            /* Better spacing for touch targets */
+            button, input, select, textarea {
+                min-height: 44px; /* iOS touch target minimum */
+            }
+
+            /* Modal adjustments */
+            .modal {
+                width: 95%;
+                max-width: none;
+                margin: 10px;
+            }
+
+            /* Invoice/Estimate cards */
+            .card[style*="display: flex; justify-content: space-between"] {
+                flex-direction: column;
+            }
+
+            .card[style*="display: flex; justify-content: space-between"] button {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            /* Action buttons stacking */
+            [style*="display: flex; gap: 0.5rem"] {
+                flex-wrap: wrap;
+            }
+
+            [style*="display: flex; gap: 0.5rem"] button {
+                flex: 1 0 30%;
+                min-width: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Extra small mobile phones */
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-btn {
+                font-size: 11px;
+                padding: 6px 8px;
+            }
+
+            .stat-value {
+                font-size: 1.2rem;
+            }
+
+            .card-title {
+                font-size: 1rem;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+            }
+
+            /* Single column for everything */
+            [style*="grid-template-columns: 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Hide less important buttons on very small screens */
+            .btn-secondary {
+                display: none;
+            }
+        }
+
+        /* Landscape mobile optimizations */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .screen h1 {
+                font-size: 1.2rem;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        /* Tablet optimizations */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            [style*="grid-template-columns: repeat(4, 1fr)"] {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            button:hover {
+                transform: none;
+            }
+
+            .card:hover {
+                transform: none;
+            }
+
+            input:focus, textarea:focus, select:focus {
+                outline: 2px solid #0a2540;
+                outline-offset: -2px;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            body {
+                -webkit-font-smoothing: antialiased;
+            }
+        }
     </style>
 <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
@@ -2094,6 +2350,22 @@
             renderMaintenanceList();
             renderMaintenanceHistory();
             renderVapiScripts();
+
+            // Social media event listeners
+            const publishOption = document.getElementById('publishOption');
+            if (publishOption) {
+                publishOption.addEventListener('change', function() {
+                    const scheduleGroup = document.getElementById('scheduleDateGroup');
+                    if (scheduleGroup) {
+                        scheduleGroup.style.display = this.value === 'schedule' ? 'block' : 'none';
+                    }
+                });
+            }
+
+            const postFilter = document.getElementById('postFilter');
+            if (postFilter) {
+                postFilter.addEventListener('change', renderSocialPosts);
+            }
         });
 
         // ============ STORAGE FUNCTIONS ============
@@ -5287,24 +5559,6 @@ Your trust means everything to us. We're committed to providing the best auto se
             document.getElementById('postLinkedIn').checked = false;
             document.getElementById('scheduleDateGroup').style.display = 'none';
         }
-
-        // Schedule date visibility toggle
-        document.addEventListener('DOMContentLoaded', function() {
-            const publishOption = document.getElementById('publishOption');
-            if (publishOption) {
-                publishOption.addEventListener('change', function() {
-                    const scheduleGroup = document.getElementById('scheduleDateGroup');
-                    if (scheduleGroup) {
-                        scheduleGroup.style.display = this.value === 'schedule' ? 'block' : 'none';
-                    }
-                });
-            }
-
-            const postFilter = document.getElementById('postFilter');
-            if (postFilter) {
-                postFilter.addEventListener('change', renderSocialPosts);
-            }
-        });
 
         // ============ INVENTORY FUNCTIONS ============
         function initSampleInventory() {
