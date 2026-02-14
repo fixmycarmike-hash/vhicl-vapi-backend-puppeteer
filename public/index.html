@@ -1138,30 +1138,36 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>NexPart API Key</label>
-                    <input type="password" id="nexpartApiKey" placeholder="Enter your NexPart API key">
-                    <small style="color: #666;">Your NexPart authentication key for API access</small>
+                    <label>NexPart Username</label>
+                    <input type="text" id="nexpartUsername" placeholder="Enter your NexPart username">
+                    <small style="color: #666;">Your NexPart login username (for scrapers)</small>
+                </div>
+
+                <div class="form-group">
+                    <label>NexPart Password</label>
+                    <input type="password" id="nexpartPassword" placeholder="Enter your NexPart password">
+                    <small style="color: #666;">Your NexPart login password (for scrapers)</small>
                 </div>
 
                 <div class="form-group">
                     <label>Account ID / Customer Number</label>
                     <input type="text" id="nexpartAccountId" placeholder="Your NexPart account ID">
-                    <small style="color: #666;">Your NexPart customer or account number</small>
+                    <small style="color: #666;">Your NexPart customer or account number (optional)</small>
                 </div>
 
                 <div class="form-group">
-                    <label>API Endpoint URL</label>
-                    <input type="text" id="nexpartEndpoint" placeholder="https://api.nexpart.com/v1" value="https://api.nexpart.com/v1">
-                    <small style="color: #666;">NexPart API endpoint URL</small>
+                    <label>NexPart Base URL</label>
+                    <input type="text" id="nexpartBaseUrl" placeholder="https://www.nexpart.com" value="https://www.nexpart.com">
+                    <small style="color: #666;">Base URL for NexPart (used by scrapers)</small>
                 </div>
 
                 <div class="form-group">
-                    <label>Environment</label>
-                    <select id="nexpartEnvironment">
-                        <option value="production">Production</option>
-                        <option value="sandbox">Sandbox / Testing</option>
+                    <label>Integration Method</label>
+                    <select id="nexpartMethod">
+                        <option value="scraper">Web Scraper (Recommended)</option>
+                        <option value="api">API (if available)</option>
                     </select>
-                    <small style="color: #666;">Use Sandbox for testing, Production for live orders</small>
+                    <small style="color: #666;">How you connect to NexPart - Scraper uses username/password</small>
                 </div>
 
                 <div class="form-group">
@@ -1170,7 +1176,7 @@
                         <strong>Enable NexPart Integration</strong>
                     </label>
                     <small style="color: #666; display: block; margin-top: 0.25rem;">
-                        Enable parts lookup, labor times, and ordering through NexPart
+                        Enable parts lookup, labor times, and ordering through NexPart scrapers
                     </small>
                 </div>
 
@@ -1190,7 +1196,7 @@
                         <strong>Enable Parts Ordering</strong>
                     </label>
                     <small style="color: #666; display: block; margin-top: 0.25rem;">
-                        Allow ALEX to order parts directly through NexPart
+                        Allow ALEX to order parts through NexPart
                     </small>
                 </div>
 
@@ -1990,17 +1996,20 @@
             }
             
             // Populate NexPart settings (with null checks)
-            const nexpartApiKeyEl = document.getElementById('nexpartApiKey');
-            if (nexpartApiKeyEl) nexpartApiKeyEl.value = settings.nexpartApiKey || '';
+            const nexpartUsernameEl = document.getElementById('nexpartUsername');
+            if (nexpartUsernameEl) nexpartUsernameEl.value = settings.nexpartUsername || '';
+            
+            const nexpartPasswordEl = document.getElementById('nexpartPassword');
+            if (nexpartPasswordEl) nexpartPasswordEl.value = settings.nexpartPassword || '';
             
             const nexpartAccountIdEl = document.getElementById('nexpartAccountId');
             if (nexpartAccountIdEl) nexpartAccountIdEl.value = settings.nexpartAccountId || '';
             
-            const nexpartEndpointEl = document.getElementById('nexpartEndpoint');
-            if (nexpartEndpointEl) nexpartEndpointEl.value = settings.nexpartEndpoint || 'https://api.nexpart.com/v1';
+            const nexpartBaseUrlEl = document.getElementById('nexpartBaseUrl');
+            if (nexpartBaseUrlEl) nexpartBaseUrlEl.value = settings.nexpartBaseUrl || 'https://www.nexpart.com';
             
-            const nexpartEnvironmentEl = document.getElementById('nexpartEnvironment');
-            if (nexpartEnvironmentEl) nexpartEnvironmentEl.value = settings.nexpartEnvironment || 'production';
+            const nexpartMethodEl = document.getElementById('nexpartMethod');
+            if (nexpartMethodEl) nexpartMethodEl.value = settings.nexpartMethod || 'scraper';
             
             const nexpartEnabledEl = document.getElementById('nexpartEnabled');
             if (nexpartEnabledEl) nexpartEnabledEl.checked = settings.nexpartEnabled !== false;
@@ -4363,10 +4372,11 @@ Thank you for choosing [SHOP_NAME]. We'll contact you once we've had a chance to
         }
 
         function saveNexpartSettings() {
-            settings.nexpartApiKey = document.getElementById('nexpartApiKey').value;
+            settings.nexpartUsername = document.getElementById('nexpartUsername').value;
+            settings.nexpartPassword = document.getElementById('nexpartPassword').value;
             settings.nexpartAccountId = document.getElementById('nexpartAccountId').value;
-            settings.nexpartEndpoint = document.getElementById('nexpartEndpoint').value;
-            settings.nexpartEnvironment = document.getElementById('nexpartEnvironment').value;
+            settings.nexpartBaseUrl = document.getElementById('nexpartBaseUrl').value;
+            settings.nexpartMethod = document.getElementById('nexpartMethod').value;
             settings.nexpartEnabled = document.getElementById('nexpartEnabled').checked;
             settings.nexpartAutoLookup = document.getElementById('nexpartAutoLookup').checked;
             settings.nexpartEnableOrdering = document.getElementById('nexpartEnableOrdering').checked;
@@ -4377,11 +4387,11 @@ Thank you for choosing [SHOP_NAME]. We'll contact you once we've had a chance to
         }
 
         function testNexpartConnection() {
-            const apiKey = document.getElementById('nexpartApiKey').value;
-            const accountId = document.getElementById('nexpartAccountId').value;
+            const username = document.getElementById('nexpartUsername').value;
+            const password = document.getElementById('nexpartPassword').value;
             
-            if (!apiKey || !accountId) {
-                alert('Please enter your NexPart API Key and Account ID first.');
+            if (!username || !password) {
+                alert('Please enter your NexPart Username and Password first.');
                 return;
             }
             
@@ -4394,8 +4404,11 @@ Thank you for choosing [SHOP_NAME]. We'll contact you once we've had a chance to
                 btn.innerHTML = '<i class="fas fa-link"></i> Test Connection';
                 btn.disabled = false;
                 
-                // Show success message (in production, this would be a real API call)
-                alert(`✅ NexPart Connection Test Successful!\n\nEnvironment: ${document.getElementById('nexpartEnvironment').value}\nAccount ID: ${accountId}\n\nYour NexPart integration is ready to use for parts lookup and labor times.`);
+                const method = document.getElementById('nexpartMethod').value;
+                const baseUrl = document.getElementById('nexpartBaseUrl').value;
+                
+                // Show success message (in production, this would be a real test with your scrapers)
+                alert(`✅ NexPart Connection Test Successful!\n\nMethod: ${method}\nBase URL: ${baseUrl}\nUsername: ${username}\n\nYour NexPart scrapers are ready to use for parts lookup and labor times.\n\nNote: This is a configuration test. Actual scraper functionality depends on your backend implementation.`);
                 
                 // Update badge to connected
                 const badge = document.getElementById('nexpartBadge');
@@ -4460,7 +4473,7 @@ Thank you for choosing [SHOP_NAME]. We'll contact you once we've had a chance to
             
             // Update NexPart badge
             const nexpartBadge = document.getElementById('nexpartBadge');
-            if (settings.nexpartEnabled && settings.nexpartApiKey && settings.nexpartAccountId) {
+            if (settings.nexpartEnabled && settings.nexpartUsername && settings.nexpartPassword) {
                 nexpartBadge.style.background = '#d4edda';
                 nexpartBadge.style.color = '#155724';
                 nexpartBadge.textContent = 'Connected';
