@@ -2554,13 +2554,12 @@
             }
             
 
-            const localTowingNumbersEl = document.getElementById('localTowingNumbers');
-            if (localTowingNumbersEl && settings.towingCompanies) {
-                localTowingNumbersEl.value = settings.towingCompanies
-                    .map(towing => `${towing.companyName} | ${towing.phoneNumber} | ${towing.notes}`)
-                    .join(\
-\);
-            }
+            // TODO: Fix towing companies loading
+            // const localTowingNumbersEl = document.getElementById('localTowingNumbers');
+            // if (localTowingNumbersEl && settings.towingCompanies) {
+            //     localTowingNumbersEl.value = settings.towingCompanies.map(...).join('
+');
+            // }
             // Populate NexPart settings (with null checks)
             const nexpartUsernameEl = document.getElementById('nexpartUsername');
             if (nexpartUsernameEl) nexpartUsernameEl.value = settings.nexpartUsername || '';
