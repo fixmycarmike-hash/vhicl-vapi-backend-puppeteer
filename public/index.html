@@ -670,6 +670,30 @@
             }
         }
     </style>
+    
+    <!-- CRITICAL: Define showScreen function BEFORE any buttons render -->
+    <script>
+        // Global screen navigation function - MUST be defined before any onclick handlers
+        window.showScreen = function(screenId) {
+            console.log('🔄 Switching to screen:', screenId);
+            try {
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                const targetScreen = document.getElementById(screenId);
+                if (targetScreen) {
+                    targetScreen.classList.add('active');
+                } else {
+                    console.error('❌ Screen not found:', screenId);
+                }
+            } catch (error) {
+                console.error('❌ Error in showScreen:', error);
+            }
+        };
+        
+        console.log('✅ showScreen function defined in head');
+    </script>
+    
 <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
 <body>
