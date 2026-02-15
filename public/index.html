@@ -1560,6 +1560,14 @@
                     <small style="color: #666; display: block; margin-top: 0.25rem;">
                         List local parts stores with phone numbers for Alex to call. Format: Store Name | Phone Number | Notes/Services
                     </small>
+
+                <div class="form-group">
+                    <label>🚗 Local Towing Company Directory</label>
+                    <textarea id="localTowingNumbers" rows="8" placeholder="City Tow Services | (555) 111-2222 | 24/7 emergency towing, flatbed available&#10;Quick Tow Company | (555) 333-4444 | Local towing, under 30 min response&#10;Highway Rescue | (555) 555-6666 | Long-distance towing, heavy equipment"></textarea>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        List local towing companies with phone numbers. Format: Company Name | Phone Number | Notes/Services
+                    </small>
+                </div>
                 </div>
 
                 <div style="display: flex; gap: 1rem; margin-top: 1rem;">
@@ -2438,7 +2446,11 @@
                 tiktokUrl: savedSettings.tiktokUrl || '',
                 googleBusinessUrl: savedSettings.googleBusinessUrl || '',
                 autoShareInvoices: savedSettings.autoShareInvoices || false,
-                showSocialLinksInvoices: savedSettings.showSocialLinksInvoices || false
+                showSocialLinksInvoices: savedSettings.showSocialLinksInvoices || false,
+                // Towing Companies
+                servicesNotPerformed: savedSettings.servicesNotPerformed || [],
+                partsStores: savedSettings.partsStores || [],
+                towingCompanies: savedSettings.towingCompanies || []
             };
             
             // Populate form fields (with null checks)
@@ -2541,6 +2553,14 @@
                     .join('\n');
             }
             
+
+            const localTowingNumbersEl = document.getElementById('localTowingNumbers');
+            if (localTowingNumbersEl && settings.towingCompanies) {
+                localTowingNumbersEl.value = settings.towingCompanies
+                    .map(towing => `${towing.companyName} | ${towing.phoneNumber} | ${towing.notes}`)
+                    .join(\
+\);
+            }
             // Populate NexPart settings (with null checks)
             const nexpartUsernameEl = document.getElementById('nexpartUsername');
             if (nexpartUsernameEl) nexpartUsernameEl.value = settings.nexpartUsername || '';
@@ -5033,6 +5053,20 @@ Thank you for choosing [SHOP_NAME]. We'll contact you once we've had a chance to
                     const parts = line.split('|').map(p => p.trim());
                     return {
                         storeName: parts[0] || '',
+                        phoneNumber: parts[1] || '',
+                        notes: parts[2] || ''
+                    };
+                });
+            // Parse towing company directory (split by lines, then by |)
+            settings.towingCompanies = localTowingNumbers
+                .split('
+')
+                .map(line => line.trim())
+                .filter(line => line.length > 0)
+                .map(line => {
+                    const parts = line.split('|').map(p => p.trim());
+                    return {
+                        companyName: parts[0] || '',
                         phoneNumber: parts[1] || '',
                         notes: parts[2] || ''
                     };
