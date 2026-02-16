@@ -797,22 +797,22 @@
                     <h2 class="card-title">📞 Quick Call Actions</h2>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                    <button class="btn btn-primary" onclick="makeVapiCall('parts')">
+                    <button class="btn btn-primary" onclick="startVapiPartsCall()">
                         <i class="fas fa-box"></i> Call Parts Store
                     </button>
-                    <button class="btn btn-primary" onclick="makeVapiCall('customer')">
+                    <button class="btn btn-primary" onclick="startVapiCustomerCall()">
                         <i class="fas fa-user"></i> Call Customer
                     </button>
-                    <button class="btn btn-primary" onclick="makeVapiCall('tow')">
+                    <button class="btn btn-primary" onclick="startVapiTowCall()">
                         <i class="fas fa-truck"></i> Call Tow Provider
                     </button>
-                    <button class="btn btn-primary" onclick="makeVapiCall('billing')">
+                    <button class="btn btn-primary" onclick="startVapiBillingCall()">
                         <i class="fas fa-credit-card"></i> Call for Payment
                     </button>
-                    <button class="btn btn-primary" onclick="makeVapiCall('reminder')">
+                    <button class="btn btn-primary" onclick="startVapiReminderCall()">
                         <i class="fas fa-bell"></i> Send Reminder
                     </button>
-                    <button class="btn btn-primary" onclick="makeVapiCall('survey')">
+                    <button class="btn btn-primary" onclick="startVapiSurveyCall()">
                         <i class="fas fa-star"></i> Survey Call
                     </button>
                 </div>
@@ -1026,7 +1026,33 @@
                         <i class="fas fa-sms"></i> Test SMS
                     </button>
                 </div>
+                        <!-- Local Services Directory -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📋 Local Services Directory</h2>
+                </div>
+                <div class="form-group">
+                    <label>🔧 Local Parts Store Directory</label>
+                    <textarea id="localPartsNumbers" rows="8" placeholder="AutoZone | (555) 123-4567 | Open 7am-9pm, carries common parts&#10;O'Reilly Auto Parts | (555) 234-5678 | Open 7am-10pm, fast delivery&#10;NAPA Auto Parts | (555) 345-6789 | Open 7am-8pm, specialty parts&#10;CarQuest | (555) 456-7890 | Open 7am-9pm, wholesale pricing&#10;Advance Auto Parts | (555) 567-8901 | Open 8am-9pm, online ordering available"></textarea>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        List local parts stores with phone numbers for Alex to call. Format: Store Name | Phone Number | Notes/Services
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>🚗 Local Towing Company Directory</label>
+                    <textarea id="localTowingNumbers" rows="8" placeholder="City Tow Services | (555) 111-2222 | 24/7 emergency towing, flatbed available&#10;Quick Tow Company | (555) 333-4444 | Local towing, under 30 min response&#10;Highway Rescue | (555) 555-6666 | Long-distance towing, heavy equipment"></textarea>
+                    <small style="color: #666; display: block; margin-top: 0.25rem;">
+                        List local towing companies with phone numbers. Format: Company Name | Phone Number | Notes/Services
+                    </small>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="saveLocalServicesSettings()">
+                        <i class="fas fa-save"></i> Save Services Directory
+                    </button>
+                </div>
             </div>
+
+</div>
 
             <!-- PayPal Configuration -->
             <div class="card">
@@ -1715,7 +1741,15 @@
             document.getElementById('paypalEnvironment').value = settings.paypalEnvironment || 'sandbox';
             document.getElementById('paypalEmail').value = settings.paypalEmail || '';
             document.getElementById('paypalEnabled').checked = settings.paypalEnabled || false;
-            document.getElementById('paypalAlexBilling').checked = settings.paypalAlexBilling !== false;
+            document.getElementById('paypalAlexBilling').checked = settings.paypalAlexBilling !== false;document.getElementById('paypalAlexBilling').checked = settings.paypalAlexBilling !== false;
+            
+            // Populate local services settings
+            const localPartsNumbersEl = document.getElementById('localPartsNumbers');
+            if (localPartsNumbersEl) localPartsNumbersEl.value = settings.localPartsNumbers || '';
+            
+            const localTowingNumbersEl = document.getElementById('localTowingNumbers');
+            if (localTowingNumbersEl) localTowingNumbersEl.value = settings.localTowingNumbers || '';
+
             
             // Populate SendGrid settings
             document.getElementById('sendgridApiKey').value = settings.sendgridApiKey || '';
@@ -2740,16 +2774,177 @@
         }
 
         // ============ VAPI PHONE INTEGRATION ============
+        // Parse phone directory format: Store Name | Phone Number | Notes
+        function parsePhoneDirectory(directoryText) {
+            if (!directoryText) return [];
+            return directoryText.split('\n')
+                .filter(line => line.trim() && line.includes('|'))
+                .map(line => {
+                    const parts = line.split('|');
+                    return {
+                        name: parts[0]?.trim() || '',
+                        phone: parts[1]?.trim() || '',
+                        notes: parts[2]?.trim() || ''
+                    };
+                })
+                .filter(entry => entry.name && entry.phone);
+        }
+
+        // Make actual VAPI call to server
+        async function makeVapiCall(phoneNumber, script, voice, type, providerName) {
+            const vapiEnabled = settings.vapiEnabled || false;
+            const vapiApiKey = settings.vapiApiKey || '';
+            
+            if (!vapiEnabled || !vapiApiKey) {
+                alert('VAPI is not configured. Please go to Settings and enable VAPI with your API key.');
+                showScreen('settings');
+                return;
+            }
+            
+            try {
+                // Call the backend API to initiate the VAPI call
+                const response = await fetch('/api/vapi/call', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phoneNumber: phoneNumber,
+                        script: script,
+                        voice: voice,
+                        type: type,
+                        vapiEnabled: vapiEnabled,
+                        vapiApiKey: vapiApiKey,
+                        providerName: providerName
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`✅ ${providerName} Call Initiated!\n\n📞 Phone: ${result.phoneNumber}\n🎤 Voice: ${result.voice}\n⏰ Time: ${new Date(result.timestamp).toLocaleTimeString()}\n\n📞 Call ID: ${result.callId}`);
+                } else {
+                    alert(`❌ Call Failed: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('VAPI call error:', error);
+                alert(`❌ Failed to initiate call: ${error.message}`);
+            }
+        }
+
         function startVapiPartsCall() {
-            alert('VAPI phone system will call the parts store to check availability and place orders.\n\nFeature requires VAPI configuration in Settings.');
+            // Get the parts store directory
+            const partsDirectory = settings.localPartsNumbers || '';
+            const partsList = parsePhoneDirectory(partsDirectory);
+            
+            if (partsList.length === 0) {
+                alert('No parts stores configured. Please add parts stores in Settings > Local Services Directory.');
+                showScreen('settings');
+                return;
+            }
+            
+            // Show selection modal for parts store
+            const storeOptions = partsList.map((store, index) => 
+                `<option value="${index}">${store.name} - ${store.phone} (${store.notes})</option>`
+            ).join('');
+            
+            const selectedStoreIndex = prompt(
+                `Select parts store to call:\n\n${partsList.map((s, i) => `${i + 1}. ${s.name} - ${s.phone}`).join('\n')}\n\nEnter number (1-${partsList.length}):`
+            );
+            
+            const storeIndex = parseInt(selectedStoreIndex) - 1;
+            if (isNaN(storeIndex) || storeIndex < 0 || storeIndex >= partsList.length) {
+                alert('Invalid selection');
+                return;
+            }
+            
+            const selectedStore = partsList[storeIndex];
+            const partName = prompt('Enter part name to ask about:');
+            const vehicleInfo = prompt('Enter vehicle info (Year Make Model):');
+            
+            // Create dynamic script for this call
+            const script = `Hello, this is ${settings.shopName || 'VHICL Pro Auto Shop'}. I need to check availability for ${partName || 'a part'} for a ${vehicleInfo || 'vehicle'}. Can you tell me if it's in stock and the price?`;
+            
+            makeVapiCall(selectedStore.phone, script, settings.vapiVoice || 'rachel', 'parts_store', selectedStore.name);
         }
 
         function startVapiCustomerCall() {
-            alert('VAPI phone system will call the customer with appointment reminders and status updates.\n\nFeature requires VAPI configuration in Settings.');
+            const customerPhone = prompt('Enter customer phone number:');
+            if (!customerPhone) return;
+            
+            const customerName = prompt('Customer name:');
+            const message = prompt('What message to deliver?');
+            
+            const script = `Hello ${customerName || 'customer'}, this is ${settings.shopName || 'VHICL Pro Auto Shop'}. ${message || 'This is an important message regarding your vehicle.'}`;
+            makeVapiCall(customerPhone, script, settings.vapiVoice || 'rachel', 'customer', customerName);
+        }
+
+        function startVapiBillingCall() {
+            const customerPhone = prompt('Enter customer phone number:');
+            if (!customerPhone) return;
+            
+            const customerName = prompt('Customer name:');
+            const amount = prompt('Amount due: $');
+            const invoiceNumber = prompt('Invoice number:');
+            
+            const script = `Hello ${customerName || 'customer'}, this is ${settings.shopName || 'VHICL Pro Auto Shop'}. This is a payment reminder for invoice #${invoiceNumber || 'N/A'} in the amount of $${amount || '0.00'}. Please contact us to arrange payment.`;
+            makeVapiCall(customerPhone, script, settings.vapiVoice || 'rachel', 'billing', customerName);
+        }
+
+        function startVapiReminderCall() {
+            const customerPhone = prompt('Enter customer phone number:');
+            if (!customerPhone) return;
+            
+            const customerName = prompt('Customer name:');
+            const appointmentDate = prompt('Appointment date:');
+            const appointmentTime = prompt('Appointment time:');
+            const service = prompt('Service type:');
+            
+            const script = `Hello ${customerName || 'customer'}, this is ${settings.shopName || 'VHICL Pro Auto Shop'}. This is a reminder that your appointment for ${service || 'your vehicle'} is scheduled for ${appointmentDate || 'upcoming date'} at ${appointmentTime || 'time'}. Please call us if you need to reschedule.`;
+            makeVapiCall(customerPhone, script, settings.vapiVoice || 'rachel', 'reminder', customerName);
+        }
+
+        function startVapiSurveyCall() {
+            const customerPhone = prompt('Enter customer phone number:');
+            if (!customerPhone) return;
+            
+            const customerName = prompt('Customer name:');
+            
+            const script = `Hello ${customerName || 'customer'}, this is ${settings.shopName || 'VHICL Pro Auto Shop'}. We're calling to conduct a brief satisfaction survey about your recent service experience. On a scale of 1 to 10, how would you rate your overall satisfaction?`;
+            makeVapiCall(customerPhone, script, settings.vapiVoice || 'rachel', 'survey', customerName);
         }
 
         function startVapiTowCall() {
-            alert('VAPI phone system will call the tow service to schedule pickup.\n\nFeature requires VAPI configuration in Settings.');
+            // Get the towing company directory
+            const towingDirectory = settings.localTowingNumbers || '';
+            const towingList = parsePhoneDirectory(towingDirectory);
+            
+            if (towingList.length === 0) {
+                alert('No towing companies configured. Please add towing companies in Settings > Local Services Directory.');
+                showScreen('settings');
+                return;
+            }
+            
+            // Show selection modal for towing company
+            const selectedCompanyIndex = prompt(
+                `Select towing company to call:\n\n${towingList.map((t, i) => `${i + 1}. ${t.name} - ${t.phone}`).join('\n')}\n\nEnter number (1-${towingList.length}):`
+            );
+            
+            const companyIndex = parseInt(selectedCompanyIndex) - 1;
+            if (isNaN(companyIndex) || companyIndex < 0 || companyIndex >= towingList.length) {
+                alert('Invalid selection');
+                return;
+            }
+            
+            const selectedCompany = towingList[companyIndex];
+            const pickupAddress = prompt('Enter pickup address:');
+            const dropoffAddress = prompt('Enter destination (your shop address):', settings.shopAddress || 'your shop');
+            const urgency = prompt('Urgency level? (routine/priority/emergency)', 'routine');
+            
+            // Create dynamic script for this call
+            const script = `Hello, this is ${settings.shopName || 'VHICL Pro Auto Shop'}. We need a ${urgency} tow from ${pickupAddress || 'pickup location'} to ${dropoffAddress || 'our shop'}. When can you have a truck available?`;
+            
+            makeVapiCall(selectedCompany.phone, script, settings.vapiVoice || 'rachel', 'towing', selectedCompany.name);
         }
 
         function configureVapi() {
@@ -3310,31 +3505,6 @@ ALEX AI Assistant
             }
         }
 
-        function makeVapiCall(type) {
-            const vapiEnabled = settings.vapiEnabled || false;
-            if (!vapiEnabled) {
-                alert('Please enable VAPI in Settings first.');
-                showScreen('settings');
-                return;
-            }
-            
-            const callTypes = {
-                'parts': { script: 'Parts Store Call', prompt: 'Enter parts store phone number' },
-                'customer': { script: 'Customer Call', prompt: 'Enter customer phone number' },
-                'tow': { script: 'Tow Dispatch', prompt: 'Enter tow provider phone number' },
-                'billing': { script: 'Payment Request', prompt: 'Enter customer phone number' },
-                'reminder': { script: 'Customer Reminder', prompt: 'Enter customer phone number' },
-                'survey': { script: 'Survey Call', prompt: 'Enter customer phone number' }
-            };
-            
-            const callInfo = callTypes[type];
-            const phoneNumber = prompt(callInfo.prompt);
-            
-            if (phoneNumber) {
-                alert(`VAPI is initiating call to ${phoneNumber}...\n\nUsing script: ${callInfo.script}\nVoice: ${settings.vapiVoice || 'rachel'}\n\nIn production, this would make an actual call.`);
-            }
-        }
-
         // ============ INTEGRATION SETTINGS FUNCTIONS ============
         function saveVapiSettings() {
             settings.vapiApiKey = document.getElementById('vapiApiKey').value;
@@ -3371,7 +3541,17 @@ ALEX AI Assistant
             localStorage.setItem('vhicl_settings', JSON.stringify(settings));
             updateIntegrationBadges();
             alert('PayPal settings saved successfully!');
+        }alert('PayPal settings saved successfully!');
         }
+
+        function saveLocalServicesSettings() {
+            settings.localPartsNumbers = document.getElementById('localPartsNumbers').value;
+            settings.localTowingNumbers = document.getElementById('localTowingNumbers').value;
+            
+            localStorage.setItem('vhicl_settings', JSON.stringify(settings));
+            alert('Local services directory saved successfully!');
+        }
+
 
         function saveSendgridSettings() {
             settings.sendgridApiKey = document.getElementById('sendgridApiKey').value;
