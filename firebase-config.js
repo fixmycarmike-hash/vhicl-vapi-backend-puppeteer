@@ -4,22 +4,47 @@
  */
 
 const admin = require('firebase-admin');
-const serviceAccount = require('./firebase-service-account.json');
+let firebaseApp = null;
+let db = null;
 
-// Firebase Admin SDK configuration
-const firebaseConfig = {
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: process.env.FIREBASE_DATABASE_URL || 'https://vhicl-pro-default.firebaseio.com',
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'vhicl-pro.appspot.com'
-};
-
-// Initialize Firebase Admin
-const firebaseApp = admin.initializeApp(firebaseConfig, 'vhicl-pro-backend');
-
-// Firebase services
-const db = firebaseApp.firestore();
-const auth = firebaseApp.auth();
-const storage = firebaseApp.storage();
+try {
+  // Initialize Firebase from environment variables (SaaS model - one project for all shops)
+  const databaseURL = process.env.FIREBASE_DATABASE_URL;
+  const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
+  const apiKey = process.env.FIREBASE_API_KEY;
+  
+  if (databaseURL && storageBucket && apiKey) {
+    // For SaaS, we use environment variables instead of service account file
+    // Each shop gets unique shopId for data isolation
+    const firebaseConfig = {
+      credential: admin.credential.cert({
+        projectId: databaseURL.split('//')[1].split('.')[0],
+        privateKey: process.env.FIREBASE_PRIVATE_KEY || '',
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL || ''
+      }),
+      databaseURL: databaseURL,
+      storageBucket: storageBucket
+    };
+    
+    // If private key not provided, use application default credentials
+    if (!process.env.FIREBASE_PRIVATE_KEY) {
+      firebaseConfig.credential = admin.credential.applicationDefault();
+    }
+    
+    firebaseApp = admin.initializeApp(firebaseConfig, 'vhicl-pro-backend');
+    db = firebaseApp.firestore();
+    console.log('✅ Firebase initialized for SaaS multi-tenant system');
+    console.log('📊 Database:', databaseURL);
+    console.log('🗄️  Storage:', storageBucket);
+  } else {
+    console.log('⚠️  Firebase environment variables not set - Firebase features disabled');
+    console.log('📝 Required variables: FIREBASE_DATABASE_URL, FIREBASE_STORAGE_BUCKET, FIREBASE_API_KEY');
+  }
+} catch (error) {
+  console.log('⚠️  Firebase initialization failed:', error.message, '- Firebase features disabled');
+}
+const auth = firebaseApp ? firebaseApp.auth() : null;
+const storage = firebaseApp ? firebaseApp.storage() : null;
 
 /**
  * Shop-specific data routing
