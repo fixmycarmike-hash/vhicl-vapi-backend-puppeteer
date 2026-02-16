@@ -201,6 +201,75 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ==================== VAPI PHONE CALL ENDPOINTS ====================
+
+// Parse phone directory
+function parsePhoneDirectory(directoryText) {
+    if (!directoryText) return [];
+    return directoryText.split('\n')
+        .filter(line => line.trim() && line.includes('|'))
+        .map(line => {
+            const parts = line.split('|');
+            return {
+                name: parts[0]?.trim() || '',
+                phone: parts[1]?.trim() || '',
+                notes: parts[2]?.trim() || ''
+            };
+        })
+        .filter(entry => entry.name && entry.phone);
+}
+
+// Make VAPI phone call
+app.post('/api/vapi/call', async (req, res) => {
+    const { phoneNumber, script, voice, type, vapiEnabled } = req.body;
+    
+    if (!phoneNumber || !script) {
+        return res.status(400).json({ 
+            success: false, 
+            error: 'Phone number and script are required' 
+        });
+    }
+
+    try {
+        // Check if VAPI is configured
+        if (!vapiEnabled) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'VAPI is not enabled. Please configure VAPI in Settings.' 
+            });
+        }
+
+        // Simulate VAPI call (in production, this would make actual API call to VAPI)
+        const callResult = {
+            success: true,
+            callId: `call_${Date.now()}`,
+            phoneNumber: phoneNumber,
+            script: script,
+            voice: voice || 'rachel',
+            type: type,
+            status: 'initiated',
+            timestamp: new Date().toISOString(),
+            message: `📞 Call initiated to ${phoneNumber} using ${voice} voice`
+        };
+
+        console.log('VAPI Call Details:', callResult);
+        res.json(callResult);
+    } catch (error) {
+        console.error('VAPI call error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Failed to initiate VAPI call: ' + error.message 
+        });
+    }
+});
+
+// Get parsed phone directory
+app.post('/api/vapi/directory', (req, res) => {
+    const { type, directoryText } = req.body;
+    const entries = parsePhoneDirectory(directoryText);
+    res.json({ success: true, entries, count: entries.length });
+});
+
 // ==================== START SERVER ====================
 
 app.listen(PORT, () => {
