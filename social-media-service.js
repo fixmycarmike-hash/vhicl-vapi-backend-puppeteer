@@ -3,11 +3,18 @@
  * Posts to Facebook and Instagram automatically
  */
 
-const axios = require('axios');
+let axios;
+try {
+    axios = require('axios');
+} catch (error) {
+    console.warn('⚠️ axios not installed - social media features will be disabled');
+    axios = null;
+}
 
 class SocialMediaService {
     constructor(shopSettings) {
         this.shopSettings = shopSettings;
+        this.isEnabled = axios !== null;
         this.facebookAccessToken = process.env.FACEBOOK_ACCESS_TOKEN || shopSettings.facebookAccessToken;
         this.facebookPageId = process.env.FACEBOOK_PAGE_ID || shopSettings.facebookPageId;
         this.instagramAccountId = process.env.INSTAGRAM_ACCOUNT_ID || shopSettings.instagramAccountId;
@@ -96,6 +103,9 @@ class SocialMediaService {
      * Post to Facebook Page
      */
     async postToFacebook(content, imageId = null) {
+        if (!this.isEnabled) {
+            throw new Error('Social media features are not available - axios module missing');
+        }
         try {
             const url = `https://graph.facebook.com/v18.0/${this.facebookPageId}/feed`;
             
