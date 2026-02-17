@@ -2147,6 +2147,11 @@
                         </div>
                         <div style="display: flex; gap: 0.5rem; align-items: center;">
                             <span class="status-badge status-${est.status.toLowerCase()}">${est.status}</span>
+                            ${est.status === 'Approved' || est.status === 'Completed' ? `
+                                <button class="btn btn-success" onclick="sendCompletionEmailFromEstimate(${est.id})">
+                                    <i class="fas fa-envelope"></i> Notify
+                                </button>
+                            ` : ''}
                             <button class="btn btn-primary" onclick="convertToInvoice(${est.id})">
                                 <i class="fas fa-file-invoice"></i> Convert
                             </button>
@@ -2190,6 +2195,31 @@
             }
         }
 
+        // Send completion email from estimate
+        async function sendCompletionEmailFromEstimate(estimateId) {
+            const estimate = estimates.find(e => e.id === estimateId);
+            if (!estimate) {
+                alert('Estimate not found');
+                return;
+            }
+
+            const customerEmail = prompt(`Enter customer email:`, estimate.customerEmail || '');
+            if (!customerEmail) return;
+
+            // Prepare services performed
+            const services = estimate.parts.map(p => p.name).concat([
+                `Labor: ${estimate.labor.hours} hours @ $${estimate.labor.rate}/hr`
+            ]);
+
+            await sendCompletionEmail(
+                customerEmail,
+                estimate.customerName,
+                estimate.vehicle,
+                services,
+                estimate.total
+            );
+        }
+
         // ============ INVOICE FUNCTIONS ============
         function openInvoiceModal() {
             alert('Invoice creation modal will open here. For now, view sample invoices below.');
@@ -2231,6 +2261,9 @@
                         <div style="display: flex; gap: 0.5rem; align-items: center;">
                             <span class="status-badge status-${inv.status.toLowerCase()}">${inv.status}</span>
                             ${inv.status === 'Unpaid' ? `
+                                <button class="btn btn-primary" onclick="sendInvoiceEmailFromList(${inv.id})">
+                                    <i class="fas fa-envelope"></i> Email
+                                </button>
                                 <button class="btn btn-success" onclick="markAsPaid(${inv.id})">
                                     <i class="fas fa-check"></i> Paid
                                 </button>
@@ -2261,6 +2294,35 @@
                 saveToStorage();
                 renderInvoices();
             }
+        }
+
+        // Send invoice email from invoice list
+        async function sendInvoiceEmailFromList(invoiceId) {
+            const invoice = invoices.find(i => i.id === invoiceId);
+            if (!invoice) {
+                alert('Invoice not found');
+                return;
+            }
+
+            const customerEmail = prompt(`Enter customer email:`, invoice.customerEmail || '');
+            if (!customerEmail) return;
+
+            // Prepare invoice items
+            const items = [
+                { description: 'Services Rendered', amount: invoice.total * 0.9 }, // Sample breakdown
+                { description: 'Parts', amount: invoice.total * 0.1 }
+            ];
+
+            await sendInvoiceEmail(
+                customerEmail,
+                invoice.customerName,
+                invoice.invoiceNumber,
+                invoice.vehicle,
+                items,
+                invoice.total * 0.9, // subtotal
+                invoice.total * 0.1, // tax
+                invoice.total
+            );
         }
 
         // ============ TOWING FUNCTIONS ============
@@ -2947,6 +3009,186 @@
             makeVapiCall(selectedCompany.phone, script, settings.vapiVoice || 'rachel', 'towing', selectedCompany.name);
         }
 
+        // ============ EMAIL FUNCTIONS ============
+        
+        // Send vehicle completion email
+        async function sendCompletionEmail(customerEmail, customerName, vehicleInfo, servicesPerformed, totalCost) {
+            const sendgridEnabled = settings.sendgridEnabled || false;
+            const sendgridApiKey = settings.sendgridApiKey || '';
+            
+            if (!sendgridEnabled || !sendgridApiKey) {
+                alert('SendGrid is not configured. Please go to Settings and enable email with your API key.');
+                showScreen('settings');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/email/completion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        customerEmail: customerEmail,
+                        customerName: customerName,
+                        vehicleInfo: vehicleInfo,
+                        servicesPerformed: servicesPerformed,
+                        totalCost: totalCost,
+                        completionDate: new Date().toISOString(),
+                        shopName: settings.shopName || 'VHICL Pro Auto Shop',
+                        shopPhone: settings.shopPhone || '(555) 123-4567',
+                        shopAddress: settings.shopAddress || '123 Main St, Anytown, USA',
+                        apiKey: sendgridApiKey
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`✅ Completion email sent successfully!\n\n📧 Sent to: ${result.to}\n📄 Subject: Your ${vehicleInfo} is Ready for Pickup!\n⏰ Time: ${new Date(result.timestamp).toLocaleTimeString()}`);
+                } else {
+                    alert(`❌ Email Failed: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Completion email error:', error);
+                alert(`❌ Failed to send completion email: ${error.message}`);
+            }
+        }
+
+        // Send invoice/payment request email
+        async function sendInvoiceEmail(customerEmail, customerName, invoiceNumber, vehicleInfo, items, subtotal, tax, total) {
+            const sendgridEnabled = settings.sendgridEnabled || false;
+            const sendgridApiKey = settings.sendgridApiKey || '';
+            
+            if (!sendgridEnabled || !sendgridApiKey) {
+                alert('SendGrid is not configured. Please go to Settings and enable email with your API key.');
+                showScreen('settings');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/email/invoice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        customerEmail: customerEmail,
+                        customerName: customerName,
+                        invoiceNumber: invoiceNumber,
+                        vehicleInfo: vehicleInfo,
+                        invoiceItems: items,
+                        subtotal: subtotal,
+                        tax: tax,
+                        total: total,
+                        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+                        shopName: settings.shopName || 'VHICL Pro Auto Shop',
+                        shopPhone: settings.shopPhone || '(555) 123-4567',
+                        shopAddress: settings.shopAddress || '123 Main St, Anytown, USA',
+                        apiKey: sendgridApiKey
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`✅ Invoice email sent successfully!\n\n📧 Sent to: ${result.to}\n📄 Invoice #${invoiceNumber}\n💰 Total: $${total.toFixed(2)}\n⏰ Time: ${new Date(result.timestamp).toLocaleTimeString()}`);
+                } else {
+                    alert(`❌ Email Failed: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Invoice email error:', error);
+                alert(`❌ Failed to send invoice email: ${error.message}`);
+            }
+        }
+
+        // Send payment reminder email
+        async function sendPaymentReminderEmail(customerEmail, customerName, invoiceNumber, amount, dueDate, daysOverdue) {
+            const sendgridEnabled = settings.sendgridEnabled || false;
+            const sendgridApiKey = settings.sendgridApiKey || '';
+            
+            if (!sendgridEnabled || !sendgridApiKey) {
+                alert('SendGrid is not configured. Please go to Settings and enable email with your API key.');
+                showScreen('settings');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/email/payment-reminder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        customerEmail: customerEmail,
+                        customerName: customerName,
+                        invoiceNumber: invoiceNumber,
+                        amount: amount,
+                        dueDate: dueDate,
+                        daysOverdue: daysOverdue,
+                        shopName: settings.shopName || 'VHICL Pro Auto Shop',
+                        shopPhone: settings.shopPhone || '(555) 123-4567',
+                        apiKey: sendgridApiKey
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`✅ Payment reminder sent successfully!\n\n📧 Sent to: ${result.to}\n📄 Invoice #${invoiceNumber}\n💰 Amount: $${amount.toFixed(2)}\n⚠️ Days Overdue: ${daysOverdue}\n⏰ Time: ${new Date(result.timestamp).toLocaleTimeString()}`);
+                } else {
+                    alert(`❌ Email Failed: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Payment reminder error:', error);
+                alert(`❌ Failed to send payment reminder: ${error.message}`);
+            }
+        }
+
+        // Test SendGrid email
+        async function testSendgridEmail() {
+            const sendgridEnabled = settings.sendgridEnabled || false;
+            const sendgridApiKey = settings.sendgridApiKey || '';
+            const sendgridFromEmail = settings.sendgridFromEmail || '';
+            
+            if (!sendgridEnabled || !sendgridApiKey || !sendgridFromEmail) {
+                alert('Please configure SendGrid first:\n1. Enter API key\n2. Set from email address\n3. Enable SendGrid');
+                return;
+            }
+            
+            const testEmail = prompt('Enter email address to send test to:', sendgridFromEmail);
+            if (!testEmail) return;
+            
+            try {
+                const response = await fetch('/api/email/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        to: testEmail,
+                        subject: 'VHICL Pro - Email Test',
+                        html: '<h2>Email Test Successful!</h2><p>Your email configuration is working perfectly.</p>',
+                        text: 'Email Test Successful! Your email configuration is working perfectly.',
+                        fromEmail: sendgridFromEmail,
+                        fromName: settings.sendgridFromName || 'VHICL Pro Auto Shop',
+                        apiKey: sendgridApiKey
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`✅ Test email sent successfully!\n\n📧 Sent to: ${result.to}\n📄 Subject: ${result.subject}\n⏰ Time: ${new Date(result.timestamp).toLocaleTimeString()}`);
+                } else {
+                    alert(`❌ Email Failed: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Test email error:', error);
+                alert(`❌ Failed to send test email: ${error.message}`);
+            }
+        }
+
         function configureVapi() {
             alert('VAPI configuration panel will open here.\n\nConfigure:\n- Phone numbers\n- Call scripts\n- Call scheduling\n- Voice preferences');
             showScreen('settings');
@@ -3629,13 +3871,6 @@ ALEX AI Assistant
 
         function testPaypalConnection() {
             alert('Testing PayPal API connection...\n\nThis would verify Client ID and Secret in production.');
-        }
-
-        function testSendgridEmail() {
-            const emailAddress = prompt('Enter email address to send test email:');
-            if (emailAddress) {
-                alert(`Test email sent to ${emailAddress}!\n\nThis would send an actual email via SendGrid in production.`);
-            }
         }
 
         // ============ INVENTORY FUNCTIONS ============
