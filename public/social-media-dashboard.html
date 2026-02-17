@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Dashboard - VHICL Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar h1 {
+            font-size: 1.5rem;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .navbar a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 i {
+            color: #667eea;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .platform-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .platform-card.connected {
+            border-color: #4CAF50;
+            background: #f1f8f4;
+        }
+
+        .platform-card.disconnected {
+            border-color: #f44336;
+            background: #fef5f5;
+        }
+
+        .platform-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .platform-header h3 {
+            color: #333;
+        }
+
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-badge.connected {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-badge.disconnected {
+            background: #f44336;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-group textarea,
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group textarea:focus,
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-facebook {
+            background: #1877F2;
+            color: white;
+        }
+
+        .btn-facebook:hover {
+            background: #166fe5;
+        }
+
+        .btn-instagram {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            color: white;
+        }
+
+        .btn-instagram:hover {
+            opacity: 0.9;
+        }
+
+        .platform-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .template-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .template-btn {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .template-btn:hover,
+        .template-btn.active {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .post-preview {
+            background: #f0f2f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .post-preview-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .post-preview-avatar {
+            width: 50px;
+            height: 50px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .post-preview-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .post-preview-time {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .post-preview-content {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .schedule-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .schedule-info i {
+            color: #2196f3;
+            margin-right: 10px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .platform-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>📱 Social Media Dashboard</h1>
+        <div>
+            <a href="index-unified.html"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="tech-dashboard.html"><i class="fas fa-users-cog"></i> Tech</a>
+            <a href="reports-dashboard.html"><i class="fas fa-chart-line"></i> Reports</a>
+            <a href="settings-complete-with-all-settings.html"><i class="fas fa-cog"></i> Settings</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fab fa-facebook"></i> <i class="fab fa-instagram"></i> Social Media Management</h1>
+            <p>Automatically post to Facebook and Instagram to keep your customers engaged</p>
+        </div>
+
+        <div id="success-alert" class="alert success">
+            <i class="fas fa-check-circle"></i> Post published successfully!
+        </div>
+
+        <div id="error-alert" class="alert error">
+            <i class="fas fa-exclamation-circle"></i> <span id="error-message"></span>
+        </div>
+
+        <div class="grid">
+            <!-- Platform Status -->
+            <div class="card">
+                <h2><i class="fas fa-plug"></i> Platform Connection</h2>
+                
+                <div class="platform-card" id="facebook-card">
+                    <div class="platform-header">
+                        <h3><i class="fab fa-facebook"></i> Facebook</h3>
+                        <span class="status-badge" id="facebook-status">Checking...</span>
+                    </div>
+                    <p>Connect your Facebook Page to post updates and promotions</p>
+                </div>
+
+                <div class="platform-card" id="instagram-card">
+                    <div class="platform-header">
+                        <h3><i class="fab fa-instagram"></i> Instagram</h3>
+                        <span class="status-badge" id="instagram-status">Checking...</span>
+                    </div>
+                    <p>Connect your Instagram Business account for image posts</p>
+                </div>
+
+                <button class="btn btn-secondary" onclick="validateConfiguration()">
+                    <i class="fas fa-sync"></i> Check Connection Status
+                </button>
+            </div>
+
+            <!-- Posting Schedule -->
+            <div class="card">
+                <h2><i class="fas fa-calendar-alt"></i> Weekly Auto-Post</h2>
+                
+                <div class="schedule-info">
+                    <i class="fas fa-info-circle"></i>
+                    Posts are automatically generated and published every Monday at 10:00 AM
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="weekly-posts">0</div>
+                        <div class="stat-label">Posts This Month</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="next-post">Mon</div>
+                        <div class="stat-label">Next Post Day</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="postWeeklyContent()">
+                        <i class="fas fa-paper-plane"></i> Post Weekly Content Now
+                    </button>
+                    <button class="btn btn-secondary" onclick="getSchedule()">
+                        <i class="fas fa-calendar"></i> View Schedule
+                    </button>
+                </div>
+            </div>
+
+            <!-- Create Post -->
+            <div class="card">
+                <h2><i class="fas fa-edit"></i> Create Post</h2>
+                
+                <div class="form-group">
+                    <label>Select Template Type</label>
+                    <div class="template-selector">
+                        <button class="template-btn active" onclick="selectTemplate('successStories')">Success Story</button>
+                        <button class="template-btn" onclick="selectTemplate('tips')">Pro Tip</button>
+                        <button class="template-btn" onclick="selectTemplate('promotions')">Promotion</button>
+                        <button class="template-btn" onclick="selectTemplate('educational')">Educational</button>
+                        <button class="template-btn" onclick="selectTemplate('team')">Team</button>
+                        <button class="template-btn" onclick="selectTemplate('community')">Community</button>
+                        <button class="template-btn" onclick="selectTemplate('seasonal')">Seasonal</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Post Content</label>
+                    <textarea id="post-content" placeholder="Your post content will appear here..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Image URL (Optional - Required for Instagram)</label>
+                    <input type="text" id="image-url" placeholder="https://example.com/image.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label>Post Preview</label>
+                    <div class="post-preview">
+                        <div class="post-preview-header">
+                            <div class="post-preview-avatar">
+                                <i class="fas fa- wrench"></i>
+                            </div>
+                            <div>
+                                <div class="post-preview-name">Your Shop Name</div>
+                                <div class="post-preview-time">Just now</div>
+                            </div>
+                        </div>
+                        <div class="post-preview-content" id="preview-content">
+                            Select a template to generate content...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="platform-buttons">
+                    <button class="btn btn-facebook" onclick="postTo('facebook')">
+                        <i class="fab fa-facebook"></i> Post to Facebook
+                    </button>
+                    <button class="btn btn-instagram" onclick="postTo('instagram')">
+                        <i class="fab fa-instagram"></i> Post to Instagram
+                    </button>
+                    <button class="btn btn-primary" onclick="postTo('both')">
+                        <i class="fas fa-share-alt"></i> Post to Both
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="card">
+            <h2><i class="fas fa-chart-bar"></i> Social Media Stats</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="impressions">0</div>
+                    <div class="stat-label">Impressions (7 days)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="engagement">0</div>
+                    <div class="stat-label">Engagements (7 days)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="posts-count">0</div>
+                    <div class="stat-label">Posts This Month</div>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="getStats()">
+                    <i class="fas fa-sync"></i> Refresh Stats
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedTemplate = 'successStories';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            validateConfiguration();
+            getSchedule();
+            getStats();
+        });
+
+        // Validate configuration
+        async function validateConfiguration() {
+            try {
+                const response = await fetch('/api/social/validate');
+                const data = await response.json();
+
+                // Update Facebook status
+                const fbCard = document.getElementById('facebook-card');
+                const fbStatus = document.getElementById('facebook-status');
+                if (data.canPostToFacebook) {
+                    fbCard.className = 'platform-card connected';
+                    fbStatus.className = 'status-badge connected';
+                    fbStatus.textContent = 'Connected';
+                } else {
+                    fbCard.className = 'platform-card disconnected';
+                    fbStatus.className = 'status-badge disconnected';
+                    fbStatus.textContent = 'Not Connected';
+                }
+
+                // Update Instagram status
+                const igCard = document.getElementById('instagram-card');
+                const igStatus = document.getElementById('instagram-status');
+                if (data.canPostToInstagram) {
+                    igCard.className = 'platform-card connected';
+                    igStatus.className = 'status-badge connected';
+                    igStatus.textContent = 'Connected';
+                } else {
+                    igCard.className = 'platform-card disconnected';
+                    igStatus.className = 'status-badge disconnected';
+                    igStatus.textContent = 'Not Connected';
+                }
+            } catch (error) {
+                console.error('Validation error:', error);
+            }
+        }
+
+        // Select template
+        function selectTemplate(type) {
+            selectedTemplate = type;
+            
+            // Update active state
+            document.querySelectorAll('.template-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Generate post
+            generatePost();
+        }
+
+        // Generate post from template
+        async function generatePost() {
+            try {
+                const response = await fetch('/api/social/generate-post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        templateType: selectedTemplate,
+                        data: {
+                            service: 'brake service',
+                            maintenance: 'oil change',
+                            year: '2019',
+                            make: 'Toyota',
+                            model: 'Camry',
+                            discount: '15',
+                            price: '$99',
+                            originalPrice: '$129',
+                            years: '10',
+                            benefit: 'safety and performance'
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('post-content').value = data.content;
+                document.getElementById('preview-content').textContent = data.content;
+            } catch (error) {
+                console.error('Generate error:', error);
+            }
+        }
+
+        // Post to platform
+        async function postTo(platform) {
+            const content = document.getElementById('post-content').value;
+            const imageUrl = document.getElementById('image-url').value;
+
+            if (!content) {
+                showError('Please enter post content');
+                return;
+            }
+
+            if (platform === 'instagram' && !imageUrl) {
+                showError('Instagram requires an image URL');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/social/post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: content,
+                        imageUrl: imageUrl,
+                        platform: platform
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Post published successfully!');
+                    document.getElementById('post-content').value = '';
+                    document.getElementById('image-url').value = '';
+                    getStats();
+                } else {
+                    showError('Failed to post: ' + JSON.stringify(data.results));
+                }
+            } catch (error) {
+                showError('Error posting: ' + error.message);
+            }
+        }
+
+        // Post weekly content
+        async function postWeeklyContent() {
+            try {
+                const response = await fetch('/api/social/weekly-post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Weekly post published successfully!');
+                    getStats();
+                } else {
+                    showError('Failed to post: ' + JSON.stringify(data.results));
+                }
+            } catch (error) {
+                showError('Error posting weekly content: ' + error.message);
+            }
+        }
+
+        // Get schedule
+        async function getSchedule() {
+            try {
+                const response = await fetch('/api/social/schedule');
+                const data = await response.json();
+                console.log('Schedule:', data.schedule);
+            } catch (error) {
+                console.error('Schedule error:', error);
+            }
+        }
+
+        // Get stats
+        async function getStats() {
+            try {
+                const response = await fetch('/api/social/stats');
+                const data = await response.json();
+
+                if (data.success && data.stats) {
+                    data.stats.forEach(stat => {
+                        if (stat.name === 'page_impressions') {
+                            document.getElementById('impressions').textContent = stat.values[0]?.value || 0;
+                        } else if (stat.name === 'page_engaged_users') {
+                            document.getElementById('engagement').textContent = stat.values[0]?.value || 0;
+                        } else if (stat.name === 'page_post_engagements') {
+                            document.getElementById('posts-count').textContent = stat.values[0]?.value || 0;
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Stats error:', error);
+            }
+        }
+
+        // Show success alert
+        function showSuccess(message) {
+            const alert = document.getElementById('success-alert');
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show error alert
+        function showError(message) {
+            const alert = document.getElementById('error-alert');
+            document.getElementById('error-message').textContent = message;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
