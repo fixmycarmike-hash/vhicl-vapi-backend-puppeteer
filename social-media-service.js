@@ -46,7 +46,7 @@ class SocialMediaService {
                 "Behind every great repair is a great team. Meet our skilled technicians! 👥 #AutoShop #TeamWork"
             ],
             beforeAfter: [
-                "Before &amp; After: {service} transformation! Check out the difference. 📸 #BeforeAfter #AutoRepair #CarCare",
+                "Before & After: {service} transformation! Check out the difference. 📸 #BeforeAfter #AutoRepair #CarCare",
                 "Amazing transformation! This {year} {make} {model} looks brand new after {service}. 🚗✨ #AutoShop #Restoration",
                 "See what we can do! Before and after of today's {service}. Results speak for themselves! 📸 #AutoRepair #QualityWork"
             ],
@@ -207,7 +207,7 @@ class SocialMediaService {
         };
 
         // Post to Facebook
-        if (this.facebookPageId &amp;&amp; this.facebookAccessToken) {
+        if (this.facebookPageId && this.facebookAccessToken) {
             let imageId = null;
             if (imageUrl) {
                 try {
@@ -220,7 +220,7 @@ class SocialMediaService {
         }
 
         // Post to Instagram (requires image)
-        if (this.instagramAccountId &amp;&amp; this.facebookAccessToken &amp;&amp; imageUrl) {
+        if (this.instagramAccountId && this.facebookAccessToken && imageUrl) {
             results.instagram = await this.postToInstagram(content, imageUrl);
         }
 
@@ -332,8 +332,8 @@ class SocialMediaService {
         return {
             valid: errors.length === 0,
             errors: errors,
-            canPostToFacebook: !!this.facebookAccessToken &amp;&amp; !!this.facebookPageId,
-            canPostToInstagram: !!this.facebookAccessToken &amp;&amp; !!this.instagramAccountId
+            canPostToFacebook: !!this.facebookAccessToken && !!this.facebookPageId,
+            canPostToInstagram: !!this.facebookAccessToken && !!this.instagramAccountId
         };
     }
 }
