@@ -1,26 +1,28 @@
 {
-  "name": "vhicl-pro-backend",
-  "version": "3.0.1",
-  "description": "VHICL Pro Backend - Single Shop Mode (No Firebase)",
-  "main": "server-no-firebase.js",
+  "name": "service-advisor-in-a-box",
+  "version": "4.0.0",
+  "description": "Service Advisor in a Box - Professional Auto Shop Management with Firebase",
+  "main": "server.js",
   "scripts": {
-    "start": "node server-no-firebase.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "body-parser": "^1.20.4",
     "cors": "^2.8.6",
     "dotenv": "^16.3.1",
-    "express": "^4.22.1"
+    "express": "^4.22.1",
+    "firebase-admin": "^12.7.0"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fixmycarmike-hash/vhicl-vapi-backend.git"
   },
   "keywords": [
-    "vhicl",
-    "auto",
-    "shop",
-    "management"
+    "service-advisor",
+    "auto-shop",
+    "management",
+    "firebase",
+    "vhicl"
   ],
   "author": "",
   "license": "ISC",
