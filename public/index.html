@@ -671,6 +671,32 @@
         }
     </style>
 <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+
+    <!-- Main Application Script -->
+    <script>
+        // Show Screen Function - Must be defined before navigation buttons
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show selected screen
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+            }
+            
+            // Update active button state
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.querySelector(`[onclick="showScreen('${screenId}')"`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+    </script>
 </head>
 <body>
     <nav class="navbar">
@@ -2306,33 +2332,6 @@
         let settings = {};
 
         // ============ SHOW SCREEN FUNCTION ============
-        function showScreen(screenId) {
-            // Hide all screens
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            
-            // Show selected screen
-            const targetScreen = document.getElementById(screenId);
-            if (targetScreen) {
-                targetScreen.classList.add('active');
-            }
-            
-            // Update nav buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Find and activate the clicked button
-            event.target.classList.add('active');
-        }
-
-        // ============ INITIALIZE ============
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load data from localStorage
-            loadFromStorage();
-            
-            // Load settings
             loadSettings();
             
             // Initialize sample data if empty
@@ -2557,9 +2556,6 @@
             const localTowingNumbersEl = document.getElementById('localTowingNumbers');
             if (localTowingNumbersEl && settings.towingCompanies) {
                 localTowingNumbersEl.value = settings.towingCompanies
-                    .join('''\n''');
-                    .join('\n');
-\);
             }
             // Populate NexPart settings (with null checks)
             const nexpartUsernameEl = document.getElementById('nexpartUsername');
