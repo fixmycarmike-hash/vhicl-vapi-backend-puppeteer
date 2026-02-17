@@ -696,6 +696,98 @@
                 activeBtn.classList.add('active');
             }
         }
+        // ============ MODAL FUNCTIONS ============
+        function openCustomerModal() {
+            document.getElementById('customerModal').classList.add('active');
+            populateCustomerDropdown();
+        }
+
+        function openAppointmentModal() {
+            document.getElementById('appointmentModal').classList.add('active');
+            populateCustomerDropdown();
+        }
+
+        function openEstimateModal() {
+            window.editingEstimateId = null;
+            estimateParts = [];
+            estimateLabor = [];
+            updateEstimateTotal();
+            
+            const customerSelect = document.getElementById('estimateCustomerSelect');
+            if (customerSelect) {
+                customerSelect.innerHTML = '<option value="">Select Customer</option>' +
+                    customers.map(c => `<option value="${c.id}">${c.name} - ${c.vehicle}</option>`).join('');
+            }
+            
+            const vehicleInput = document.getElementById('estimateVehicle');
+            const descInput = document.getElementById('estimateDescription');
+            const statusSelect = document.getElementById('estimateStatus');
+            const partsList = document.getElementById('estimatePartsList');
+            const laborList = document.getElementById('estimateLaborList');
+            
+            if (vehicleInput) vehicleInput.value = '';
+            if (descInput) descInput.value = '';
+            if (statusSelect) statusSelect.value = 'Draft';
+            if (partsList) partsList.innerHTML = '';
+            if (laborList) laborList.innerHTML = '';
+            
+            const modal = document.getElementById('estimateModal');
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        function openInvoiceModal() {
+            alert('Invoice creation modal will open here. For now, view sample invoices below.');
+        }
+
+        function openTowingModal() {
+            document.getElementById('towingModal').classList.add('active');
+        }
+
+        function openInventoryModal() {
+            document.getElementById('inventoryModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                
+                if (modalId === 'estimateModal') {
+                    window.editingEstimateId = null;
+                    estimateParts = [];
+                    estimateLabor = [];
+                    
+                    const submitBtn = document.querySelector('#estimateModal .btn-primary');
+                    if (submitBtn) {
+                        submitBtn.textContent = 'Create Estimate';
+                    }
+                    
+                    const vehicleInput = document.getElementById('estimateVehicle');
+                    const descInput = document.getElementById('estimateDescription');
+                    const statusSelect = document.getElementById('estimateStatus');
+                    
+                    if (vehicleInput) vehicleInput.value = '';
+                    if (descInput) descInput.value = '';
+                    if (statusSelect) statusSelect.value = 'Draft';
+                    
+                    renderEstimateParts();
+                    renderEstimateLabor();
+                    updateEstimateTotal();
+                }
+            }
+        }
+
+        function populateCustomerDropdown() {
+            const select = document.getElementById('appointmentCustomer');
+            if (select) {
+                select.innerHTML = '<option value="">Select Customer</option>';
+                customers.forEach(customer => {
+                    select.innerHTML += `<option value="${customer.id}">${customer.name}</option>`;
+                });
+            }
+        }
     </script>
 </head>
 <body>
@@ -2320,8 +2412,10 @@
             <button class="btn btn-primary" onclick="saveInventoryItem()">Add Item</button>
         </div>
     </div>
-
     <script>
+        let settings = {};
+        // ============ GLOBAL VARIABLES ============
+
         // ============ GLOBAL VARIABLES ============
         let customers = [];
         let appointments = [];
@@ -2329,11 +2423,10 @@
         let invoices = [];
         let towingRequests = [];
         let inventory = [];
-        let settings = {};
-
-        // ============ SHOW SCREEN FUNCTION ============
-            loadSettings();
-            
+        let maintenanceJobs = [];
+        let estimateParts = [];
+        let estimateLabor = [];
+        let vapiScripts = [];
             // Initialize sample data if empty
             if (customers.length === 0) initSampleCustomers();
             if (inventory.length === 0) initSampleInventory();
@@ -2736,131 +2829,6 @@
             if (!badge) return;
             
             if (settings.apiEnabled && settings.apiKey) {
-                badge.style.background = '#d4edda';
-                badge.style.color = '#155724';
-                badge.textContent = 'Connected';
-                
-                // Show navbar indicator
-                if (indicator) {
-                    indicator.style.display = 'flex';
-                    indicator.style.background = 'rgba(67, 233, 123, 0.2)';
-                    indicator.style.color = '#43e97b';
-                }
-                if (indicatorText) {
-                    indicatorText.textContent = 'API Connected';
-                }
-            } else {
-                badge.style.background = '#f8d7da';
-                badge.style.color = '#721c24';
-                badge.textContent = 'Disconnected';
-                
-                // Hide navbar indicator
-                if (indicator) {
-                    indicator.style.display = 'none';
-                }
-            }
-        }
-
-        function testApiConnection() {
-            const apiEndpointEl = document.getElementById('apiEndpoint');
-            const apiKeyEl = document.getElementById('apiKey');
-            const apiEnabledEl = document.getElementById('apiEnabled');
-            
-            if (!apiEndpointEl || !apiKeyEl || !apiEnabledEl) {
-                console.error('Required API elements not found');
-                return;
-            }
-            
-            const endpoint = apiEndpointEl.value;
-            const apiKey = apiKeyEl.value;
-            const isEnabled = apiEnabledEl.checked;
-            
-            if (!endpoint || !apiKey) {
-                alert('Please enter both API endpoint and API key');
-                return;
-            }
-            
-            // Show loading indicator
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
-            btn.disabled = true;
-            
-            const statusDiv = document.getElementById('apiStatus');
-            if (statusDiv) {
-                statusDiv.className = 'api-status';
-                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin status-icon"></i> Testing connection...';
-                statusDiv.style.display = 'block';
-            }
-            
-            // Simulate API test (in production, this would be a real fetch)
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                
-                if (isEnabled) {
-                    statusDiv.className = 'api-status connected';
-                    statusDiv.innerHTML = '<i class="fas fa-check-circle status-icon"></i><strong>Connected</strong><br>Endpoint: ' + endpoint + '<br>Environment: ' + settings.apiEnvironment;
-                    
-                    // Update settings to reflect enabled state
-                    settings.apiEnabled = true;
-                    settings.apiKey = apiKey;
-                    settings.apiEndpoint = endpoint;
-                    updateApiBadge();
-                    
-                    alert('✅ API Connection Test Successful!\n\nEndpoint: ' + endpoint + '\nEnvironment: ' + settings.apiEnvironment + '\nVersion: ' + settings.apiVersion);
-                } else {
-                    statusDiv.className = 'api-status disconnected';
-                    statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle status-icon"></i><strong>Disconnected</strong><br>API integration is disabled. Enable it to use Techflow features.';
-                    alert('⚠️ API integration is disabled. Enable it to use Techflow features.');
-                }
-            }, 2000);
-        }
-
-        function togglePartsMatrix() {
-            const checkbox = document.getElementById('usePartsMatrix');
-            const matrixCard = document.getElementById('partsMatrixCard');
-            if (matrixCard) {
-                matrixCard.style.display = checkbox.checked ? 'block' : 'none';
-            }
-        }
-
-        document.getElementById('usePartsMatrix')?.addEventListener('change', togglePartsMatrix);
-
-        // ============ MODAL FUNCTIONS ============
-        function openCustomerModal() {
-            document.getElementById('customerModal').classList.add('active');
-            populateCustomerDropdown();
-        }
-
-        function openAppointmentModal() {
-            document.getElementById('appointmentModal').classList.add('active');
-            populateCustomerDropdown();
-        }
-
-        function openTowingModal() {
-            document.getElementById('towingModal').classList.add('active');
-        }
-
-        function openInventoryModal() {
-            document.getElementById('inventoryModal').classList.add('active');
-        }
-
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('active');
-                
-                // Reset estimate form if closing estimate modal
-                if (modalId === 'estimateModal') {
-                    window.editingEstimateId = null;
-                    estimateParts = [];
-                    estimateLabor = [];
-                    
-                    // Reset button text
-                    const submitBtn = document.querySelector('#estimateModal .btn-primary');
-                    if (submitBtn) {
-                        submitBtn.textContent = 'Create Estimate';
                     }
                     
                     // Clear form fields
@@ -2890,7 +2858,6 @@
         });
 
         // ============ CUSTOMER FUNCTIONS ============
-        function populateCustomerDropdown() {
             const select = document.getElementById('appointmentCustomer');
             select.innerHTML = '<option value="">Select Customer</option>';
             customers.forEach(customer => {
@@ -2949,83 +2916,6 @@
                     </div>
                 </div>
             `).join('');
-        }
-
-        function deleteCustomer(id) {
-            if (confirm('Are you sure you want to delete this customer?')) {
-                customers = customers.filter(c => c.id !== id);
-                saveToStorage();
-                renderCustomers();
-            }
-        }
-
-        function initSampleCustomers() {
-            customers = [
-                {
-                    id: 1,
-                    name: 'John Smith',
-                    phone: '(555) 111-2222',
-                    email: 'john@example.com',
-                    vehicles: [
-                        { year: 2018, make: 'Honda', model: 'Accord', plate: 'ABC123' }
-                    ]
-                },
-                {
-                    id: 2,
-                    name: 'Jane Doe',
-                    phone: '(555) 333-4444',
-                    email: 'jane@example.com',
-                    vehicles: [
-                        { year: 2020, make: 'Toyota', model: 'Camry', plate: 'XYZ789' }
-                    ]
-                }
-            ];
-            saveToStorage();
-        }
-
-        // ============ APPOINTMENT FUNCTIONS ============
-        function saveAppointment() {
-            const appointment = {
-                id: Date.now(),
-                customerId: document.getElementById('appointmentCustomer').value,
-                customerName: customers.find(c => c.id == document.getElementById('appointmentCustomer').value)?.name || 'Unknown',
-                date: document.getElementById('appointmentDate').value,
-                time: document.getElementById('appointmentTime').value,
-                serviceType: document.getElementById('serviceType').value,
-                notes: document.getElementById('appointmentNotes').value,
-                status: 'Scheduled'
-            };
-            
-            appointments.push(appointment);
-            saveToStorage();
-            renderAppointments();
-            closeModal('appointmentModal');
-        }
-
-        function renderAppointments() {
-            const list = document.getElementById('appointmentList');
-            if (appointments.length === 0) {
-                list.innerHTML = '<p style="text-align: center; color: #666;">No appointments scheduled yet.</p>';
-                return;
-            }
-            
-            list.innerHTML = appointments.map(apt => `
-                <div class="card" style="margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h3 style="color: #0a2540; margin-bottom: 0.5rem;">${apt.customerName}</h3>
-                            <p style="color: #666; margin: 0.25rem 0;"><i class="fas fa-calendar"></i> ${apt.date} at ${apt.time}</p>
-                            <p style="color: #666; margin: 0.25rem 0;"><i class="fas fa-wrench"></i> ${apt.serviceType}</p>
-                            ${apt.notes ? `<p style="color: #666; margin: 0.25rem 0;"><i class="fas fa-comment"></i> ${apt.notes}</p>` : ''}
-                        </div>
-                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                            <span class="status-badge status-approved">${apt.status}</span>
-                            <button class="btn btn-danger" onclick="deleteAppointment(${apt.id})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
             `).join('');
         }
 
@@ -3035,79 +2925,9 @@
                 saveToStorage();
                 renderAppointments();
             }
-        }
-
-        // ============ ESTIMATE FUNCTIONS ============
         let estimateParts = [];
         let estimateLabor = [];
 
-        function openEstimateModal() {
-            // Clear edit mode
-            window.editingEstimateId = null;
-            
-            // Reset parts and labor
-            estimateParts = [];
-            estimateLabor = [];
-            updateEstimateTotal();
-            
-            // Populate customer select
-            const customerSelect = document.getElementById('estimateCustomerSelect');
-            if (customerSelect) {
-                customerSelect.innerHTML = '<option value="">Select Customer</option>' +
-                    customers.map(c => `<option value="${c.id}">${c.name} - ${c.vehicle}</option>`).join('');
-            }
-            
-            // Clear form fields
-            const vehicleInput = document.getElementById('estimateVehicle');
-            const descInput = document.getElementById('estimateDescription');
-            const statusSelect = document.getElementById('estimateStatus');
-            const partsList = document.getElementById('estimatePartsList');
-            const laborList = document.getElementById('estimateLaborList');
-            
-            if (vehicleInput) vehicleInput.value = '';
-            if (descInput) descInput.value = '';
-            if (statusSelect) statusSelect.value = 'Draft';
-            if (partsList) partsList.innerHTML = '';
-            if (laborList) laborList.innerHTML = '';
-            
-            // Open modal
-            const modal = document.getElementById('estimateModal');
-            if (modal) {
-                modal.classList.add('active');
-            }
-        }
-
-        function addEstimatePart() {
-            const name = prompt('Part name:');
-            if (!name) return;
-            const price = parseFloat(prompt('Part price:', '0')) || 0;
-            const quantity = parseInt(prompt('Quantity:', '1')) || 1;
-            
-            estimateParts.push({ name, price, quantity });
-            renderEstimateParts();
-            updateEstimateTotal();
-        }
-
-        function addEstimateLabor() {
-            const description = prompt('Labor description:');
-            if (!description) return;
-            const hours = parseFloat(prompt('Hours:', '1')) || 1;
-            const rate = parseFloat(prompt('Hourly rate:', '100')) || 100;
-            
-            estimateLabor.push({ description, hours, rate, total: hours * rate });
-            renderEstimateLabor();
-            updateEstimateTotal();
-        }
-
-        function renderEstimateParts() {
-            const partsList = document.getElementById('estimatePartsList');
-            if (!partsList) return;
-            
-            // Ensure estimateParts is an array
-            if (!Array.isArray(estimateParts)) {
-                estimateParts = [];
-            }
-            
             if (estimateParts.length === 0) {
                 partsList.innerHTML = '<p style="color: #666;">No parts added yet</p>';
                 return;
@@ -3345,17 +3165,6 @@
             
             invoices.push(invoice);
             estimates = estimates.filter(e => e.id !== estimateId);
-            saveToStorage();
-            renderEstimates();
-            renderInvoices();
-            alert('Estimate converted to invoice!');
-        }
-
-        function deleteEstimate(id) {
-            if (confirm('Are you sure you want to delete this estimate?')) {
-                estimates = estimates.filter(e => e.id !== id);
-                saveToStorage();
-                renderEstimates();
             }
         }
 
@@ -3437,15 +3246,6 @@
         }
 
         // ============ INVOICE FUNCTIONS ============
-        function openInvoiceModal() {
-            alert('Invoice creation modal will open here. For now, view sample invoices below.');
-        }
-
-        function initSampleInvoices() {
-            invoices = [
-                {
-                    id: 1,
-                    customerName: 'Bob Wilson',
                     vehicle: '2019 Ford F-150',
                     date: '2025-01-14',
                     status: 'Paid',
@@ -4326,7 +4126,6 @@
         }
 
         // ============ MAINTENANCE FUNCTIONS ============
-        let maintenanceJobs = [];
         let maintenanceHistory = [];
 
         function initSampleMaintenance() {
@@ -5749,6 +5548,51 @@ Your trust means everything to us. We're committed to providing the best auto se
         function editInventoryItem(id) {
             alert('Edit functionality coming soon!');
         }
+    </script>
+</body>
+</html>        
+        // ============ INITIALIZE ============
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFromStorage();
+            loadSettings();
+            
+            if (customers.length === 0) initSampleCustomers();
+            if (inventory.length === 0) initSampleInventory();
+            if (towingRequests.length === 0) initSampleTowing();
+            if (estimates.length === 0) initSampleEstimates();
+            if (invoices.length === 0) initSampleInvoices();
+            if (maintenanceJobs.length === 0) initSampleMaintenance();
+            if (vapiScripts.length === 0) initSampleVapiScripts();
+            
+            initSocialMedia();
+            
+            renderCustomers();
+            renderAppointments();
+            renderEstimates();
+            renderPendingApprovalEstimates();
+            renderInvoices();
+            renderTowing();
+            renderInventory();
+            renderMaintenanceList();
+            renderMaintenanceHistory();
+            renderVapiScripts();
+            renderSocialPosts();
+
+            const publishOption = document.getElementById('publishOption');
+            if (publishOption) {
+                publishOption.addEventListener('change', function() {
+                    const scheduleGroup = document.getElementById('scheduleDateGroup');
+                    if (scheduleGroup) {
+                        scheduleGroup.style.display = this.value === 'schedule' ? 'block' : 'none';
+                    }
+                });
+            }
+
+            const postFilter = document.getElementById('postFilter');
+            if (postFilter) {
+                postFilter.addEventListener('change', renderSocialPosts);
+            }
+        });
     </script>
 </body>
 </html>
