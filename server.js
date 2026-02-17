@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const fs = require('fs');
 const admin = require('firebase-admin');
 
 const app = express();
@@ -15,24 +16,55 @@ app.use(express.static('public'));
 // ==================== FIREBASE INITIALIZATION ====================
 // Service Advisor in a Box - Professional Firebase Integration
 
-const serviceAccount = require('./vhicl-pro-cloud-sync-firebase-adminsdk-fbsvc-64f3920175.json');
+// Firebase initialization with fallback for missing credentials
+let db = null;
+let techniciansRef = null;
+let dropoffsRef = null;
+let appointmentsRef = null;
+let estimatesRef = null;
+let customersRef = null;
+let shopsRef = null;
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://vhicl-pro-cloud-sync-default-rtdb.firebaseio.com"
-});
+const firebaseCredentialsPath = './vhicl-pro-cloud-sync-firebase-adminsdk-fbsvc-64f3920175.json';
 
-const db = admin.database();
-console.log('✅ Firebase initialized - Service Advisor in a Box');
+try {
+  // Check if Firebase credentials file exists
+  if (fs.existsSync(firebaseCredentialsPath)) {
+    const serviceAccount = require(firebaseCredentialsPath);
+    
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: "https://vhicl-pro-cloud-sync-default-rtdb.firebaseio.com"
+    });
+    
+    db = admin.database();
+    console.log('✅ Firebase initialized - Service Advisor in a Box');
+    
+    // ==================== DATABASE REFERENCES ====================
+    techniciansRef = db.ref('technicians');
+    dropoffsRef = db.ref('dropoffs');
+    appointmentsRef = db.ref('appointments');
+    estimatesRef = db.ref('estimates');
+    customersRef = db.ref('customers');
+    shopsRef = db.ref('shops');
+  } else {
+    throw new Error(`Firebase credentials file not found: ${firebaseCredentialsPath}`);
+  }
+} catch (error) {
+  console.warn('⚠️ Firebase credentials not found - running in client-only mode');
+  console.warn('⚠️ Firebase Admin SDK features will be unavailable');
+  console.warn('⚠️ To enable Firebase Admin features, ensure the credential file is present');
+  console.warn('⚠️ Frontend will use Firebase Client SDK instead');
+  console.warn('⚠️ Error details:', error.message);
+  // Continue without Firebase - frontend will handle Firebase client SDK
+}
 
 // ==================== DATABASE REFERENCES ====================
 
-const techniciansRef = db.ref('technicians');
-const dropoffsRef = db.ref('dropoffs');
-const appointmentsRef = db.ref('appointments');
-const estimatesRef = db.ref('estimates');
-const customersRef = db.ref('customers');
-const shopsRef = db.ref('shops');
+// Helper function to safely check if Firebase is available
+function isFirebaseAvailable() {
+  return db !== null && techniciansRef !== null;
+}
 
 // In-memory cache for faster access (synced with Firebase)
 let technicians = [];
@@ -41,8 +73,7 @@ let appointments = [];
 let estimates = [];
 
 // ==================== SOCIAL MEDIA INTEGRATION ====================
-const ShopSettingsService = require('./shop-settings-service.js');
-const shopSettingsService = new ShopSettingsService();
+const shopSettingsService = require('./shop-settings-service.js');
 const registerSocialMediaEndpoints = require('./social-media-endpoints.js');
 registerSocialMediaEndpoints(app, shopSettingsService);
 
