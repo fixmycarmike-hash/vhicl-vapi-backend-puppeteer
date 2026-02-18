@@ -574,6 +574,10 @@
         });
 
         function loadTechnicians() {
+            const techs = techService.getAllTechnicians(true);
+            const techList = document.getElementById('techList');
+            
+            if (techs.length === 0) {
                 techList.innerHTML = `
                     <div class="empty-state">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
