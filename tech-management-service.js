@@ -425,4 +425,3 @@ class TechManagementService {
 // Export for use in other files
 // 
 
-}
